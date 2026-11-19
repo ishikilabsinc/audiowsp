@@ -1,0 +1,236 @@
+{
+  "full_scale_ofp": {
+    "large_lv60_self": {
+      "Pretrained Baseline (1.0x)": {
+        "clean_macro": 4.123,
+        "nuis_macro": 7.315,
+        "overall_macro": 5.719,
+        "clean": {
+          "test_clean": 1.32,
+          "test_other": 3.68,
+          "tedlium_test": 5.69,
+          "mls_test": 5.8
+        },
+        "nuis": {
+          "test_clean": 1.9,
+          "test_other": 6.08,
+          "tedlium_test": 8.5,
+          "mls_test": 12.78
+        }
+      },
+      "AudioWSP + OFP-ZeroDrift(gc=0.12)": {
+        "clean_macro": 4.195,
+        "nuis_macro": 7.44,
+        "overall_macro": 5.817,
+        "clean": {
+          "test_clean": 1.32,
+          "test_other": 3.7,
+          "tedlium_test": 5.92,
+          "mls_test": 5.84
+        },
+        "nuis": {
+          "test_clean": 1.9,
+          "test_other": 6.19,
+          "tedlium_test": 8.75,
+          "mls_test": 12.92
+        }
+      },
+      "AudioWSP + OFP-ZeroDrift(gc=0.2)": {
+        "clean_macro": 4.197,
+        "nuis_macro": 7.532,
+        "overall_macro": 5.865,
+        "clean": {
+          "test_clean": 1.32,
+          "test_other": 3.78,
+          "tedlium_test": 5.86,
+          "mls_test": 5.83
+        },
+        "nuis": {
+          "test_clean": 1.9,
+          "test_other": 6.45,
+          "tedlium_test": 8.77,
+          "mls_test": 13.01
+        }
+      }
+    },
+    "base_960h": {
+      "Pretrained Baseline (1.0x)": {
+        "clean_macro": 8.867,
+        "nuis_macro": 21.425,
+        "overall_macro": 15.146,
+        "clean": {
+          "test_clean": 2.46,
+          "test_other": 6.89,
+          "tedlium_test": 11.49,
+          "mls_test": 14.63
+        },
+        "nuis": {
+          "test_clean": 6.3,
+          "test_other": 22.71,
+          "tedlium_test": 20.56,
+          "mls_test": 36.13
+        }
+      },
+      "AudioWSP + OFP-ZeroDrift(gc=0.12)": {
+        "clean_macro": 8.945,
+        "nuis_macro": 21.765,
+        "overall_macro": 15.355,
+        "clean": {
+          "test_clean": 2.44,
+          "test_other": 7.05,
+          "tedlium_test": 11.63,
+          "mls_test": 14.66
+        },
+        "nuis": {
+          "test_clean": 6.56,
+          "test_other": 23.08,
+          "tedlium_test": 20.6,
+          "mls_test": 36.82
+        }
+      },
+      "AudioWSP + OFP-ZeroDrift(gc=0.2)": {
+        "clean_macro": 8.953,
+        "nuis_macro": 22.055,
+        "overall_macro": 15.504,
+        "clean": {
+          "test_clean": 2.37,
+          "test_other": 7.07,
+          "tedlium_test": 11.59,
+          "mls_test": 14.78
+        },
+        "nuis": {
+          "test_clean": 6.79,
+          "test_other": 23.41,
+          "tedlium_test": 20.75,
+          "mls_test": 37.27
+        }
+      }
+    }
+  },
+  "compression_pareto": {
+    "large_lv60_self": {
+      "standard_svd": {
+        "params_m": 156.85,
+        "macro_clean_wer": 83.28,
+        "per_dataset": {
+          "test_clean": 81.42,
+          "test_other": 81.46,
+          "tedlium_test": 82.71,
+          "mls_test": 87.55
+        }
+      },
+      "magnitude": {
+        "params_m": 156.85,
+        "macro_clean_wer": 9.05,
+        "per_dataset": {
+          "test_clean": 2.53,
+          "test_other": 8.41,
+          "tedlium_test": 13.29,
+          "mls_test": 11.96
+        }
+      },
+      "asvd": {
+        "params_m": 156.85,
+        "macro_clean_wer": 25.12,
+        "per_dataset": {
+          "test_clean": 15.75,
+          "test_other": 25.02,
+          "tedlium_test": 29.23,
+          "mls_test": 30.48
+        }
+      },
+      "wanda": {
+        "params_m": 156.85,
+        "macro_clean_wer": 12.23,
+        "per_dataset": {
+          "test_clean": 5.68,
+          "test_other": 11.65,
+          "tedlium_test": 16.53,
+          "mls_test": 15.05
+        }
+      },
+      "ot_svd_no_ofp": {
+        "params_m": 156.85,
+        "macro_clean_wer": 13.46,
+        "per_dataset": {
+          "test_clean": 4.85,
+          "test_other": 12.27,
+          "tedlium_test": 18.13,
+          "mls_test": 18.57
+        }
+      },
+      "ot_svd_ofp": {
+        "params_m": 156.95,
+        "macro_clean_wer": 13.67,
+        "per_dataset": {
+          "test_clean": 5.5,
+          "test_other": 12.39,
+          "tedlium_test": 18.35,
+          "mls_test": 18.44
+        }
+      }
+    },
+    "base_960h": {
+      "standard_svd": {
+        "params_m": 64.76,
+        "macro_clean_wer": 99.95,
+        "per_dataset": {
+          "test_clean": 99.91,
+          "test_other": 99.95,
+          "tedlium_test": 99.96,
+          "mls_test": 100.0
+        }
+      },
+      "magnitude": {
+        "params_m": 64.76,
+        "macro_clean_wer": 61.11,
+        "per_dataset": {
+          "test_clean": 41.3,
+          "test_other": 60.2,
+          "tedlium_test": 70.71,
+          "mls_test": 72.24
+        }
+      },
+      "asvd": {
+        "params_m": 64.76,
+        "macro_clean_wer": 54.24,
+        "per_dataset": {
+          "test_clean": 34.11,
+          "test_other": 53.15,
+          "tedlium_test": 62.46,
+          "mls_test": 67.25
+        }
+      },
+      "wanda": {
+        "params_m": 64.76,
+        "macro_clean_wer": 17.07,
+        "per_dataset": {
+          "test_clean": 7.0,
+          "test_other": 13.81,
+          "tedlium_test": 21.35,
+          "mls_test": 26.1
+        }
+      },
+      "ot_svd_no_ofp": {
+        "params_m": 64.76,
+        "macro_clean_wer": 43.53,
+        "per_dataset": {
+          "test_clean": 21.87,
+          "test_other": 39.7,
+          "tedlium_test": 49.42,
+          "mls_test": 63.12
+        }
+      },
+      "ot_svd_ofp": {
+        "params_m": 64.83,
+        "macro_clean_wer": 42.03,
+        "per_dataset": {
+          "test_clean": 22.36,
+          "test_other": 39.06,
+          "tedlium_test": 47.09,
+          "mls_test": 59.59
+        }
+      }
+    }
+  }
+}

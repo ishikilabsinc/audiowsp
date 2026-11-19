@@ -1,0 +1,336 @@
+{
+  "ami_cleaned": {
+    "Baseline": {
+      "clean_wer": 6.5,
+      "noisy_wer": 12.61,
+      "combined_wer": 9.55
+    },
+    "streaming": {
+      "ctc_ttft_ms": 12.57,
+      "llm_pipelined_ttft_ms": 21.56,
+      "llm_fullchunk_ttft_ms": 32.49
+    },
+    "32.1B": {
+      "single_clean_wer": 6.22,
+      "multi_clean_wer": 5.14,
+      "rtfx_1gpu": 61.15,
+      "rtfx_4gpu": 244.6
+    },
+    "26.2B": {
+      "single_clean_wer": 6.75,
+      "multi_clean_wer": 5.19,
+      "rtfx_1gpu": 67.42,
+      "rtfx_4gpu": 269.68
+    }
+  },
+  "spgispeech": {
+    "Baseline": {
+      "clean_wer": 3.13,
+      "noisy_wer": 7.51,
+      "combined_wer": 5.32
+    },
+    "streaming": {
+      "ctc_ttft_ms": 15.72,
+      "llm_pipelined_ttft_ms": 24.07,
+      "llm_fullchunk_ttft_ms": 36.61
+    },
+    "32.1B": {
+      "single_clean_wer": 1.7,
+      "multi_clean_wer": 1.21,
+      "rtfx_1gpu": 66.76,
+      "rtfx_4gpu": 267.04
+    },
+    "26.2B": {
+      "single_clean_wer": 1.85,
+      "multi_clean_wer": 1.21,
+      "rtfx_1gpu": 69.75,
+      "rtfx_4gpu": 279.0
+    }
+  },
+  "gigaspeech_cleaned": {
+    "Baseline": {
+      "clean_wer": 5.98,
+      "noisy_wer": 3.38,
+      "combined_wer": 4.68
+    },
+    "streaming": {
+      "ctc_ttft_ms": 13.07,
+      "llm_pipelined_ttft_ms": 24.92,
+      "llm_fullchunk_ttft_ms": 35.19
+    },
+    "32.1B": {
+      "single_clean_wer": 6.05,
+      "multi_clean_wer": 3.55,
+      "rtfx_1gpu": 59.53,
+      "rtfx_4gpu": 238.12
+    },
+    "26.2B": {
+      "single_clean_wer": 6.29,
+      "multi_clean_wer": 3.53,
+      "rtfx_1gpu": 63.27,
+      "rtfx_4gpu": 253.08
+    }
+  },
+  "urgent2024": {
+    "Baseline": {
+      "clean_wer": 11.81,
+      "noisy_wer": 15.33,
+      "combined_wer": 13.57
+    },
+    "streaming": {
+      "ctc_ttft_ms": 16.09,
+      "llm_pipelined_ttft_ms": 23.12,
+      "llm_fullchunk_ttft_ms": 37.47
+    },
+    "32.1B": {
+      "single_clean_wer": 11.15,
+      "multi_clean_wer": 8.66,
+      "rtfx_1gpu": 53.12,
+      "rtfx_4gpu": 212.48
+    },
+    "26.2B": {
+      "single_clean_wer": 11.74,
+      "multi_clean_wer": 8.8,
+      "rtfx_1gpu": 59.2,
+      "rtfx_4gpu": 236.8
+    }
+  },
+  "urgent2024_clean": {
+    "Baseline": {
+      "clean_wer": 4.99,
+      "noisy_wer": 6.78,
+      "combined_wer": 5.88
+    },
+    "streaming": {
+      "ctc_ttft_ms": 14.67,
+      "llm_pipelined_ttft_ms": 21.73,
+      "llm_fullchunk_ttft_ms": 32.72
+    },
+    "32.1B": {
+      "single_clean_wer": 4.85,
+      "multi_clean_wer": 4.02,
+      "rtfx_1gpu": 55.72,
+      "rtfx_4gpu": 222.88
+    },
+    "26.2B": {
+      "single_clean_wer": 5.03,
+      "multi_clean_wer": 3.99,
+      "rtfx_1gpu": 59.33,
+      "rtfx_4gpu": 237.32
+    }
+  },
+  "voxpopuli_cleaned_aa": {
+    "Baseline": {
+      "clean_wer": 1.58,
+      "noisy_wer": 2.66,
+      "combined_wer": 2.12
+    },
+    "streaming": {
+      "ctc_ttft_ms": 12.83,
+      "llm_pipelined_ttft_ms": 26.28,
+      "llm_fullchunk_ttft_ms": 40.37
+    },
+    "32.1B": {
+      "single_clean_wer": 1.6,
+      "multi_clean_wer": 0.9,
+      "rtfx_1gpu": 115.48,
+      "rtfx_4gpu": 461.92
+    },
+    "26.2B": {
+      "single_clean_wer": 1.71,
+      "multi_clean_wer": 1.01,
+      "rtfx_1gpu": 121.7,
+      "rtfx_4gpu": 486.8
+    }
+  },
+  "monsoon_en_in": {
+    "Baseline": {
+      "clean_wer": 4.08,
+      "noisy_wer": 17.61,
+      "combined_wer": 10.84
+    },
+    "streaming": {
+      "ctc_ttft_ms": 15.74,
+      "llm_pipelined_ttft_ms": 22.93,
+      "llm_fullchunk_ttft_ms": 35.72
+    },
+    "32.1B": {
+      "single_clean_wer": 2.7,
+      "multi_clean_wer": 2.34,
+      "rtfx_1gpu": 48.79,
+      "rtfx_4gpu": 195.16
+    },
+    "26.2B": {
+      "single_clean_wer": 3.21,
+      "multi_clean_wer": 2.34,
+      "rtfx_1gpu": 55.86,
+      "rtfx_4gpu": 223.44
+    }
+  },
+  "test_clean": {
+    "Baseline": {
+      "clean_wer": 0.92,
+      "noisy_wer": 2.09,
+      "combined_wer": 1.5
+    },
+    "streaming": {
+      "ctc_ttft_ms": 13.78,
+      "llm_pipelined_ttft_ms": 21.77,
+      "llm_fullchunk_ttft_ms": 33.85
+    },
+    "32.1B": {
+      "single_clean_wer": 0.88,
+      "multi_clean_wer": 0.58,
+      "rtfx_1gpu": 49.98,
+      "rtfx_4gpu": 199.92
+    },
+    "26.2B": {
+      "single_clean_wer": 1.25,
+      "multi_clean_wer": 0.63,
+      "rtfx_1gpu": 54.92,
+      "rtfx_4gpu": 219.68
+    }
+  },
+  "test_other": {
+    "Baseline": {
+      "clean_wer": 2.69,
+      "noisy_wer": 8.39,
+      "combined_wer": 5.54
+    },
+    "streaming": {
+      "ctc_ttft_ms": 15.18,
+      "llm_pipelined_ttft_ms": 22.2,
+      "llm_fullchunk_ttft_ms": 38.75
+    },
+    "32.1B": {
+      "single_clean_wer": 2.42,
+      "multi_clean_wer": 1.9,
+      "rtfx_1gpu": 37.63,
+      "rtfx_4gpu": 150.52
+    },
+    "26.2B": {
+      "single_clean_wer": 2.85,
+      "multi_clean_wer": 2.16,
+      "rtfx_1gpu": 40.82,
+      "rtfx_4gpu": 163.28
+    }
+  },
+  "earnings22": {
+    "Baseline": {
+      "clean_wer": 8.92,
+      "noisy_wer": 10.75,
+      "combined_wer": 9.84
+    },
+    "streaming": {
+      "ctc_ttft_ms": 12.71,
+      "llm_pipelined_ttft_ms": 27.41,
+      "llm_fullchunk_ttft_ms": 37.39
+    },
+    "32.1B": {
+      "single_clean_wer": 8.8,
+      "multi_clean_wer": 6.85,
+      "rtfx_1gpu": 91.62,
+      "rtfx_4gpu": 366.48
+    },
+    "26.2B": {
+      "single_clean_wer": 9.15,
+      "multi_clean_wer": 8.56,
+      "rtfx_1gpu": 95.31,
+      "rtfx_4gpu": 381.24
+    }
+  },
+  "common_voice": {
+    "Baseline": {
+      "clean_wer": 12.44,
+      "noisy_wer": 22.44,
+      "combined_wer": 17.44
+    },
+    "streaming": {
+      "ctc_ttft_ms": 11.75,
+      "llm_pipelined_ttft_ms": 22.97,
+      "llm_fullchunk_ttft_ms": 33.46
+    },
+    "32.1B": {
+      "single_clean_wer": 5.95,
+      "multi_clean_wer": 3.75,
+      "rtfx_1gpu": 107.74,
+      "rtfx_4gpu": 430.96
+    },
+    "26.2B": {
+      "single_clean_wer": 6.14,
+      "multi_clean_wer": 3.75,
+      "rtfx_1gpu": 117.23,
+      "rtfx_4gpu": 468.92
+    }
+  },
+  "tedlium_test": {
+    "Baseline": {
+      "clean_wer": 2.25,
+      "noisy_wer": 4.13,
+      "combined_wer": 3.19
+    },
+    "streaming": {
+      "ctc_ttft_ms": 15.24,
+      "llm_pipelined_ttft_ms": 21.61,
+      "llm_fullchunk_ttft_ms": 33.66
+    },
+    "32.1B": {
+      "single_clean_wer": 2.12,
+      "multi_clean_wer": 1.83,
+      "rtfx_1gpu": 52.79,
+      "rtfx_4gpu": 211.16
+    },
+    "26.2B": {
+      "single_clean_wer": 2.25,
+      "multi_clean_wer": 1.87,
+      "rtfx_1gpu": 59.35,
+      "rtfx_4gpu": 237.4
+    }
+  },
+  "mls_test": {
+    "Baseline": {
+      "clean_wer": 3.6,
+      "noisy_wer": 14.24,
+      "combined_wer": 8.92
+    },
+    "streaming": {
+      "ctc_ttft_ms": 14.18,
+      "llm_pipelined_ttft_ms": 24.2,
+      "llm_fullchunk_ttft_ms": 36.52
+    },
+    "32.1B": {
+      "single_clean_wer": 3.73,
+      "multi_clean_wer": 3.1,
+      "rtfx_1gpu": 62.67,
+      "rtfx_4gpu": 250.68
+    },
+    "26.2B": {
+      "single_clean_wer": 3.92,
+      "multi_clean_wer": 3.98,
+      "rtfx_1gpu": 67.4,
+      "rtfx_4gpu": 269.6
+    }
+  },
+  "earnings22_cleaned_aa_chunked": {
+    "Baseline": {
+      "clean_wer": 4.24
+    },
+    "streaming": {
+      "ctc_ttft_ms": 15.59,
+      "llm_pipelined_ttft_ms": 21.71,
+      "llm_fullchunk_ttft_ms": 32.45
+    },
+    "32.1B": {
+      "single_clean_wer": 4.45,
+      "multi_clean_wer": 3.54,
+      "rtfx_1gpu": 92.63,
+      "rtfx_4gpu": 370.52
+    },
+    "26.2B": {
+      "single_clean_wer": 4.53,
+      "multi_clean_wer": 3.56,
+      "rtfx_1gpu": 98.44,
+      "rtfx_4gpu": 393.76
+    }
+  }
+}
