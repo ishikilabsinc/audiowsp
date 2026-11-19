@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "sent": true,
+  "reason": null,
+  "limit": false,
+  "wall_s": 0.0,
+  "model": "astra-wsp",
+  "effort": "max",
+  "audit": {
+    "tool_free": true,
+    "tool_items": {},
+    "event_types": {
+      "turn.recorded": 1
+    }
+  },
+  "prompt_sha256": "dde076568ada2f201a47c2259102aba68c5e12831b4469032be67c8ebb5b0527",
+  "placeholders": [],
+  "end": "2026-11-08T05:30:34-0800",
+  "note": "Turn 3: program b0, b1, bm"
+}

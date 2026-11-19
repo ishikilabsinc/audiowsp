@@ -1,0 +1,166 @@
+{
+  "urgent2024": {
+    "Baseline": {
+      "clean_wer": 11.81,
+      "noisy_wer": 15.33,
+      "combined_wer": 13.57
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 11.5,
+      "noisy_wer": 14.26,
+      "combined_wer": 12.88
+    }
+  },
+  "monsoon_en_in": {
+    "Baseline": {
+      "clean_wer": 4.08,
+      "noisy_wer": 17.61,
+      "combined_wer": 10.84
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 2.8,
+      "noisy_wer": 14.21,
+      "combined_wer": 8.51
+    }
+  },
+  "ami_cleaned": {
+    "Baseline": {
+      "clean_wer": 6.5,
+      "noisy_wer": 12.61,
+      "combined_wer": 9.56
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 6.25,
+      "noisy_wer": 12.05,
+      "combined_wer": 9.15
+    }
+  },
+  "gigaspeech_cleaned": {
+    "Baseline": {
+      "clean_wer": 5.98,
+      "noisy_wer": 3.38,
+      "combined_wer": 4.68
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 6.16,
+      "noisy_wer": 3.49,
+      "combined_wer": 4.82
+    }
+  },
+  "urgent2024_clean": {
+    "Baseline": {
+      "clean_wer": 4.99,
+      "noisy_wer": 6.78,
+      "combined_wer": 5.89
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 4.68,
+      "noisy_wer": 6.22,
+      "combined_wer": 5.45
+    }
+  },
+  "spgispeech": {
+    "Baseline": {
+      "clean_wer": 3.13,
+      "noisy_wer": 7.51,
+      "combined_wer": 5.32
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 1.73,
+      "noisy_wer": 6.47,
+      "combined_wer": 4.1
+    }
+  },
+  "voxpopuli_cleaned_aa": {
+    "Baseline": {
+      "clean_wer": 1.58,
+      "noisy_wer": 2.66,
+      "combined_wer": 2.12
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 1.58,
+      "noisy_wer": 2.85,
+      "combined_wer": 2.21
+    }
+  },
+  "earnings22": {
+    "Baseline": {
+      "clean_wer": 8.92,
+      "noisy_wer": 10.75,
+      "combined_wer": 9.83
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 9.01,
+      "noisy_wer": 9.11,
+      "combined_wer": 9.06
+    }
+  },
+  "common_voice": {
+    "Baseline": {
+      "clean_wer": 12.44,
+      "noisy_wer": 22.44,
+      "combined_wer": 17.44
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 8.87,
+      "noisy_wer": 18.22,
+      "combined_wer": 13.55
+    }
+  },
+  "test_clean": {
+    "Baseline": {
+      "clean_wer": 0.91,
+      "noisy_wer": 1.82,
+      "combined_wer": 1.36
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 0.91,
+      "noisy_wer": 1.39,
+      "combined_wer": 1.15
+    }
+  },
+  "test_other": {
+    "Baseline": {
+      "clean_wer": 2.69,
+      "noisy_wer": 8.39,
+      "combined_wer": 5.54
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 2.74,
+      "noisy_wer": 6.89,
+      "combined_wer": 4.81
+    }
+  },
+  "mls_test": {
+    "Baseline": {
+      "clean_wer": 3.6,
+      "noisy_wer": 14.24,
+      "combined_wer": 8.92
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 3.68,
+      "noisy_wer": 12.89,
+      "combined_wer": 8.28
+    }
+  },
+  "earnings22_cleaned_aa_chunked": {
+    "Baseline": {
+      "clean_wer": 4.24
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 4.14
+    }
+  },
+  "tedlium_test": {
+    "Baseline": {
+      "clean_wer": 2.3,
+      "noisy_wer": 3.77,
+      "combined_wer": 3.03
+    },
+    "AudioWSP_v3": {
+      "clean_wer": 2.3,
+      "noisy_wer": 3.62,
+      "combined_wer": 2.96
+    }
+  }
+}

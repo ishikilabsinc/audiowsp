@@ -1,0 +1,197 @@
+{
+  "datasets": [
+    "test_clean",
+    "test_other",
+    "tedlium_test",
+    "mls_test"
+  ],
+  "methods": {
+    "Baseline (Nemotron-3.5-30B-A4B)": {
+      "macro_clean_official_wer": 2.687,
+      "macro_nuis_official_wer": 3.58,
+      "macro_overall_official_wer": 3.133,
+      "per_dataset_clean": {
+        "test_clean": 1.39,
+        "test_other": 2.81,
+        "tedlium_test": 2.41,
+        "mls_test": 4.14
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.42,
+        "test_other": 4.03,
+        "tedlium_test": 2.86,
+        "mls_test": 5.0
+      }
+    },
+    "Standard Ridge (1F+0B Baseline)": {
+      "macro_clean_official_wer": 2.696,
+      "macro_nuis_official_wer": 3.616,
+      "macro_overall_official_wer": 3.156,
+      "per_dataset_clean": {
+        "test_clean": 1.45,
+        "test_other": 2.81,
+        "tedlium_test": 2.48,
+        "mls_test": 4.04
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.35,
+        "test_other": 4.29,
+        "tedlium_test": 2.95,
+        "mls_test": 4.88
+      }
+    },
+    "AdamW (15-Epoch Backprop)": {
+      "macro_clean_official_wer": 2.654,
+      "macro_nuis_official_wer": 3.558,
+      "macro_overall_official_wer": 3.106,
+      "per_dataset_clean": {
+        "test_clean": 1.45,
+        "test_other": 2.7,
+        "tedlium_test": 2.44,
+        "mls_test": 4.03
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.27,
+        "test_other": 4.14,
+        "tedlium_test": 2.89,
+        "mls_test": 4.93
+      }
+    },
+    "AudioWSP + OFP-4TapBridge (Ours)": {
+      "macro_clean_official_wer": 2.669,
+      "macro_nuis_official_wer": 3.542,
+      "macro_overall_official_wer": 3.105,
+      "per_dataset_clean": {
+        "test_clean": 1.33,
+        "test_other": 2.84,
+        "tedlium_test": 2.41,
+        "mls_test": 4.09
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.39,
+        "test_other": 4.07,
+        "tedlium_test": 2.91,
+        "mls_test": 4.81
+      }
+    },
+    "AudioWSP + OFP-Hybrid (Bridge+GEVD)": {
+      "macro_clean_official_wer": 2.695,
+      "macro_nuis_official_wer": 3.561,
+      "macro_overall_official_wer": 3.128,
+      "per_dataset_clean": {
+        "test_clean": 1.39,
+        "test_other": 2.81,
+        "tedlium_test": 2.46,
+        "mls_test": 4.12
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.46,
+        "test_other": 3.81,
+        "tedlium_test": 2.95,
+        "mls_test": 5.02
+      }
+    },
+    "AudioWSP + Joint OFP (Bridge + FiltLLM k=12)": {
+      "macro_clean_official_wer": 2.667,
+      "macro_nuis_official_wer": 3.555,
+      "macro_overall_official_wer": 3.111,
+      "per_dataset_clean": {
+        "test_clean": 1.33,
+        "test_other": 2.88,
+        "tedlium_test": 2.34,
+        "mls_test": 4.12
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.39,
+        "test_other": 4.1,
+        "tedlium_test": 2.91,
+        "mls_test": 4.83
+      }
+    },
+    "AudioWSP + Joint OFP (Bridge + FiltLLM k=25)": {
+      "macro_clean_official_wer": 2.696,
+      "macro_nuis_official_wer": 3.586,
+      "macro_overall_official_wer": 3.141,
+      "per_dataset_clean": {
+        "test_clean": 1.33,
+        "test_other": 2.91,
+        "tedlium_test": 2.39,
+        "mls_test": 4.16
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.42,
+        "test_other": 4.18,
+        "tedlium_test": 2.89,
+        "mls_test": 4.86
+      }
+    },
+    "AudioWSP + OFP-GEVD-Bridge(k=64)": {
+      "macro_clean_official_wer": 2.71,
+      "macro_nuis_official_wer": 3.484,
+      "macro_overall_official_wer": 3.097,
+      "per_dataset_clean": {
+        "test_clean": 1.39,
+        "test_other": 2.88,
+        "tedlium_test": 2.44,
+        "mls_test": 4.14
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.35,
+        "test_other": 3.92,
+        "tedlium_test": 2.84,
+        "mls_test": 4.83
+      }
+    },
+    "AudioWSP + OFP-GEVD-Bridge(k=128) + FiltLLM(k=8)": {
+      "macro_clean_official_wer": 2.724,
+      "macro_nuis_official_wer": 3.594,
+      "macro_overall_official_wer": 3.159,
+      "per_dataset_clean": {
+        "test_clean": 1.39,
+        "test_other": 2.84,
+        "tedlium_test": 2.46,
+        "mls_test": 4.2
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.31,
+        "test_other": 4.18,
+        "tedlium_test": 2.89,
+        "mls_test": 5.0
+      }
+    },
+    "AudioWSP + OFP-Adaptive (ac=0.55, klm=0)": {
+      "macro_clean_official_wer": 2.677,
+      "macro_nuis_official_wer": 3.489,
+      "macro_overall_official_wer": 3.083,
+      "per_dataset_clean": {
+        "test_clean": 1.39,
+        "test_other": 2.81,
+        "tedlium_test": 2.44,
+        "mls_test": 4.08
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.35,
+        "test_other": 3.96,
+        "tedlium_test": 2.84,
+        "mls_test": 4.81
+      }
+    },
+    "AudioWSP + OFP-Adaptive (ac=0.55, klm=6)": {
+      "macro_clean_official_wer": 2.685,
+      "macro_nuis_official_wer": 3.511,
+      "macro_overall_official_wer": 3.098,
+      "per_dataset_clean": {
+        "test_clean": 1.39,
+        "test_other": 2.81,
+        "tedlium_test": 2.44,
+        "mls_test": 4.11
+      },
+      "per_dataset_nuis": {
+        "test_clean": 2.31,
+        "test_other": 4.1,
+        "tedlium_test": 2.84,
+        "mls_test": 4.79
+      }
+    }
+  }
+}

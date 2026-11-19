@@ -1,0 +1,13 @@
+{
+  "budget": null,
+  "mode": "audio-deepfake",
+  "prompt": "v0",
+  "turn": 1,
+  "runs": 0,
+  "passes": 0,
+  "done": false,
+  "sent_turns": 0,
+  "draft_turns": 1,
+  "editor": null,
+  "notes": []
+}

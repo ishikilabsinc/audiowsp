@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "sent": true,
+  "reason": null,
+  "limit": false,
+  "wall_s": 0.0,
+  "model": "astra-wsp",
+  "effort": "max",
+  "audit": {
+    "tool_free": true,
+    "tool_items": {},
+    "event_types": {
+      "turn.recorded": 1
+    }
+  },
+  "prompt_sha256": "589084e87b01c41476c8e4a75e3a9a928949a752a337021f6bc614c92ea36c87",
+  "placeholders": [],
+  "end": "2026-11-08T05:30:33-0800",
+  "note": "Turn 5: final summary and weight diff"
+}

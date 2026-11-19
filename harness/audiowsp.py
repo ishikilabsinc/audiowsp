@@ -27,7 +27,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from harness.firewall import assert_practice_split
-from exp1_unseen_generators.one_pass_frontier_optimizer import (
+from harness.one_pass_frontier_optimizer import (
     OneForwardPassOptimizer,
     OnePassFrontierOptimizer,
     OFP,

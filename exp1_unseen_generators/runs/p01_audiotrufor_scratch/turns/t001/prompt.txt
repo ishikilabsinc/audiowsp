@@ -1,0 +1,36 @@
+TASK. You are given the weights of an audio deepfake detector, audio-trufor-scratch-v1. It maps a waveform to one scalar score. A higher score means the clip is more likely to be synthetic speech. Your job is to make that score more general by EDITING THE WEIGHTS DIRECTLY: find the directions in the network that the score uses as shortcuts, and remove those shortcuts without giving up the ability to tell synthetic speech from real speech.
+
+HOW IT WILL BE MEASURED. After you finish, the edited weights and the original weights are scored on held-out clips you never see. The headline number is the equal error rate (EER) on generators that were not in the practice set. EER is a ranking measure: adding a constant to every score, or applying any strictly increasing function of the score, does not change it. Around that number, a shortcut report is computed on the same clips:
+
+- speaker-disjoint matched EER: generators that were in the practice set, speakers that were not
+- unseen-generator EER: generators that were not in the practice set
+- gender probe: on real clips only, how well the score ranks one gender above the other (AUC; 0.5 means the score carries no gender ranking)
+- language probe: the same, for language, on real clips only
+- speaker dependence: on real clips only, the share of score variance explained by speaker identity (0 means none, 1 means the score is constant on each speaker)
+- same-transcript EER: EER using only clips that share a transcript with the other class, so the words do not decide the label
+- cross-transcript correlation: across transcripts, the correlation between the mean score of the real clips and the mean score of the synthetic clips. A high correlation means the score is tracking the words
+
+An edit counts only if the unseen-generator EER goes down, the matched EER does not get materially worse, and none of the shortcut measures get materially worse. A lower EER that comes from leaning harder on speaker, gender, language, or the transcript does not count.
+
+WHAT COUNTS. We want edits that come from a measured shortcut. Show that some direction, channel, head, or block predicts speaker, gender, language, or transcript on the practice clips, and that changing it moves that shortcut more than it moves the matched detection score. Out of scope, and refused by save_edit: every tensor listed as frozen, and any edit that only multiplies a whole tensor by a constant.
+
+WHAT YOU HAVE.
+1. A persistent Python kernel. Variables survive between code blocks. The checkpoint is read-only under /model, the practice manifest is read-only under /practice, and /work is yours. Defined in advance: NAMES, SHAPES, FROZEN, load(name), load_original(name), save_edit(name, tensor), drop_edit(name), edited(). Gradients are disabled. To run code, reply with exactly one block that starts with ```python. One execution may take up to 900 seconds. Output is cut at 10,000 characters. You may run code up to 300 times.
+2. Practice clips only. None of them is in the held-out report. The manifest is exp1_unseen_generators/manifests/practice_manifest.jsonl. Each row has an id, a label (1 synthetic, 0 real), a generator, a speaker, a gender, a language, and a transcript id. You do not read waveforms from disk. You see clips only through the forward tool.
+3. A forward-pass tool with a budget of 50 passes. A pass is one of:
+ (a) SCORE. Reply with one block that starts with ```forward and contains JSON:
+ {"type": "score", "model": "original" or "edited" or "both", "items": ["<practice id>", ...]}
+ At most 512 items. "both" scores the original and the edited weights on the same items and returns the paired EER difference. You get EER, AUC, and the shortcut report for those items only.
+ (b) ACTIVATIONS. Reply with one ```forward block:
+ {"type": "activations", "model": "original" or "edited", "items": ["<practice id>", ...], "layers": [<layer index>, ...]}
+ At most 128 items. Arrays are written under /work. A request that fails does not count against the budget.
+
+HOW TO WORK.
+1. Diagnose first. On practice items, separate a real failure of the detector from a shortcut (the score predicts gender, speaker, language, or the transcript).
+2. Localize before you edit. A direction that is more active on synthetic clips is not yet a cause. Change it, at more than one strength, and read the paired score report.
+3. Keep an edit only when the practice report shows a lower detection error and shortcut measures that are not worse. Say how many items you used.
+4. Print summaries. Print shapes, counts, and a few scalar statistics. Do not print raw waveforms or long dumps of sample values.
+
+RULES. Not allowed: gradient descent or any other training; backward passes; optimizers; fitting weights to a loss; running the detector any way other than the forward tool; internet access. Allowed: any analysis of the weights and of forward-pass results, and any direct edit save_edit will accept.
+
+HOW THE SESSION RUNS. It continues until the forward budget is used. Then leave the tensors you want in /work/edited and reply with no code block: what you changed, the practice numbers, and why those numbers should survive on generators, speakers, genders, languages, and transcripts you did not use.

@@ -1,0 +1,264 @@
+{
+  "audit_certificate": {
+    "task": "asr_multidataset_sota_and_compression",
+    "firewall_verified": true,
+    "zero_eval_leakage": true,
+    "practice_splits": [
+      "dev-clean",
+      "dev-other"
+    ],
+    "n_calibration_utterances": 180,
+    "calibration_ids_sha256": "edb42769171daaf58774bdf7a877f971f2b0d6982f7a4c166dec3c8d7b205d0b",
+    "nuisance_families": [
+      "telephony_8khz",
+      "snr_noise",
+      "room_reverb",
+      "codec_mulaw",
+      "gain_shift"
+    ]
+  },
+  "models": {
+    "large_lv60_self": {
+      "Pretrained Baseline (1.0x)": {
+        "clean_macro": 4.122,
+        "nuis_macro": 7.316,
+        "overall_macro": 5.719,
+        "clean": {
+          "test_clean": 1.3218923933209648,
+          "test_other": 3.6770377989200314,
+          "tedlium_test": 5.685159772593609,
+          "mls_test": 5.803338549817423
+        },
+        "nuis": {
+          "test_clean": 1.901565995525727,
+          "test_other": 6.08058608058608,
+          "tedlium_test": 8.504075787618417,
+          "mls_test": 12.778366914103923
+        }
+      },
+      "Diagonal Fisher LDA (1F+0B)": {
+        "clean_macro": 22.531,
+        "nuis_macro": 34.718,
+        "overall_macro": 28.625,
+        "clean": {
+          "test_clean": 9.230055658627087,
+          "test_other": 19.722293648752892,
+          "tedlium_test": 29.053126837874927,
+          "mls_test": 32.12050078247261
+        },
+        "nuis": {
+          "test_clean": 14.168530947054435,
+          "test_other": 30.695970695970697,
+          "tedlium_test": 42.079753249614456,
+          "mls_test": 51.926475786496994
+        }
+      },
+      "Standard Ridge / ELM (1F+0B)": {
+        "clean_macro": 4.715,
+        "nuis_macro": 8.338,
+        "overall_macro": 6.527,
+        "clean": {
+          "test_clean": 1.6233766233766231,
+          "test_other": 4.3455901259964,
+          "tedlium_test": 6.763379729464811,
+          "mls_test": 6.129368805425144
+        },
+        "nuis": {
+          "test_clean": 2.460850111856823,
+          "test_other": 7.216117216117215,
+          "tedlium_test": 9.870015421899096,
+          "mls_test": 13.803464121597738
+        }
+      },
+      "RanPAC (NeurIPS 2023 1F+0B)": {
+        "clean_macro": 6.949,
+        "nuis_macro": 12.69,
+        "overall_macro": 9.82,
+        "clean": {
+          "test_clean": 2.504638218923933,
+          "test_other": 6.634096168680895,
+          "tedlium_test": 10.272495589100176,
+          "mls_test": 8.385498174230568
+        },
+        "nuis": {
+          "test_clean": 4.250559284116331,
+          "test_other": 12.014652014652015,
+          "tedlium_test": 15.79643093192333,
+          "mls_test": 18.69918699186992
+        }
+      },
+      "SGD (15-Epoch Backprop)": {
+        "clean_macro": 4.821,
+        "nuis_macro": 8.823,
+        "overall_macro": 6.822,
+        "clean": {
+          "test_clean": 1.6929499072356216,
+          "test_other": 4.3455901259964,
+          "tedlium_test": 6.920211723191532,
+          "mls_test": 6.324986958789776
+        },
+        "nuis": {
+          "test_clean": 2.162565249813572,
+          "test_other": 8.058608058608058,
+          "tedlium_test": 9.870015421899096,
+          "mls_test": 15.19971721456345
+        }
+      },
+      "AdamW (15-Epoch Backprop)": {
+        "clean_macro": 5.165,
+        "nuis_macro": 9.455,
+        "overall_macro": 7.31,
+        "clean": {
+          "test_clean": 1.8089053803339517,
+          "test_other": 4.757006942658782,
+          "tedlium_test": 7.351499705940013,
+          "mls_test": 6.742305685967658
+        },
+        "nuis": {
+          "test_clean": 2.684563758389262,
+          "test_other": 8.498168498168498,
+          "tedlium_test": 10.641110376734964,
+          "mls_test": 15.995051254860373
+        }
+      },
+      "AudioWSP + OFP (1F+0B, Ours)": {
+        "clean_macro": 4.31,
+        "nuis_macro": 7.71,
+        "overall_macro": 6.01,
+        "clean": {
+          "test_clean": 1.3450834879406308,
+          "test_other": 3.90845975829262,
+          "tedlium_test": 6.11644775534209,
+          "mls_test": 5.868544600938967
+        },
+        "nuis": {
+          "test_clean": 1.901565995525727,
+          "test_other": 6.666666666666667,
+          "tedlium_test": 8.85657633840053,
+          "mls_test": 13.414634146341465
+        }
+      }
+    },
+    "base_960h": {
+      "Pretrained Baseline (1.0x)": {
+        "clean_macro": 8.867,
+        "nuis_macro": 21.423,
+        "overall_macro": 15.145,
+        "clean": {
+          "test_clean": 2.458256029684601,
+          "test_other": 6.891231679094884,
+          "tedlium_test": 11.487943540482258,
+          "mls_test": 14.63223787167449
+        },
+        "nuis": {
+          "test_clean": 6.3012677106636845,
+          "test_other": 22.71062271062271,
+          "tedlium_test": 20.555188367481826,
+          "mls_test": 36.12583951926476
+        }
+      },
+      "Diagonal Fisher LDA (1F+0B)": {
+        "clean_macro": 11.416,
+        "nuis_macro": 26.697,
+        "overall_macro": 19.057,
+        "clean": {
+          "test_clean": 3.385899814471243,
+          "test_other": 8.974029313448186,
+          "tedlium_test": 14.330523426779063,
+          "mls_test": 18.974960876369327
+        },
+        "nuis": {
+          "test_clean": 8.762117822520507,
+          "test_other": 27.435897435897438,
+          "tedlium_test": 25.11566424322538,
+          "mls_test": 45.47543301519972
+        }
+      },
+      "Standard Ridge / ELM (1F+0B)": {
+        "clean_macro": 8.942,
+        "nuis_macro": 21.874,
+        "overall_macro": 15.408,
+        "clean": {
+          "test_clean": 2.481447124304267,
+          "test_other": 6.865518128053484,
+          "tedlium_test": 11.8016075279357,
+          "mls_test": 14.619196661450182
+        },
+        "nuis": {
+          "test_clean": 6.674123788217748,
+          "test_other": 23.26007326007326,
+          "tedlium_test": 20.995814055959464,
+          "mls_test": 36.56769176387416
+        }
+      },
+      "RanPAC (NeurIPS 2023 1F+0B)": {
+        "clean_macro": 10.855,
+        "nuis_macro": 25.163,
+        "overall_macro": 18.009,
+        "clean": {
+          "test_clean": 3.7337662337662336,
+          "test_other": 8.408331190537414,
+          "tedlium_test": 14.467751421289943,
+          "mls_test": 16.810119979134065
+        },
+        "nuis": {
+          "test_clean": 9.13497390007457,
+          "test_other": 25.934065934065938,
+          "tedlium_test": 25.26988323419255,
+          "mls_test": 40.314598798161896
+        }
+      },
+      "SGD (15-Epoch Backprop)": {
+        "clean_macro": 10.189,
+        "nuis_macro": 25.124,
+        "overall_macro": 17.656,
+        "clean": {
+          "test_clean": 2.782931354359926,
+          "test_other": 7.791205965543842,
+          "tedlium_test": 13.330719466771221,
+          "mls_test": 16.84924360980699
+        },
+        "nuis": {
+          "test_clean": 7.979120059656973,
+          "test_other": 26.263736263736266,
+          "tedlium_test": 24.366600572813397,
+          "mls_test": 41.88759278897137
+        }
+      },
+      "AdamW (15-Epoch Backprop)": {
+        "clean_macro": 10.085,
+        "nuis_macro": 25.773,
+        "overall_macro": 17.929,
+        "clean": {
+          "test_clean": 2.458256029684601,
+          "test_other": 7.739778863461044,
+          "tedlium_test": 13.252303469907861,
+          "mls_test": 16.88836724047992
+        },
+        "nuis": {
+          "test_clean": 8.165548098434003,
+          "test_other": 27.17948717948718,
+          "tedlium_test": 24.41066314166116,
+          "mls_test": 43.33686815129021
+        }
+      },
+      "AudioWSP + OFP (1F+0B, Ours)": {
+        "clean_macro": 9.272,
+        "nuis_macro": 22.838,
+        "overall_macro": 16.055,
+        "clean": {
+          "test_clean": 2.6205936920222634,
+          "test_other": 7.199794291591669,
+          "tedlium_test": 11.880023524799059,
+          "mls_test": 15.388628064684404
+        },
+        "nuis": {
+          "test_clean": 6.7114093959731544,
+          "test_other": 24.02930402930403,
+          "tedlium_test": 21.9211280017625,
+          "mls_test": 38.688582537999295
+        }
+      }
+    }
+  }
+}

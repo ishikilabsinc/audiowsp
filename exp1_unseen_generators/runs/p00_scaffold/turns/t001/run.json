@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "sent": false,
+  "reason": "recorded locally; the editor model has not been called",
+  "limit": false,
+  "wall_s": 0.0,
+  "model": null,
+  "effort": null,
+  "audit": {
+    "tool_free": true,
+    "tool_items": {},
+    "event_types": {
+      "turn.recorded": 1
+    }
+  },
+  "prompt_sha256": "b479967bef54058462d7167ad4fe6b9cd3d35582928971272b15bd90518971bc",
+  "placeholders": [
+    "{checkpoint_name}",
+    "{forward_budget}",
+    "{practice_manifest}"
+  ],
+  "end": "2026-11-08T01:33:56-0800",
+  "note": "draft task; placeholders are unbound and the editor has not been called"
+}

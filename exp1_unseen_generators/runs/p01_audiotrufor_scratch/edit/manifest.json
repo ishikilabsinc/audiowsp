@@ -1,0 +1,200 @@
+{
+  "dtype": "float32",
+  "tensors": [
+    {
+      "name": "trufor.b0.proj",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 1024,
+      "relative_change": 0.0,
+      "base_sha256": "bb9f8df61474d25e71fa00722318cd387396ca1736605e1248821cc0de3d3af8",
+      "edited_sha256": "c9356390b870f5f90db89f2a722f7dd54ddbd59a260382c25aa259150c9fe7f0",
+      "changed_rows": 1024,
+      "changed_columns": 1024
+    },
+    {
+      "name": "trufor.b0.w",
+      "shape": [
+        1024
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 1024,
+      "relative_change": 0.0,
+      "base_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+      "edited_sha256": "6ea14af73716a61e76d69b19f2bba85ded902b9d2c4e6dda244c633d3d1ab549"
+    },
+    {
+      "name": "trufor.b1.proj",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 1024,
+      "relative_change": 0.0,
+      "base_sha256": "bb9f8df61474d25e71fa00722318cd387396ca1736605e1248821cc0de3d3af8",
+      "edited_sha256": "c9356390b870f5f90db89f2a722f7dd54ddbd59a260382c25aa259150c9fe7f0",
+      "changed_rows": 1024,
+      "changed_columns": 1024
+    },
+    {
+      "name": "trufor.b1.w",
+      "shape": [
+        1024
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 1024,
+      "relative_change": 0.0,
+      "base_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+      "edited_sha256": "87970415963df8a34fcc18f33d86d98890af6b0e3bebdf917fd01ed8a7f5d950"
+    },
+    {
+      "name": "trufor.bh.norm",
+      "shape": [
+        2
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 2,
+      "relative_change": 0.8672799468040466,
+      "base_sha256": "22b6f43bd8d27738d3213f29e96b62d01d9d6c0ab4f9732aaae803186f51eab7",
+      "edited_sha256": "cf64396201f019cfa3a159e9695020089d47a2d0e14508e1b74679f775fec440"
+    },
+    {
+      "name": "trufor.bh.proj",
+      "shape": [
+        160,
+        160
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 1152,
+      "relative_change": 0.0,
+      "base_sha256": "f627ca4c2c322f15db26152df306bd4f983f0146409b81a4341b9b340c365a16",
+      "edited_sha256": "662b7178b7469e9677678a726e90c863c1e8c48d0137d343eb06a97205c9914f",
+      "changed_rows": 160,
+      "changed_columns": 160
+    },
+    {
+      "name": "trufor.bh.scale",
+      "shape": [
+        160
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 96,
+      "relative_change": 1.7316577434539795,
+      "base_sha256": "e67f1f457024f99bc16e7dde10f824f8d72bb4d317b23f00c1834272f2658001",
+      "edited_sha256": "88c98e598128b5c56b2d890dcbcef181f0bbbad79ad2e8e33fdab4e86de9c63b"
+    },
+    {
+      "name": "trufor.bh.shift",
+      "shape": [
+        160
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 96,
+      "relative_change": 0.0,
+      "base_sha256": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+      "edited_sha256": "5d69b8497139665a3cd1cd2182721b4cfa83515b45f1d10d6d262db548010a2a"
+    },
+    {
+      "name": "trufor.bh.w",
+      "shape": [
+        160
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 96,
+      "relative_change": 0.0,
+      "base_sha256": "9e132485d5107211de325a45e7917cbe3e4b5b9cde3e4ee91d7d2102317759ee",
+      "edited_sha256": "a9d2251675f57011b9a497dbd67bc1c063c5383cfd8be9e7e8b49a75984dfba8"
+    },
+    {
+      "name": "trufor.bm.proj",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 1024,
+      "relative_change": 0.0,
+      "base_sha256": "bb9f8df61474d25e71fa00722318cd387396ca1736605e1248821cc0de3d3af8",
+      "edited_sha256": "c9356390b870f5f90db89f2a722f7dd54ddbd59a260382c25aa259150c9fe7f0",
+      "changed_rows": 1024,
+      "changed_columns": 1024
+    },
+    {
+      "name": "trufor.bm.w",
+      "shape": [
+        1024
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 1024,
+      "relative_change": 0.0,
+      "base_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+      "edited_sha256": "d54cb2e06076c08aefeef110b677a1ec05f4dbf2728d6589166c87b669d14c12"
+    },
+    {
+      "name": "trufor.ch.scale",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 128,
+      "relative_change": 3.4392802715301514,
+      "base_sha256": "02722f124d0f1736a9dd7c4ddcd05630dcf16ee1ce3454e9a876005ce005d4ac",
+      "edited_sha256": "01bf80354b540933059e9898a6ac2ef72d8fd3697a7add249a685aacc50daefb"
+    },
+    {
+      "name": "trufor.ch.shift",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 128,
+      "relative_change": 0.0,
+      "base_sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
+      "edited_sha256": "8fd39c1e37a33cc7868f75e15cad9f65b3571c51c090057b59eeeb1218ec3fbc"
+    },
+    {
+      "name": "trufor.ch.w",
+      "shape": [
+        128
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 128,
+      "relative_change": 0.0,
+      "base_sha256": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
+      "edited_sha256": "84a5e14de4bee240e45a41ef745f626e1266c979d2acdf313f512e808587976a"
+    },
+    {
+      "name": "trufor.head.alpha",
+      "shape": [
+        6
+      ],
+      "dtype": "float32",
+      "form": "sparse",
+      "changed_entries": 6,
+      "relative_change": 1.2919365167617798,
+      "base_sha256": "9c96abcf679f283862a28bc89f5d9fa1085c5b3f360389f00ac996ca84570fd0",
+      "edited_sha256": "3cecb005731d25652b07efc6df787e4a4c9f0bbae15d1f9c23ee2649657c8762"
+    }
+  ],
+  "changed_tensors": 15,
+  "changed_entries_total": 7976,
+  "note": "sha256 is of the contiguous float32 bytes"
+}

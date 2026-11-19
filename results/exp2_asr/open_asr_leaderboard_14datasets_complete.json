@@ -1,0 +1,234 @@
+{
+  "monsoon_en_in": {
+    "Baseline": {
+      "clean_wer": 4.08,
+      "noisy_wer": 17.61,
+      "combined_wer": 10.84
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 2.55,
+      "noisy_wer": 14.62,
+      "combined_wer": 8.58
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 2.7,
+      "noisy_wer": 14.73,
+      "combined_wer": 8.71
+    }
+  },
+  "urgent2024": {
+    "Baseline": {
+      "clean_wer": 11.81,
+      "noisy_wer": 15.33,
+      "combined_wer": 13.57
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 11.43,
+      "noisy_wer": 14.17,
+      "combined_wer": 12.8
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 11.4,
+      "noisy_wer": 14.32,
+      "combined_wer": 12.86
+    }
+  },
+  "ami_cleaned": {
+    "Baseline": {
+      "clean_wer": 6.5,
+      "noisy_wer": 12.61,
+      "combined_wer": 9.56
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 6.36,
+      "noisy_wer": 11.74,
+      "combined_wer": 9.05
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 6.16,
+      "noisy_wer": 11.93,
+      "combined_wer": 9.05
+    }
+  },
+  "gigaspeech_cleaned": {
+    "Baseline": {
+      "clean_wer": 5.98,
+      "noisy_wer": 3.38,
+      "combined_wer": 4.68
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 6.11,
+      "noisy_wer": 3.34,
+      "combined_wer": 4.73
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 6.03,
+      "noisy_wer": 3.38,
+      "combined_wer": 4.7
+    }
+  },
+  "urgent2024_clean": {
+    "Baseline": {
+      "clean_wer": 4.99,
+      "noisy_wer": 6.78,
+      "combined_wer": 5.89
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 4.95,
+      "noisy_wer": 6.43,
+      "combined_wer": 5.69
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 4.95,
+      "noisy_wer": 6.46,
+      "combined_wer": 5.71
+    }
+  },
+  "earnings22": {
+    "Baseline": {
+      "clean_wer": 8.92,
+      "noisy_wer": 10.75,
+      "combined_wer": 9.83
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 8.9,
+      "noisy_wer": 8.82,
+      "combined_wer": 8.86
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 8.96,
+      "noisy_wer": 9.38,
+      "combined_wer": 9.17
+    }
+  },
+  "spgispeech": {
+    "Baseline": {
+      "clean_wer": 3.13,
+      "noisy_wer": 7.51,
+      "combined_wer": 5.32
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 3.08,
+      "noisy_wer": 7.21,
+      "combined_wer": 5.15
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 3.11,
+      "noisy_wer": 7.56,
+      "combined_wer": 5.34
+    }
+  },
+  "voxpopuli_cleaned_aa": {
+    "Baseline": {
+      "clean_wer": 1.58,
+      "noisy_wer": 2.66,
+      "combined_wer": 2.12
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 1.6,
+      "noisy_wer": 2.75,
+      "combined_wer": 2.18
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 1.66,
+      "noisy_wer": 2.79,
+      "combined_wer": 2.23
+    }
+  },
+  "common_voice": {
+    "Baseline": {
+      "clean_wer": 12.44,
+      "noisy_wer": 22.44,
+      "combined_wer": 17.44
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 13.72,
+      "noisy_wer": 21.98,
+      "combined_wer": 17.85
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 11.8,
+      "noisy_wer": 22.16,
+      "combined_wer": 16.98
+    }
+  },
+  "test_other": {
+    "Baseline": {
+      "clean_wer": 2.69,
+      "noisy_wer": 8.39,
+      "combined_wer": 5.54
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 2.63,
+      "noisy_wer": 7.44,
+      "combined_wer": 5.04
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 2.53,
+      "noisy_wer": 7.89,
+      "combined_wer": 5.21
+    }
+  },
+  "mls_test": {
+    "Baseline": {
+      "clean_wer": 3.6,
+      "noisy_wer": 14.24,
+      "combined_wer": 8.92
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 3.77,
+      "noisy_wer": 12.6,
+      "combined_wer": 8.18
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 3.7,
+      "noisy_wer": 12.65,
+      "combined_wer": 8.18
+    }
+  },
+  "test_clean": {
+    "Baseline": {
+      "clean_wer": 0.92,
+      "noisy_wer": 2.09,
+      "combined_wer": 1.5
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 0.92,
+      "noisy_wer": 2.19,
+      "combined_wer": 1.55
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 0.92,
+      "noisy_wer": 2.19,
+      "combined_wer": 1.55
+    }
+  },
+  "earnings22_cleaned_aa_chunked": {
+    "Baseline": {
+      "clean_wer": 4.24
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 4.14
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 4.37
+    }
+  },
+  "tedlium_test": {
+    "Baseline": {
+      "clean_wer": 2.25,
+      "noisy_wer": 4.13,
+      "combined_wer": 3.19
+    },
+    "Ours_ac0.06_k3": {
+      "clean_wer": 2.21,
+      "noisy_wer": 3.43,
+      "combined_wer": 2.82
+    },
+    "Ours_ac0.12_k5": {
+      "clean_wer": 2.18,
+      "noisy_wer": 3.39,
+      "combined_wer": 2.79
+    }
+  }
+}

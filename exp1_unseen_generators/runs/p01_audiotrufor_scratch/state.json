@@ -1,0 +1,13 @@
+{
+  "budget": 50,
+  "mode": "audio-deepfake-p01_audiotrufor_scratch",
+  "prompt": "v1",
+  "turn": 5,
+  "runs": 5,
+  "passes": 5,
+  "done": true,
+  "sent_turns": 5,
+  "draft_turns": 0,
+  "editor": "astra-wsp",
+  "notes": []
+}

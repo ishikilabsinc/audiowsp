@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "sent": true,
+  "reason": null,
+  "limit": false,
+  "wall_s": 0.0,
+  "model": "astra-wsp",
+  "effort": "max",
+  "audit": {
+    "tool_free": true,
+    "tool_items": {},
+    "event_types": {
+      "turn.recorded": 1
+    }
+  },
+  "prompt_sha256": "b00278bc96200b4329583cf6a8e88ad7daddd435b74e69ca2c80683cb07e1459",
+  "placeholders": [],
+  "end": "2026-11-08T05:30:32-0800",
+  "note": "Turn 1: inspect weights and score original model"
+}

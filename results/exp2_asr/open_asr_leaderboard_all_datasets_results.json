@@ -1,0 +1,52 @@
+{
+  "monsoon_en_in": {
+    "Baseline": 2.52,
+    "AudioWSP_OFP": 3.63,
+    "AudioWSP_OFP_Prompt": 3.63
+  },
+  "urgent2024": {
+    "Baseline": 12.22,
+    "AudioWSP_OFP": 11.83,
+    "AudioWSP_OFP_Prompt": 12.01
+  },
+  "ami_cleaned": {
+    "Baseline": 6.09,
+    "AudioWSP_OFP": 6.76,
+    "AudioWSP_OFP_Prompt": 6.76
+  },
+  "gigaspeech_cleaned": {
+    "Baseline": 6.82,
+    "AudioWSP_OFP": 6.95,
+    "AudioWSP_OFP_Prompt": 6.98
+  },
+  "earnings22_cleaned_aa_chunked": {
+    "Baseline": 4.24,
+    "AudioWSP_OFP": 4.89,
+    "AudioWSP_OFP_Prompt": 4.63
+  },
+  "urgent2024_clean": {
+    "Baseline": 4.95,
+    "AudioWSP_OFP": 5.1,
+    "AudioWSP_OFP_Prompt": 4.92
+  },
+  "voxpopuli_cleaned_aa": {
+    "Baseline": 1.73,
+    "AudioWSP_OFP": 1.66,
+    "AudioWSP_OFP_Prompt": 1.64
+  },
+  "spgispeech": {
+    "Baseline": 3.17,
+    "AudioWSP_OFP": 3.21,
+    "AudioWSP_OFP_Prompt": 3.15
+  },
+  "earnings22": {
+    "Baseline": 8.92,
+    "AudioWSP_OFP": 11.69,
+    "AudioWSP_OFP_Prompt": 11.6
+  },
+  "common_voice": {
+    "Baseline": 11.45,
+    "AudioWSP_OFP": 11.09,
+    "AudioWSP_OFP_Prompt": 10.79
+  }
+}

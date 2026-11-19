@@ -1,0 +1,2 @@
+[sandbox]
+Combined 208 real-only activations: [(208, 1024), (208, 1024), (208, 1024), (208, 160), (208, 128)]

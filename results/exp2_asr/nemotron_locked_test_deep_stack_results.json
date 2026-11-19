@@ -1,0 +1,786 @@
+{
+  "datasets": [
+    "test_clean",
+    "test_other",
+    "tedlium_test",
+    "mls_test"
+  ],
+  "firewall_audit": {
+    "task": "asr_nemotron_30b_deep_stack_ofp",
+    "firewall_verified": true,
+    "zero_eval_leakage": true,
+    "practice_splits": [
+      "dev-clean",
+      "dev-other",
+      "validation",
+      "dev"
+    ],
+    "n_calibration_utterances": 170,
+    "calibration_ids_sha256": "2cfe5e8a9b7522476fb3fa275e1efa140f45d89f97b0787ee17fba115d885530",
+    "nuisance_families": [
+      "white_0db",
+      "babble_3db",
+      "farfield_reverb",
+      "pstn_telephony_codec"
+    ],
+    "context": "eval_locked_test_per_corruption_sota"
+  },
+  "methods": {
+    "Baseline (Nemotron-3.5-30B-A4B)": {
+      "macro_clean_official_wer": 2.688,
+      "macro_nuis_official_wer": 8.092,
+      "macro_overall_official_wer": 5.39,
+      "macro_clean_strict_wer": 3.13,
+      "macro_nuis_strict_wer": 8.31,
+      "macro_overall_strict_wer": 5.72,
+      "per_dataset_clean_official": {
+        "test_clean": 1.39,
+        "test_other": 2.81,
+        "tedlium_test": 2.41,
+        "mls_test": 4.14
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.61,
+        "test_other": 9.33,
+        "tedlium_test": 4.21,
+        "mls_test": 15.22
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.61,
+        "test_other": 3.06,
+        "tedlium_test": 3.35,
+        "mls_test": 4.5
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.5,
+        "test_other": 9.48,
+        "tedlium_test": 4.91,
+        "mls_test": 15.35
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.7,
+          "Babble3dB": 3.92,
+          "Reverb": 3.13,
+          "PSTN": 2.66
+        },
+        "test_other": {
+          "White0dB": 21.48,
+          "Babble3dB": 5.93,
+          "Reverb": 3.85,
+          "PSTN": 6.07
+        },
+        "tedlium_test": {
+          "White0dB": 6.32,
+          "Babble3dB": 3.44,
+          "Reverb": 3.25,
+          "PSTN": 3.81
+        },
+        "mls_test": {
+          "White0dB": 34.34,
+          "Babble3dB": 10.21,
+          "Reverb": 5.6,
+          "PSTN": 10.74
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.62,
+          "Babble3dB": 3.82,
+          "Reverb": 3.03,
+          "PSTN": 2.55
+        },
+        "test_other": {
+          "White0dB": 21.59,
+          "Babble3dB": 5.85,
+          "Reverb": 4.35,
+          "PSTN": 6.15
+        },
+        "tedlium_test": {
+          "White0dB": 6.99,
+          "Babble3dB": 4.21,
+          "Reverb": 3.83,
+          "PSTN": 4.6
+        },
+        "mls_test": {
+          "White0dB": 34.27,
+          "Babble3dB": 10.26,
+          "Reverb": 5.62,
+          "PSTN": 11.25
+        }
+      }
+    },
+    "Standard Ridge (1F+0B Baseline)": {
+      "macro_clean_official_wer": 2.695,
+      "macro_nuis_official_wer": 7.81,
+      "macro_overall_official_wer": 5.252,
+      "macro_clean_strict_wer": 3.15,
+      "macro_nuis_strict_wer": 8.062,
+      "macro_overall_strict_wer": 5.606,
+      "per_dataset_clean_official": {
+        "test_clean": 1.45,
+        "test_other": 2.81,
+        "tedlium_test": 2.48,
+        "mls_test": 4.04
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.61,
+        "test_other": 8.56,
+        "tedlium_test": 4.21,
+        "mls_test": 14.86
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.64,
+        "test_other": 3.09,
+        "tedlium_test": 3.44,
+        "mls_test": 4.43
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.62,
+        "test_other": 8.73,
+        "tedlium_test": 4.91,
+        "mls_test": 14.99
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.7,
+          "Babble3dB": 3.76,
+          "Reverb": 3.29,
+          "PSTN": 2.66
+        },
+        "test_other": {
+          "White0dB": 18.81,
+          "Babble3dB": 5.78,
+          "Reverb": 4.3,
+          "PSTN": 5.33
+        },
+        "tedlium_test": {
+          "White0dB": 6.13,
+          "Babble3dB": 3.62,
+          "Reverb": 3.16,
+          "PSTN": 3.9
+        },
+        "mls_test": {
+          "White0dB": 33.89,
+          "Babble3dB": 9.38,
+          "Reverb": 5.9,
+          "PSTN": 10.29
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.78,
+          "Babble3dB": 3.66,
+          "Reverb": 3.5,
+          "PSTN": 2.55
+        },
+        "test_other": {
+          "White0dB": 18.74,
+          "Babble3dB": 6.0,
+          "Reverb": 4.8,
+          "PSTN": 5.4
+        },
+        "tedlium_test": {
+          "White0dB": 6.8,
+          "Babble3dB": 4.41,
+          "Reverb": 3.83,
+          "PSTN": 4.6
+        },
+        "mls_test": {
+          "White0dB": 34.04,
+          "Babble3dB": 9.42,
+          "Reverb": 6.0,
+          "PSTN": 10.49
+        }
+      }
+    },
+    "AdamW (15-Epoch Backprop)": {
+      "macro_clean_official_wer": 2.692,
+      "macro_nuis_official_wer": 7.907,
+      "macro_overall_official_wer": 5.3,
+      "macro_clean_strict_wer": 3.133,
+      "macro_nuis_strict_wer": 8.095,
+      "macro_overall_strict_wer": 5.614,
+      "per_dataset_clean_official": {
+        "test_clean": 1.45,
+        "test_other": 2.77,
+        "tedlium_test": 2.44,
+        "mls_test": 4.11
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.68,
+        "test_other": 9.04,
+        "tedlium_test": 4.07,
+        "mls_test": 14.84
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.67,
+        "test_other": 3.06,
+        "tedlium_test": 3.37,
+        "mls_test": 4.43
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.54,
+        "test_other": 9.11,
+        "tedlium_test": 4.74,
+        "mls_test": 14.99
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 5.02,
+          "Babble3dB": 3.76,
+          "Reverb": 3.29,
+          "PSTN": 2.66
+        },
+        "test_other": {
+          "White0dB": 19.7,
+          "Babble3dB": 7.11,
+          "Reverb": 4.3,
+          "PSTN": 5.04
+        },
+        "tedlium_test": {
+          "White0dB": 5.95,
+          "Babble3dB": 3.44,
+          "Reverb": 3.07,
+          "PSTN": 3.81
+        },
+        "mls_test": {
+          "White0dB": 33.81,
+          "Babble3dB": 9.38,
+          "Reverb": 5.75,
+          "PSTN": 10.44
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.78,
+          "Babble3dB": 3.66,
+          "Reverb": 3.18,
+          "PSTN": 2.55
+        },
+        "test_other": {
+          "White0dB": 19.49,
+          "Babble3dB": 7.05,
+          "Reverb": 4.8,
+          "PSTN": 5.1
+        },
+        "tedlium_test": {
+          "White0dB": 6.51,
+          "Babble3dB": 4.21,
+          "Reverb": 3.74,
+          "PSTN": 4.5
+        },
+        "mls_test": {
+          "White0dB": 33.89,
+          "Babble3dB": 9.42,
+          "Reverb": 5.93,
+          "PSTN": 10.71
+        }
+      }
+    },
+    "AudioWSP + Deep-Stack OFP (Stage 0+1+2+3 Ours)": {
+      "macro_clean_official_wer": 2.705,
+      "macro_nuis_official_wer": 6.955,
+      "macro_overall_official_wer": 4.83,
+      "macro_clean_strict_wer": 3.008,
+      "macro_nuis_strict_wer": 7.062,
+      "macro_overall_strict_wer": 5.035,
+      "per_dataset_clean_official": {
+        "test_clean": 1.39,
+        "test_other": 2.81,
+        "tedlium_test": 2.48,
+        "mls_test": 4.14
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.41,
+        "test_other": 8.04,
+        "tedlium_test": 3.76,
+        "mls_test": 12.61
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.55,
+        "test_other": 3.2,
+        "tedlium_test": 2.8,
+        "mls_test": 4.48
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.46,
+        "test_other": 8.32,
+        "tedlium_test": 3.88,
+        "mls_test": 12.59
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.39,
+          "Babble3dB": 3.61,
+          "Reverb": 2.98,
+          "PSTN": 2.66
+        },
+        "test_other": {
+          "White0dB": 14.96,
+          "Babble3dB": 8.59,
+          "Reverb": 3.85,
+          "PSTN": 4.74
+        },
+        "tedlium_test": {
+          "White0dB": 4.93,
+          "Babble3dB": 3.35,
+          "Reverb": 2.97,
+          "PSTN": 3.81
+        },
+        "mls_test": {
+          "White0dB": 27.84,
+          "Babble3dB": 7.34,
+          "Reverb": 5.6,
+          "PSTN": 9.68
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.14,
+          "Babble3dB": 3.98,
+          "Reverb": 3.18,
+          "PSTN": 2.55
+        },
+        "test_other": {
+          "White0dB": 14.99,
+          "Babble3dB": 8.85,
+          "Reverb": 4.35,
+          "PSTN": 5.1
+        },
+        "tedlium_test": {
+          "White0dB": 5.17,
+          "Babble3dB": 3.45,
+          "Reverb": 2.97,
+          "PSTN": 3.93
+        },
+        "mls_test": {
+          "White0dB": 27.66,
+          "Babble3dB": 7.29,
+          "Reverb": 5.62,
+          "PSTN": 9.8
+        }
+      }
+    },
+    "AudioWSP + Broadband-Gated Deep-Stack OFP (Ours)": {
+      "macro_clean_official_wer": 2.688,
+      "macro_nuis_official_wer": 6.873,
+      "macro_overall_official_wer": 4.78,
+      "macro_clean_strict_wer": 2.99,
+      "macro_nuis_strict_wer": 6.975,
+      "macro_overall_strict_wer": 4.982,
+      "per_dataset_clean_official": {
+        "test_clean": 1.39,
+        "test_other": 2.84,
+        "tedlium_test": 2.41,
+        "mls_test": 4.11
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.45,
+        "test_other": 7.48,
+        "tedlium_test": 3.76,
+        "mls_test": 12.8
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.55,
+        "test_other": 3.23,
+        "tedlium_test": 2.73,
+        "mls_test": 4.45
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.38,
+        "test_other": 7.76,
+        "tedlium_test": 3.9,
+        "mls_test": 12.86
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.39,
+          "Babble3dB": 3.76,
+          "Reverb": 2.98,
+          "PSTN": 2.66
+        },
+        "test_other": {
+          "White0dB": 14.96,
+          "Babble3dB": 6.67,
+          "Reverb": 4.0,
+          "PSTN": 4.3
+        },
+        "tedlium_test": {
+          "White0dB": 4.93,
+          "Babble3dB": 3.35,
+          "Reverb": 3.07,
+          "PSTN": 3.72
+        },
+        "mls_test": {
+          "White0dB": 27.84,
+          "Babble3dB": 8.32,
+          "Reverb": 5.6,
+          "PSTN": 9.46
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.14,
+          "Babble3dB": 3.66,
+          "Reverb": 3.18,
+          "PSTN": 2.55
+        },
+        "test_other": {
+          "White0dB": 14.99,
+          "Babble3dB": 6.9,
+          "Reverb": 4.5,
+          "PSTN": 4.65
+        },
+        "tedlium_test": {
+          "White0dB": 5.17,
+          "Babble3dB": 3.54,
+          "Reverb": 3.07,
+          "PSTN": 3.83
+        },
+        "mls_test": {
+          "White0dB": 27.66,
+          "Babble3dB": 8.59,
+          "Reverb": 5.62,
+          "PSTN": 9.57
+        }
+      }
+    },
+    "AudioWSP + GEVD-96 Deep-Stack OFP (Ours)": {
+      "macro_clean_official_wer": 2.695,
+      "macro_nuis_official_wer": 7.062,
+      "macro_overall_official_wer": 4.879,
+      "macro_clean_strict_wer": 2.973,
+      "macro_nuis_strict_wer": 7.13,
+      "macro_overall_strict_wer": 5.051,
+      "per_dataset_clean_official": {
+        "test_clean": 1.39,
+        "test_other": 2.84,
+        "tedlium_test": 2.44,
+        "mls_test": 4.11
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.25,
+        "test_other": 8.04,
+        "tedlium_test": 3.95,
+        "mls_test": 13.01
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.55,
+        "test_other": 3.23,
+        "tedlium_test": 2.68,
+        "mls_test": 4.43
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.26,
+        "test_other": 8.25,
+        "tedlium_test": 4.02,
+        "mls_test": 12.99
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.39,
+          "Babble3dB": 2.98,
+          "Reverb": 2.98,
+          "PSTN": 2.66
+        },
+        "test_other": {
+          "White0dB": 16.74,
+          "Babble3dB": 6.96,
+          "Reverb": 4.0,
+          "PSTN": 4.44
+        },
+        "tedlium_test": {
+          "White0dB": 5.67,
+          "Babble3dB": 3.44,
+          "Reverb": 2.97,
+          "PSTN": 3.72
+        },
+        "mls_test": {
+          "White0dB": 28.59,
+          "Babble3dB": 8.02,
+          "Reverb": 5.6,
+          "PSTN": 9.83
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.14,
+          "Babble3dB": 2.87,
+          "Reverb": 3.18,
+          "PSTN": 2.87
+        },
+        "test_other": {
+          "White0dB": 16.64,
+          "Babble3dB": 7.2,
+          "Reverb": 4.5,
+          "PSTN": 4.65
+        },
+        "tedlium_test": {
+          "White0dB": 5.75,
+          "Babble3dB": 3.54,
+          "Reverb": 2.97,
+          "PSTN": 3.83
+        },
+        "mls_test": {
+          "White0dB": 28.19,
+          "Babble3dB": 8.21,
+          "Reverb": 5.62,
+          "PSTN": 9.95
+        }
+      }
+    },
+    "AudioWSP + Per-Bin Mel + Hybrid GEVD-96 OFP (Ours)": {
+      "macro_clean_official_wer": 2.703,
+      "macro_nuis_official_wer": 7.047,
+      "macro_overall_official_wer": 4.875,
+      "macro_clean_strict_wer": 2.993,
+      "macro_nuis_strict_wer": 7.112,
+      "macro_overall_strict_wer": 5.053,
+      "per_dataset_clean_official": {
+        "test_clean": 1.39,
+        "test_other": 2.77,
+        "tedlium_test": 2.48,
+        "mls_test": 4.17
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.68,
+        "test_other": 7.81,
+        "tedlium_test": 3.86,
+        "mls_test": 12.84
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.55,
+        "test_other": 3.16,
+        "tedlium_test": 2.78,
+        "mls_test": 4.48
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.62,
+        "test_other": 8.06,
+        "tedlium_test": 3.93,
+        "mls_test": 12.84
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.7,
+          "Babble3dB": 4.23,
+          "Reverb": 2.98,
+          "PSTN": 2.82
+        },
+        "test_other": {
+          "White0dB": 16.44,
+          "Babble3dB": 6.67,
+          "Reverb": 4.0,
+          "PSTN": 4.15
+        },
+        "tedlium_test": {
+          "White0dB": 5.3,
+          "Babble3dB": 3.35,
+          "Reverb": 3.25,
+          "PSTN": 3.53
+        },
+        "mls_test": {
+          "White0dB": 28.59,
+          "Babble3dB": 8.09,
+          "Reverb": 5.6,
+          "PSTN": 9.08
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.46,
+          "Babble3dB": 4.14,
+          "Reverb": 3.18,
+          "PSTN": 2.71
+        },
+        "test_other": {
+          "White0dB": 16.34,
+          "Babble3dB": 6.9,
+          "Reverb": 4.5,
+          "PSTN": 4.5
+        },
+        "tedlium_test": {
+          "White0dB": 5.36,
+          "Babble3dB": 3.45,
+          "Reverb": 3.26,
+          "PSTN": 3.64
+        },
+        "mls_test": {
+          "White0dB": 28.12,
+          "Babble3dB": 8.36,
+          "Reverb": 5.62,
+          "PSTN": 9.27
+        }
+      }
+    },
+    "AudioWSP + Multi-Scale Mel + GEVD-96 Deep-Stack OFP (Ours)": {
+      "macro_clean_official_wer": 2.678,
+      "macro_nuis_official_wer": 6.977,
+      "macro_overall_official_wer": 4.827,
+      "macro_clean_strict_wer": 2.96,
+      "macro_nuis_strict_wer": 7.062,
+      "macro_overall_strict_wer": 5.011,
+      "per_dataset_clean_official": {
+        "test_clean": 1.39,
+        "test_other": 2.77,
+        "tedlium_test": 2.44,
+        "mls_test": 4.11
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.41,
+        "test_other": 7.7,
+        "tedlium_test": 3.79,
+        "mls_test": 13.01
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.55,
+        "test_other": 3.16,
+        "tedlium_test": 2.71,
+        "mls_test": 4.42
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.34,
+        "test_other": 7.98,
+        "tedlium_test": 3.88,
+        "mls_test": 13.05
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.39,
+          "Babble3dB": 3.45,
+          "Reverb": 2.98,
+          "PSTN": 2.82
+        },
+        "test_other": {
+          "White0dB": 15.26,
+          "Babble3dB": 6.81,
+          "Reverb": 4.0,
+          "PSTN": 4.74
+        },
+        "tedlium_test": {
+          "White0dB": 5.39,
+          "Babble3dB": 3.35,
+          "Reverb": 2.7,
+          "PSTN": 3.72
+        },
+        "mls_test": {
+          "White0dB": 28.67,
+          "Babble3dB": 8.09,
+          "Reverb": 5.6,
+          "PSTN": 9.68
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.14,
+          "Babble3dB": 3.34,
+          "Reverb": 3.18,
+          "PSTN": 2.71
+        },
+        "test_other": {
+          "White0dB": 15.29,
+          "Babble3dB": 7.05,
+          "Reverb": 4.5,
+          "PSTN": 5.1
+        },
+        "tedlium_test": {
+          "White0dB": 5.46,
+          "Babble3dB": 3.45,
+          "Reverb": 2.78,
+          "PSTN": 3.83
+        },
+        "mls_test": {
+          "White0dB": 28.42,
+          "Babble3dB": 8.36,
+          "Reverb": 5.62,
+          "PSTN": 9.8
+        }
+      }
+    },
+    "AudioWSP + Multi-Scale Mel + Broadband Deep-Stack OFP (Ours)": {
+      "macro_clean_official_wer": 2.695,
+      "macro_nuis_official_wer": 6.867,
+      "macro_overall_official_wer": 4.781,
+      "macro_clean_strict_wer": 3.003,
+      "macro_nuis_strict_wer": 6.93,
+      "macro_overall_strict_wer": 4.966,
+      "per_dataset_clean_official": {
+        "test_clean": 1.39,
+        "test_other": 2.84,
+        "tedlium_test": 2.44,
+        "mls_test": 4.11
+      },
+      "per_dataset_nuis_official": {
+        "test_clean": 3.49,
+        "test_other": 7.44,
+        "tedlium_test": 3.83,
+        "mls_test": 12.71
+      },
+      "per_dataset_clean_strict": {
+        "test_clean": 1.55,
+        "test_other": 3.23,
+        "tedlium_test": 2.78,
+        "mls_test": 4.45
+      },
+      "per_dataset_nuis_strict": {
+        "test_clean": 3.38,
+        "test_other": 7.68,
+        "tedlium_test": 3.95,
+        "mls_test": 12.71
+      },
+      "per_dataset_corruption_official": {
+        "test_clean": {
+          "White0dB": 4.55,
+          "Babble3dB": 3.76,
+          "Reverb": 2.98,
+          "PSTN": 2.66
+        },
+        "test_other": {
+          "White0dB": 15.41,
+          "Babble3dB": 6.07,
+          "Reverb": 4.0,
+          "PSTN": 4.3
+        },
+        "tedlium_test": {
+          "White0dB": 5.11,
+          "Babble3dB": 3.35,
+          "Reverb": 2.97,
+          "PSTN": 3.9
+        },
+        "mls_test": {
+          "White0dB": 27.23,
+          "Babble3dB": 8.09,
+          "Reverb": 5.52,
+          "PSTN": 9.98
+        }
+      },
+      "per_dataset_corruption_strict": {
+        "test_clean": {
+          "White0dB": 4.3,
+          "Babble3dB": 3.66,
+          "Reverb": 2.87,
+          "PSTN": 2.71
+        },
+        "test_other": {
+          "White0dB": 15.29,
+          "Babble3dB": 6.3,
+          "Reverb": 4.5,
+          "PSTN": 4.65
+        },
+        "tedlium_test": {
+          "White0dB": 5.27,
+          "Babble3dB": 3.54,
+          "Reverb": 2.97,
+          "PSTN": 4.02
+        },
+        "mls_test": {
+          "White0dB": 26.75,
+          "Babble3dB": 8.36,
+          "Reverb": 5.55,
+          "PSTN": 10.18
+        }
+      }
+    }
+  }
+}

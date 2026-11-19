@@ -1,0 +1,16 @@
+{"id": "m-s0-t1-r", "score": 0.15, "label": 0, "generator": "A", "speaker": "s0", "gender": "m", "language": "en", "transcript_id": "t1", "split": "eval_matched"}
+{"id": "m-s0-t1-s", "score": 0.85, "label": 1, "generator": "A", "speaker": "s0", "gender": "m", "language": "en", "transcript_id": "t1", "split": "eval_matched"}
+{"id": "m-s1-t2-r", "score": 0.15, "label": 0, "generator": "A", "speaker": "s1", "gender": "m", "language": "en", "transcript_id": "t2", "split": "eval_matched"}
+{"id": "m-s1-t2-s", "score": 0.85, "label": 1, "generator": "A", "speaker": "s1", "gender": "m", "language": "en", "transcript_id": "t2", "split": "eval_matched"}
+{"id": "m-s2-t3-r", "score": 0.45, "label": 0, "generator": "A", "speaker": "s2", "gender": "f", "language": "en", "transcript_id": "t3", "split": "eval_matched"}
+{"id": "m-s2-t3-s", "score": 0.95, "label": 1, "generator": "A", "speaker": "s2", "gender": "f", "language": "en", "transcript_id": "t3", "split": "eval_matched"}
+{"id": "m-s3-t4-r", "score": 0.45, "label": 0, "generator": "A", "speaker": "s3", "gender": "f", "language": "es", "transcript_id": "t4", "split": "eval_matched"}
+{"id": "m-s3-t4-s", "score": 0.95, "label": 1, "generator": "A", "speaker": "s3", "gender": "f", "language": "es", "transcript_id": "t4", "split": "eval_matched"}
+{"id": "u-s0-t1-r", "score": 0.40, "label": 0, "generator": "B", "speaker": "s0", "gender": "m", "language": "en", "transcript_id": "t1", "split": "eval_unseen_generator"}
+{"id": "u-s0-t1-s", "score": 0.42, "label": 1, "generator": "B", "speaker": "s0", "gender": "m", "language": "en", "transcript_id": "t1", "split": "eval_unseen_generator"}
+{"id": "u-s1-t2-r", "score": 0.40, "label": 0, "generator": "B", "speaker": "s1", "gender": "m", "language": "en", "transcript_id": "t2", "split": "eval_unseen_generator"}
+{"id": "u-s1-t2-s", "score": 0.42, "label": 1, "generator": "B", "speaker": "s1", "gender": "m", "language": "en", "transcript_id": "t2", "split": "eval_unseen_generator"}
+{"id": "u-s2-t3-r", "score": 0.70, "label": 0, "generator": "B", "speaker": "s2", "gender": "f", "language": "en", "transcript_id": "t3", "split": "eval_unseen_generator"}
+{"id": "u-s2-t3-s", "score": 0.72, "label": 1, "generator": "B", "speaker": "s2", "gender": "f", "language": "en", "transcript_id": "t3", "split": "eval_unseen_generator"}
+{"id": "u-s3-t4-r", "score": 0.70, "label": 0, "generator": "B", "speaker": "s3", "gender": "f", "language": "es", "transcript_id": "t4", "split": "eval_unseen_generator"}
+{"id": "u-s3-t4-s", "score": 0.72, "label": 1, "generator": "B", "speaker": "s3", "gender": "f", "language": "es", "transcript_id": "t4", "split": "eval_unseen_generator"}

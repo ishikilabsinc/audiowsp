@@ -1,0 +1,121 @@
+{
+  "nemotron_681m_bpe_ctc": {
+    "Baseline (Nemotron-3.5 681M BPE-CTC)": {
+      "clean_macro": 7.94,
+      "nuis_macro": 10.45,
+      "overall_macro": 9.195,
+      "clean": {
+        "test_clean": 5.08,
+        "test_other": 8.69,
+        "tedlium_test": 5.21,
+        "mls_test": 12.78
+      },
+      "nuis": {
+        "test_clean": 7.05,
+        "test_other": 11.17,
+        "tedlium_test": 7.53,
+        "mls_test": 16.05
+      }
+    },
+    "Standard Ridge (1F+0B Baseline)": {
+      "clean_macro": 7.942,
+      "nuis_macro": 10.562,
+      "overall_macro": 9.252,
+      "clean": {
+        "test_clean": 5.08,
+        "test_other": 8.82,
+        "tedlium_test": 5.1,
+        "mls_test": 12.77
+      },
+      "nuis": {
+        "test_clean": 7.61,
+        "test_other": 11.1,
+        "tedlium_test": 7.49,
+        "mls_test": 16.05
+      }
+    },
+    "AudioWSP + OFP-GEVD (1F+0B, Ours)": {
+      "clean_macro": 7.955,
+      "nuis_macro": 10.652,
+      "overall_macro": 9.304,
+      "clean": {
+        "test_clean": 5.06,
+        "test_other": 8.95,
+        "tedlium_test": 5.04,
+        "mls_test": 12.77
+      },
+      "nuis": {
+        "test_clean": 7.64,
+        "test_other": 11.25,
+        "tedlium_test": 7.6,
+        "mls_test": 16.12
+      }
+    }
+  },
+  "ot_vel_compression": {
+    "large_lv60_self": {
+      "magnitude": {
+        "params_m": 174.75,
+        "macro_clean_wer": 5.24,
+        "per_dataset": {
+          "test_clean": 1.62,
+          "test_other": 4.32,
+          "tedlium_test": 8.02,
+          "mls_test": 7.0
+        }
+      },
+      "wanda": {
+        "params_m": 174.75,
+        "macro_clean_wer": 5.38,
+        "per_dataset": {
+          "test_clean": 1.72,
+          "test_other": 4.76,
+          "tedlium_test": 7.8,
+          "mls_test": 7.26
+        }
+      },
+      "ot_vel_ofp": {
+        "params_m": 174.84,
+        "macro_clean_wer": 6.21,
+        "per_dataset": {
+          "test_clean": 1.97,
+          "test_other": 5.25,
+          "tedlium_test": 9.53,
+          "mls_test": 8.1
+        }
+      }
+    },
+    "base_960h": {
+      "magnitude": {
+        "params_m": 65.21,
+        "macro_clean_wer": 26.96,
+        "per_dataset": {
+          "test_clean": 12.87,
+          "test_other": 22.29,
+          "tedlium_test": 33.7,
+          "mls_test": 38.98
+        }
+      },
+      "wanda": {
+        "params_m": 65.21,
+        "macro_clean_wer": 14.0,
+        "per_dataset": {
+          "test_clean": 5.08,
+          "test_other": 10.88,
+          "tedlium_test": 17.96,
+          "mls_test": 22.07
+        }
+      },
+      "ot_vel_ofp": {
+        "params_m": 65.29,
+        "macro_clean_wer": 15.88,
+        "per_dataset": {
+          "test_clean": 5.87,
+          "test_other": 12.88,
+          "tedlium_test": 20.09,
+          "mls_test": 24.69
+        }
+      }
+    }
+  }
+}

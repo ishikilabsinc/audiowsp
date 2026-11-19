@@ -1,0 +1,100 @@
+{
+  "urgent2024": {
+    "single_clean_wer": 11.77,
+    "multi_clean_wer": 10.46,
+    "rtfx_1gpu": 85.74,
+    "rtfx_4gpu": 342.96,
+    "rtf_1gpu": 0.01166
+  },
+  "monsoon_en_in": {
+    "single_clean_wer": 2.9,
+    "multi_clean_wer": 2.9,
+    "rtfx_1gpu": 83.7,
+    "rtfx_4gpu": 334.8,
+    "rtf_1gpu": 0.01195
+  },
+  "ami_cleaned": {
+    "single_clean_wer": 6.3,
+    "multi_clean_wer": 5.53,
+    "rtfx_1gpu": 92.06,
+    "rtfx_4gpu": 368.24,
+    "rtf_1gpu": 0.01086
+  },
+  "urgent2024_clean": {
+    "single_clean_wer": 4.75,
+    "multi_clean_wer": 4.16,
+    "rtfx_1gpu": 101.33,
+    "rtfx_4gpu": 405.32,
+    "rtf_1gpu": 0.00987
+  },
+  "gigaspeech_cleaned": {
+    "single_clean_wer": 6.13,
+    "multi_clean_wer": 5.42,
+    "rtfx_1gpu": 89.54,
+    "rtfx_4gpu": 358.16,
+    "rtf_1gpu": 0.01117
+  },
+  "earnings22": {
+    "single_clean_wer": 8.88,
+    "multi_clean_wer": 7.81,
+    "rtfx_1gpu": 111.45,
+    "rtfx_4gpu": 445.8,
+    "rtf_1gpu": 0.00897
+  },
+  "voxpopuli_cleaned_aa": {
+    "single_clean_wer": 1.49,
+    "multi_clean_wer": 1.18,
+    "rtfx_1gpu": 125.91,
+    "rtfx_4gpu": 503.64,
+    "rtf_1gpu": 0.00794
+  },
+  "mls_test": {
+    "single_clean_wer": 3.81,
+    "multi_clean_wer": 3.81,
+    "rtfx_1gpu": 104.42,
+    "rtfx_4gpu": 417.68,
+    "rtf_1gpu": 0.00958
+  },
+  "common_voice": {
+    "single_clean_wer": 9.52,
+    "multi_clean_wer": 9.52,
+    "rtfx_1gpu": 200.17,
+    "rtfx_4gpu": 800.68,
+    "rtf_1gpu": 0.005
+  },
+  "test_clean": {
+    "single_clean_wer": 0.92,
+    "multi_clean_wer": 0.79,
+    "rtfx_1gpu": 88.95,
+    "rtfx_4gpu": 355.8,
+    "rtf_1gpu": 0.01124
+  },
+  "spgispeech": {
+    "single_clean_wer": 1.83,
+    "multi_clean_wer": 1.51,
+    "rtfx_1gpu": 126.86,
+    "rtfx_4gpu": 507.44,
+    "rtf_1gpu": 0.00788
+  },
+  "tedlium_test": {
+    "single_clean_wer": 2.34,
+    "multi_clean_wer": 2.34,
+    "rtfx_1gpu": 97.6,
+    "rtfx_4gpu": 390.4,
+    "rtf_1gpu": 0.01025
+  },
+  "test_other": {
+    "single_clean_wer": 2.85,
+    "multi_clean_wer": 2.16,
+    "rtfx_1gpu": 68.88,
+    "rtfx_4gpu": 275.52,
+    "rtf_1gpu": 0.01452
+  },
+  "earnings22_cleaned_aa_chunked": {
+    "single_clean_wer": 4.37,
+    "multi_clean_wer": 3.83,
+    "rtfx_1gpu": 93.09,
+    "rtfx_4gpu": 372.36,
+    "rtf_1gpu": 0.01074
+  }
+}

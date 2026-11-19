@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "sent": true,
+  "reason": null,
+  "limit": false,
+  "wall_s": 0.0,
+  "model": "astra-wsp",
+  "effort": "max",
+  "audit": {
+    "tool_free": true,
+    "tool_items": {},
+    "event_types": {
+      "turn.recorded": 1
+    }
+  },
+  "prompt_sha256": "d934ddd4a259b78374e1d0b3091efd812227035a07c5c38c23ecedeba4b61be3",
+  "placeholders": [],
+  "end": "2026-11-08T05:30:32-0800",
+  "note": "Turn 2: extract real-speech activations across layers 0..4"
+}

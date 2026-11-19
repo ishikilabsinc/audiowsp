@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "sent": true,
+  "reason": null,
+  "limit": false,
+  "wall_s": 0.0,
+  "model": "astra-wsp",
+  "effort": "max",
+  "audit": {
+    "tool_free": true,
+    "tool_items": {},
+    "event_types": {
+      "turn.recorded": 1
+    }
+  },
+  "prompt_sha256": "f2b39694bfc1fe9059d17f3017409d6e8ee5a40230f5ef3e578776e68bafb35b",
+  "placeholders": [],
+  "end": "2026-11-08T05:30:34-0800",
+  "note": "Turn 4: program bh and ch"
+}

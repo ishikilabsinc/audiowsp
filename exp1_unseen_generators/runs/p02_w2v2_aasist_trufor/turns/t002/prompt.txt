@@ -1,0 +1,209 @@
+[sandbox]
+Total tensors=250, practice=512, real_only=208
+trufor.head.alpha original: [0. 0. 0. 0. 0. 1.]
+
+[forward]
+{
+  "n": 512,
+  "eer": 0.14853238866396762,
+  "auc": 0.9263347672064778,
+  "by_split": {
+    "eval_matched": {
+      "n": 192,
+      "n_real": 64,
+      "n_spoof": 128,
+      "eer": 0.0,
+      "auc": 1.0
+    },
+    "eval_unseen_generator": {
+      "n": 320,
+      "n_real": 144,
+      "n_spoof": 176,
+      "eer": 0.15940656565656564,
+      "auc": 0.8891256313131313
+    }
+  },
+  "by_generator": {
+    "A07": {
+      "n": 7,
+      "n_real": 0,
+      "n_spoof": 7,
+      "eer": null,
+      "auc": null
+    },
+    "A08": {
+      "n": 10,
+      "n_real": 0,
+      "n_spoof": 10,
+      "eer": null,
+      "auc": null
+    },
+    "A09": {
+      "n": 11,
+      "n_real": 0,
+      "n_spoof": 11,
+      "eer": null,
+      "auc": null
+    },
+    "A10": {
+      "n": 10,
+      "n_real": 0,
+      "n_spoof": 10,
+      "eer": null,
+      "auc": null
+    },
+    "A11": {
+      "n": 9,
+      "n_real": 0,
+      "n_spoof": 9,
+      "eer": null,
+      "auc": null
+    },
+    "A12": {
+      "n": 16,
+      "n_real": 0,
+      "n_spoof": 16,
+      "eer": null,
+      "auc": null
+    },
+    "A13": {
+      "n": 11,
+      "n_real": 0,
+      "n_spoof": 11,
+      "eer": null,
+      "auc": null
+    },
+    "A14": {
+      "n": 10,
+      "n_real": 0,
+      "n_spoof": 10,
+      "eer": null,
+      "auc": null
+    },
+    "A15": {
+      "n": 8,
+      "n_real": 0,
+      "n_spoof": 8,
+      "eer": null,
+      "auc": null
+    },
+    "A16": {
+      "n": 11,
+      "n_real": 0,
+      "n_spoof": 11,
+      "eer": null,
+      "auc": null
+    },
+    "A17": {
+      "n": 11,
+      "n_real": 0,
+      "n_spoof": 11,
+      "eer": null,
+      "auc": null
+    },
+    "A18": {
+      "n": 6,
+      "n_real": 0,
+      "n_spoof": 6,
+      "eer": null,
+      "auc": null
+    },
+    "A19": {
+      "n": 8,
+      "n_real": 0,
+      "n_spoof": 8,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A17": {
+      "n": 16,
+      "n_real": 0,
+      "n_spoof": 16,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A18": {
+      "n": 19,
+      "n_real": 0,
+      "n_spoof": 19,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A19": {
+      "n": 11,
+      "n_real": 0,
+      "n_spoof": 11,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A20": {
+      "n": 15,
+      "n_real": 0,
+      "n_spoof": 15,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A21": {
+      "n": 13,
+      "n_real": 0,
+      "n_spoof": 13,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A22": {
+      "n": 9,
+      "n_real": 0,
+      "n_spoof": 9,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A23": {
+      "n": 12,
+      "n_real": 0,
+      "n_spoof": 12,
+      "eer": null,
+      "auc": null
+    },
+    "ASV5_A24": {
+      "n": 17,
+      "n_real": 0,
+      "n_spoof": 17,
+      "eer": null,
+      "auc": null
+    },
+    "DECRO_baidu_en": {
+      "n": 32,
+      "n_real": 0,
+      "n_spoof": 32,
+      "eer": null,
+      "auc": null
+    },
+    "DECRO_fs2mtts": {
+      "n": 13,
+      "n_real": 0,
+      "n_spoof": 13,
+      "eer": null,
+      "auc": null
+    },
+    "DECRO_vits": {
+      "n": 19,
+      "n_real": 0,
+      "n_spoof": 19,
+      "eer": null,
+      "auc": null
+    },
+    "bonafide": {
+      "n": 208,
+      "n_real": 208,
+      "n_spoof": 0,
+      "eer": null,
+      "auc": null
+    }
+  },
+  "gender_probe_auc_bona_fide": 0.4850260416666667,
+  "language_probe_auc_bona_fide": 0.5298295454545454,
+  "language_probe_positive": "en",
+  "speaker_dependence_bona_fide": 0.9025604106617855,
+  "same_transcript_eer": 0.08697478991596638,
+  "cross_transcript_score_correlation": 0.18472297781989247
+}

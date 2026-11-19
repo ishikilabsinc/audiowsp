@@ -1,0 +1,297 @@
+{
+  "monsoon_en_in": {
+    "Baseline": {
+      "clean_wer": 4.08,
+      "noisy_wer": 17.61,
+      "combined_wer": 10.84,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 2.6,
+      "noisy_wer": 14.62,
+      "combined_wer": 8.61,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 2.75,
+      "noisy_wer": 14.73,
+      "combined_wer": 8.74,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    }
+  },
+  "urgent2024": {
+    "Baseline": {
+      "clean_wer": 11.81,
+      "noisy_wer": 15.33,
+      "combined_wer": 13.57,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 11.6,
+      "noisy_wer": 14.2,
+      "combined_wer": 12.9,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 11.5,
+      "noisy_wer": 14.26,
+      "combined_wer": 12.88,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    }
+  },
+  "ami_cleaned": {
+    "Baseline": {
+      "clean_wer": 6.5,
+      "noisy_wer": 12.61,
+      "combined_wer": 9.56,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 6.39,
+      "noisy_wer": 11.86,
+      "combined_wer": 9.12,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 6.25,
+      "noisy_wer": 12.05,
+      "combined_wer": 9.15,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    }
+  },
+  "gigaspeech_cleaned": {
+    "Baseline": {
+      "clean_wer": 5.98,
+      "noisy_wer": 3.38,
+      "combined_wer": 4.68,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 6.16,
+      "noisy_wer": 3.34,
+      "combined_wer": 4.75,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 6.07,
+      "noisy_wer": 3.38,
+      "combined_wer": 4.73,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    }
+  },
+  "urgent2024_clean": {
+    "Baseline": {
+      "clean_wer": 4.99,
+      "noisy_wer": 6.78,
+      "combined_wer": 5.89,
+      "routed_subspace": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 4.85,
+      "noisy_wer": 6.22,
+      "combined_wer": 5.53,
+      "routed_subspace": "vc8"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 4.89,
+      "noisy_wer": 6.07,
+      "combined_wer": 5.48,
+      "routed_subspace": "vc8"
+    }
+  },
+  "earnings22": {
+    "Baseline": {
+      "clean_wer": 8.92,
+      "noisy_wer": 10.75,
+      "combined_wer": 9.83,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 8.88,
+      "noisy_wer": 8.95,
+      "combined_wer": 8.91,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 8.94,
+      "noisy_wer": 9.49,
+      "combined_wer": 9.22,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    }
+  },
+  "spgispeech": {
+    "Baseline": {
+      "clean_wer": 3.13,
+      "noisy_wer": 7.51,
+      "combined_wer": 5.32,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 1.7,
+      "noisy_wer": 6.57,
+      "combined_wer": 4.13,
+      "routed_subspace": "spgi8",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 1.8,
+      "noisy_wer": 6.37,
+      "combined_wer": 4.08,
+      "routed_subspace": "spgi8",
+      "ctc_mode": "safety"
+    }
+  },
+  "voxpopuli_cleaned_aa": {
+    "Baseline": {
+      "clean_wer": 1.58,
+      "noisy_wer": 2.66,
+      "combined_wer": 2.12,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 1.6,
+      "noisy_wer": 2.75,
+      "combined_wer": 2.18,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 1.66,
+      "noisy_wer": 2.79,
+      "combined_wer": 2.23,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    }
+  },
+  "common_voice": {
+    "Baseline": {
+      "clean_wer": 12.44,
+      "noisy_wer": 22.44,
+      "combined_wer": 17.44,
+      "routed_subspace": "spgi8"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 8.87,
+      "noisy_wer": 20.33,
+      "combined_wer": 14.6,
+      "routed_subspace": "spgi8"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 8.05,
+      "noisy_wer": 19.32,
+      "combined_wer": 13.69,
+      "routed_subspace": "spgi8"
+    }
+  },
+  "test_other": {
+    "Baseline": {
+      "clean_wer": 2.69,
+      "noisy_wer": 8.39,
+      "combined_wer": 5.54,
+      "routed_subspace": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 2.63,
+      "noisy_wer": 6.89,
+      "combined_wer": 4.76,
+      "routed_subspace": "vc8"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 2.74,
+      "noisy_wer": 7.04,
+      "combined_wer": 4.89,
+      "routed_subspace": "vc8"
+    }
+  },
+  "mls_test": {
+    "Baseline": {
+      "clean_wer": 3.6,
+      "noisy_wer": 14.24,
+      "combined_wer": 8.92,
+      "routed_subspace": "none",
+      "ctc_mode": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 3.77,
+      "noisy_wer": 12.6,
+      "combined_wer": 8.18,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 3.7,
+      "noisy_wer": 12.65,
+      "combined_wer": 8.18,
+      "routed_subspace": "none",
+      "ctc_mode": "safety"
+    }
+  },
+  "test_clean": {
+    "Baseline": {
+      "clean_wer": 0.92,
+      "noisy_wer": 2.09,
+      "combined_wer": 1.5,
+      "routed_subspace": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 0.92,
+      "noisy_wer": 2.13,
+      "combined_wer": 1.53,
+      "routed_subspace": "vc8"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 0.88,
+      "noisy_wer": 2.14,
+      "combined_wer": 1.51,
+      "routed_subspace": "vc8"
+    }
+  },
+  "earnings22_cleaned_aa_chunked": {
+    "Baseline": {
+      "clean_wer": 4.24
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 4.14
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 4.37
+    }
+  },
+  "tedlium_test": {
+    "Baseline": {
+      "clean_wer": 2.25,
+      "noisy_wer": 4.13,
+      "combined_wer": 3.19,
+      "routed_subspace": "none"
+    },
+    "AudioWSP_k3": {
+      "clean_wer": 2.21,
+      "noisy_wer": 3.73,
+      "combined_wer": 2.97,
+      "routed_subspace": "vc8"
+    },
+    "AudioWSP_k5": {
+      "clean_wer": 2.18,
+      "noisy_wer": 3.69,
+      "combined_wer": 2.94,
+      "routed_subspace": "vc8"
+    }
+  }
+}
