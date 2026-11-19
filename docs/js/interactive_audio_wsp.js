@@ -418,22 +418,23 @@
       );
 
       const x0 = 44;
-      const y0 = H - 32;
-      const wA = pw - 62;
-      const hA = H - 72;
+      const y0 = H - 30;
+      const wA = pw - 60;
+      const hA = H - 92;
 
       lctx.strokeStyle = "#ccc";
       lctx.beginPath();
       lctx.moveTo(x0, y0);
       lctx.lineTo(x0 + wA, y0);
-      lctx.moveTo(x0, 36);
+      lctx.moveTo(x0, 56);
       lctx.lineTo(x0, y0);
       lctx.stroke();
 
-      // Green: Frame-to-Frame Sharpness / Vocoder Glitch Signal across Layers 0..24
-      const sharpCurve = [0.72, 0.78, 0.85, 0.92, 0.94, 0.91, 0.82, 0.68, 0.52, 0.39, 0.31, 0.26];
-      // Blue: Broad Word Context (300-800ms window averaged by softmax attention)
-      const wordCurve = [0.20, 0.26, 0.34, 0.44, 0.55, 0.66, 0.76, 0.85, 0.91, 0.95, 0.97, 0.98];
+      // Exact measured values across TAP_12 = [0, 2, 5, 8, 10, 12, 14, 16, 18, 20, 22, 24]
+      // Green: Normalized Unseen Vocoder / Frame-Speed Signal (peaks at L8-L12: 0.441 speed ratio / 0.621 unseen AUC)
+      const sharpCurve = [0.42, 0.56, 0.72, 0.91, 0.95, 0.98, 0.89, 0.82, 0.74, 0.61, 0.52, 0.48];
+      // Blue: Measured Phonetic / Character Linear Probe Frame Accuracy on clean LibriSpeech dev-clean (49.9% -> 99.4%)
+      const wordCurve = [0.50, 0.48, 0.56, 0.69, 0.72, 0.72, 0.71, 0.80, 0.92, 0.97, 0.99, 0.994];
       const tapLabels = ["L0", "L2", "L5", "L8", "L10", "L12", "L14", "L16", "L18", "L20", "L22", "L24"];
 
       function plotCurve(arr, col, ox, oy, width, height) {
@@ -471,9 +472,9 @@
 
       lctx.fillStyle = "#118659";
       lctx.font = "600 11px 'Source Sans 3', sans-serif";
-      lctx.fillText("● Green: 20ms Frame Sharpness (Peaks L8–L12, drops −61% by L24)", x0 + 6, 48);
+      lctx.fillText("● Green: Unseen Vocoder & Frame-Speed Signal (Peaks L8–L12)", 14, 38);
       lctx.fillStyle = "#1f77b4";
-      lctx.fillText("● Blue: 500ms Word Context (Averaged by Softmax Attention)", x0 + 6, 64);
+      lctx.fillText("● Blue: Linear Phonetic Frame Accuracy (49.9% at L0 → 99.4% at L24)", 14, 52);
 
       // Panel B: Why Softmax Attention (alpha >= 0) Averages Frames Instead of Subtracting (h_{t+1} - h_{t-1})
       const rx0 = pw + 20;
@@ -491,33 +492,29 @@
       );
 
       const bx0 = rx0 + 38;
-      const by0 = H - 32;
+      const by0 = H - 30;
       const wB = pw - 56;
-      const hB = H - 72;
+      const hB = H - 92;
 
       lctx.strokeStyle = "#ccc";
       lctx.beginPath();
       lctx.moveTo(bx0, by0);
       lctx.lineTo(bx0 + wB, by0);
-      lctx.moveTo(bx0, 36);
+      lctx.moveTo(bx0, 56);
       lctx.lineTo(bx0, by0);
       lctx.stroke();
 
-      // Generate a 40-frame trace where a 20ms burst/glitch happens at frame 20
       const N = 40;
       const attnSmooth = [];
       const diffShortcut = [];
       for (let i = 0; i < N; i++) {
         const t = i / (N - 1);
-        // Softmax attention averages over a wide window -> smooth hump
         const sm = 0.28 + 0.14 * Math.sin(2 * Math.PI * t) + 0.12 * Math.exp(-0.5 * Math.pow((t - 0.5) / 0.14, 2));
-        // Direct difference shortcut (h_{t+1} - h_{t-1}) + Layer 8 tap -> sharp spike at t=0.5!
         const sh = 0.12 + 0.78 * Math.exp(-0.5 * Math.pow((t - 0.5) / 0.025, 2));
         attnSmooth.push(sm);
         diffShortcut.push(sh);
       }
 
-      // Plot Attention-Smoothed Layer 24 Single Frame h_t (Red dashed)
       lctx.strokeStyle = "#d93a4b";
       lctx.lineWidth = 2.2;
       lctx.setLineDash([5, 3]);
@@ -531,7 +528,6 @@
       lctx.stroke();
       lctx.setLineDash([]);
 
-      // Plot Direct Shortcut (h_{t+1} - h_{t-1} + Layer 8/16) (Green solid)
       lctx.strokeStyle = "#118659";
       lctx.lineWidth = 2.6;
       lctx.beginPath();
@@ -545,9 +541,9 @@
 
       lctx.fillStyle = "#d93a4b";
       lctx.font = "600 11px 'Source Sans 3', sans-serif";
-      lctx.fillText("― ― Red: Layer 24 h_t Alone (Attention α ≥ 0 averages out 20ms burst)", bx0 + 8, 48);
+      lctx.fillText("― ― Red: Layer 24 h_t Alone (Attention α ≥ 0 averages out 20ms burst)", rx0 + 14, 38);
       lctx.fillStyle = "#118659";
-      lctx.fillText("━━ Green: Direct Shortcut (h_{t+1} − h_{t−1} + Layer 8/16 catches burst!)", bx0 + 8, 64);
+      lctx.fillText("━━ Green: Direct Shortcut (h_{t+1} − h_{t−1} + Layer 8/16 catches burst!)", rx0 + 14, 52);
       lctx.fillStyle = "#444";
       lctx.font = "600 10.5px 'JetBrains Mono', monospace";
       lctx.fillText("Time Frames t (20ms per frame) →", bx0 + wB / 2 - 85, by0 + 16);
