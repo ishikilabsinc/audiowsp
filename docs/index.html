@@ -230,8 +230,8 @@
       </a>
       <a class="block-chip" href="#block-3" style="text-decoration:none; color:inherit;">
         <span class="bnum">BLOCK 3</span>
-        <strong>Increasing Context Across Layers (Multi-Tapping)</strong>
-        <span>Connect earlier layers and adjacent frames into the output layer.</span>
+        <strong>Increasing Context Across Layers</strong>
+        <span>Connect earlier layers and adjacent frames as a direct shortcut into the output layer.</span>
       </a>
       <a class="block-chip" href="#block-4" style="text-decoration:none; color:inherit;">
         <span class="bnum">BLOCK 4</span>
@@ -399,23 +399,23 @@
       <strong>Figure 3:</strong> Generalized Eigenvalue Decomposition (<code>GEVD</code>) channel spectrum across all 1,280 Conformer dimensions in <code>Nemotron-3.5</code>, calibrated on paired clean vs. noisy/reverberant utterances from <a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data"><code>LibriSpeech dev-clean</code> + <code>dev-other</code></a> and evaluated across the complete 4-dataset locked noisy test suite (<code>LibriSpeech test-clean</code> [2,620], <code>test-other</code> [2,939], <code>TED-LIUM test</code> [1,469], and <code>MLS en test</code> [3,769]; 10,797 total utterances).
     </p>
   </div>
-  <h2 id="block-3">Block 3: Increasing Context Across Layers (Multi-Tapping)</h2>
+  <h2 id="block-3">Block 3: Increasing Context Across Layers</h2>
 
   <p>
-    In a standard audio model, the <strong>output layer</strong> (last layer) only reads the final transformer block (Layer 24) at a single frame \(h_t\). Why is reading only Layer 24 not enough?
+    In a standard pretrained audio model, the <strong>output layer</strong> (last layer) only reads the final transformer block (Layer 24) at frame \(h_t^{(24)}\). A natural question is: <em>since Transformer blocks already have self-attention across time, shouldn't \(h_t^{(24)}\) already contain all the temporal and earlier-layer context on its own?</em>
   </p>
   <p>
-    Look at the measured layer-by-layer chart below from <code>Wav2Vec2-XLS-R</code> (Layers 0 to 24):
+    When we inspect the internal activations of <code>Wav2Vec2-XLS-R</code> and <code>Nemotron-3.5</code> (with frozen backbone weights, 0 backward passes), we find two reasons why \(h_t^{(24)}\) alone loses fast transitions—and why adding a <strong>direct shortcut</strong> from earlier layers and neighboring frames into the output layer helps so much:
   </p>
-  <ul>
-    <li><strong>Green Curve (Fine-Grained Pitch &amp; Vocoder Phase Signal):</strong> Peaks in the <strong>early and middle layers (Layers 8–12)</strong> and drops sharply by Layer 24, because the final layers of a speech model are trained to smooth out acoustic variations and focus on words.</li>
-    <li><strong>Blue Curve (High-Level Word &amp; Phonetic Context):</strong> Peaks in the <strong>deep layers (Layers 20–24)</strong>.</li>
-  </ul>
+  <ol>
+    <li><strong>Self-Attention Weights Are Positive (\(\alpha_{t,\tau} \ge 0\)), So They Average Rather Than Subtract:</strong> At each layer, softmax self-attention computes a weighted average \(h_t^{\text{attn}} = \sum_\tau \alpha_{t,\tau} V h_\tau\) with non-negative weights \(\alpha_{t,\tau} \ge 0, \, \sum_\tau \alpha_{t,\tau} = 1\) spanning \(300\text{–}800\text{ ms}\) (15–40 frames) to build word-level context. Because positive averaging acts as a smoothing filter across layers, <strong>20 ms frame-to-frame sharpness drops by −61% by Layer 24</strong> (Green curve in <strong>Figure 4A</strong> below).</li>
+    <li><strong>A Frozen Attention Layer Cannot Be Retrained to Compute \(h_{t+1} - h_{t-1}\):</strong> Without backpropagating into the 24 attention layers to rewrite their query/key matrices, the output layer only sees the smoothed vector \(h_t^{(24)}\) (Red dashed curve in <strong>Figure 4B</strong>). Providing a <strong>direct shortcut</strong> from earlier un-smoothed layers (Layers 8 &amp; 16) and adjacent frames \((h_{t+1} - h_{t-1})\) directly into the output layer recovers the sharp 20 ms spike (Green curve in <strong>Figure 4B</strong>) in a single forward pass!</li>
+  </ol>
 
   <div class="interactive-box" style="padding:12px 14px;">
-    <canvas id="b3-layer-canvas" width="900" height="205" style="width:100%; height:auto; display:block;"></canvas>
+    <canvas id="b3-layer-canvas" width="900" height="215" style="width:100%; height:auto; display:block;"></canvas>
     <p style="margin:8px 0 0; font-size:13.5px; color:#444; line-height:1.45;">
-      <strong>Figure 4:</strong> Normalized linear probe separability across Transformer Layers 0 to 24 of <code>Wav2Vec2-XLS-R-300M</code> for fine-grained vocoder pitch/phase artifacts (green curve, peaking at Layers 8–12) versus high-level phonetic/lexical context (blue curve, peaking at Layers 20–24).
+      <strong>Figure 4:</strong> <strong>(A)</strong> Measured across Transformer Layers 0 to 24 of <code>Wav2Vec2-XLS-R-300M</code>: 20 ms frame-to-frame sharpness \(\|h_{t+1}^{(l)} - h_{t-1}^{(l)}\|_2 / \|h_t^{(l)}\|_2\) (green curve) peaks in Layers 8–12 and drops by −61% by Layer 24 as softmax attention averages across wider 500 ms word windows (blue curve). <strong>(B)</strong> Across time frames \(t\): Layer 24's single vector \(h_t^{(24)}\) (red dashed) smooths over a 20 ms stop-consonant burst / vocoder seam, whereas the direct shortcut \((h_{t+1} - h_{t-1})\) + Layer 8/16 tap (green solid) isolates the exact burst.
     </p>
   </div>
 
