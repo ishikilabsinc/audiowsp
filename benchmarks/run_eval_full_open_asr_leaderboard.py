@@ -219,29 +219,12 @@ def mamba2_fast_step_kernel(
 
 
 def attach_triton_inference_kernels(model) -> None:
-    """Attaches fused Triton MoE, Router, and Mamba-2 SSM kernels for Hopper GPU inference."""
-    def make_triton_experts_fwd(exp_mod):
-        orig_fn = exp_mod.forward
-        def fn(hidden_states, top_k_index, top_k_weights):
-            N = hidden_states.shape[0]
-            if N <= 4096 and not exp_mod.has_gate:
-                K_v = top_k_index.shape[1]
-                D_in = exp_mod.hidden_dim
-                D_inter = exp_mod.intermediate_dim
-                x_c = hidden_states.contiguous()
-                idx_c = top_k_index.contiguous()
-                w_c = top_k_weights.contiguous()
-                inter = torch.empty((N * K_v, D_inter), dtype=torch.bfloat16, device=x_c.device)
-                out_k = torch.empty((N, K_v, D_in), dtype=torch.bfloat16, device=x_c.device)
-                moe_up_relu2_kernel[(N * K_v, triton.cdiv(D_inter, 64))](
-                    x_c, exp_mod.up_proj, idx_c, inter, N, K=K_v, D_in=D_in, D_inter=D_inter, BLOCK_N=64, BLOCK_K=128, num_warps=4
-                )
-                moe_down_weighted_kernel[(N * K_v, triton.cdiv(D_in, 64))](
-                    inter, exp_mod.down_proj, idx_c, w_c, out_k, N, K=K_v, D_in=D_in, D_inter=D_inter, BLOCK_N=64, BLOCK_K=128, num_warps=4
-                )
-                return out_k.sum(dim=1).to(hidden_states.dtype)
-            return orig_fn(hidden_states, top_k_index, top_k_weights)
-        return fn
+    """Uses native mamba_ssm/cuBLAS when available; falls back to Triton Mamba-2 step kernel only if mamba_ssm is absent."""
+    try:
+        import mamba_ssm  # noqa: F401
+        return
+    except ImportError:
+        pass
 
     def triton_mamba2_selective_state_update(state, hidden_states, dt, A, B, C, D=None, dt_bias=None, dt_softplus=False, z=None, **kwargs):
         B_sz, H_sz, P_sz = hidden_states.shape
@@ -259,29 +242,6 @@ def attach_triton_inference_kernels(model) -> None:
         return out
 
     for blk in model.model.language_model.layers:
-        if hasattr(blk.mixer, "experts"):
-            moe = blk.mixer
-            moe.experts.forward = make_triton_experts_fwd(moe.experts)
-            gate_mod = moe.gate
-            gate_w_f32 = gate_mod.weight.data.to(torch.float32).contiguous()
-            gate_bias_f32 = gate_mod.e_score_correction_bias.data.to(torch.float32).contiguous()
-            r_scale = float(gate_mod.routed_scaling_factor)
-            k_top = int(gate_mod.top_k)
-            def make_fast_router(w_f32, b_f32, scale, k_v):
-                def fn(hidden_states):
-                    x_2d = hidden_states.view(-1, w_f32.shape[1]).float()
-                    N_tok = x_2d.shape[0]
-                    logits = F.linear(x_2d, w_f32)
-                    tk_w = torch.empty((N_tok, k_v), dtype=torch.float32, device=x_2d.device)
-                    tk_i = torch.empty((N_tok, k_v), dtype=torch.int64, device=x_2d.device)
-                    topk_router_fused_kernel[(N_tok,)](
-                        logits, b_f32, tk_w, tk_i, scale,
-                        logits.stride(0), tk_w.stride(0), tk_w.stride(1), tk_i.stride(0), tk_i.stride(1),
-                        K=k_v, num_warps=4
-                    )
-                    return logits, tk_w, tk_i
-                return fn
-            moe.gate.forward = make_fast_router(gate_w_f32, gate_bias_f32, r_scale, k_top)
         if isinstance(blk.mixer, nh.NemotronHMamba2Mixer):
             blk.mixer.mamba2_selective_state_update = triton_mamba2_selective_state_update
             if hasattr(blk.mixer, "selective_state_update"):
