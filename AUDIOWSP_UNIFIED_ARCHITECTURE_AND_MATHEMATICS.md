@@ -1,7 +1,7 @@
 # Weight-Space Programming (`AudioWSP`) & One-Forward-Pass Optimization (`OFP`) — Visual First-Principles Guide
 
 **Common Modular Harness (`harness/audiowsp.py`), Concrete Signal Visualizations, and Released Models:**
-- **ASR Model (`32.36B -> 26.20B`, `3.18%` 10-Set Mean WER, PR #291)**: [`https://huggingface.co/ishiki-labs/ishiki-asr-0.5`](https://huggingface.co/ishiki-labs/ishiki-asr-0.5)
+- **ASR Model (`32.36B`, `4.67%` Full 10-Set Mean WER across 76,443 Utts & `8.09% -> 6.87%` Noisy 4-Corruption Suite, PR #291)**: [`https://huggingface.co/ishiki-labs/ishiki-asr-0.5`](https://huggingface.co/ishiki-labs/ishiki-asr-0.5)
 - **Deepfake Detector (`315.4M -> 86.75M`, `-72.5%` compressed, `353.6 MB` `.safetensors`)**: [`https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5`](https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5)
 
 ---
@@ -152,5 +152,5 @@ python -m harness run-wsp --task both
 | Released Artifact | Public Link / Path | Size / Parameters | Verified Benchmark Performance |
 | :--- | :--- | :--- | :--- |
 | **Unified AudioWSP + OFP Harness** | `harness/audiowsp.py` (`AudioWSPPipeline`) | 7 Modular Blocks (`1F + 0B`) | Enforces `EvalFirewallViolation` + SHA-256 calibration audit certificates |
-| **Ishiki-ASR-0.5 (Open-Weights ASR, PR #291)** | [`huggingface.co/ishiki-labs/ishiki-asr-0.5`](https://huggingface.co/ishiki-labs/ishiki-asr-0.5) | `32.36B` (3 shards) / `26.20B` compact | **`3.18%` 10-Set Mean WER** (Rank #1 Overall) & **`21.1 ms` Streaming TTFT** |
+| **Ishiki-ASR-0.5 (Open-Weights ASR, PR #291)** | [`huggingface.co/ishiki-labs/ishiki-asr-0.5`](https://huggingface.co/ishiki-labs/ishiki-asr-0.5) | `32.36B` (full 128/128 MoE experts) | **`4.67%` Full 10-Set Mean WER (`76,443` utts, `0` regressions)** & **`6.87%` vs. `8.09%` Noisy Suite WER** |
 | **Ishiki-Deepfake-0.5 (Open-Weights Detector)** | [`huggingface.co/ishiki-labs/ishiki-deepfake-0.5`](https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5) | **`86.75M` params** (`353.6 MB` `.safetensors`, `-72.5%`) | **`0.163%` ASV19 LA**, **`1.51%` ASV21 LA**, **`2.19%` ASV21 DF**, **`2.72%` ITW**, **`0.028%` TIMIT-Clean** |

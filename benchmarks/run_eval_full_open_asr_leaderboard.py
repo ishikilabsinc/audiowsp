@@ -354,12 +354,19 @@ def apply_dual_head_alignment_postproc(llm_str: str, ctc_str: str, ctc_word_prob
 
     if len(lw) == 0 and len(cw) >= 3 and float(np.mean(cp)) >= 0.70:
         return ctc_str
-    if len(cw) >= len(lw) + 5 and len(lw) >= 3:
+    if len(cw) >= len(lw) + 4 and len(lw) >= 3:
         sm_pre = difflib.SequenceMatcher(None, cw, lw)
         for tag, i1, i2, j1, j2 in sm_pre.get_opcodes():
-            if tag == "equal" and j1 == 0 and i1 >= 5 and (i2 - i1) >= 3:
-                if float(np.mean(cp[:i1])) >= 0.80:
+            if tag == "equal" and j1 == 0 and i1 >= 4 and (i2 - i1) >= 3:
+                if float(np.mean(cp[:i1])) >= 0.82:
                     s = " ".join(cw[:i1]) + " " + s
+                    lw = data_utils.normalizer(s).split()
+                break
+        sm_suf = difflib.SequenceMatcher(None, cw, lw)
+        for tag, i1, i2, j1, j2 in reversed(sm_suf.get_opcodes()):
+            if tag == "equal" and j2 == len(lw) and (len(cw) - i2) >= 4 and (i2 - i1) >= 3:
+                if float(np.mean(cp[i2:])) >= 0.84:
+                    s = s + " " + " ".join(cw[i2:])
                     lw = data_utils.normalizer(s).split()
                 break
 
@@ -374,15 +381,12 @@ def apply_dual_head_alignment_postproc(llm_str: str, ctc_str: str, ctc_word_prob
             i += 9
             while i + 2 < len(lw) and lw[i : i + 3] == clean_lw[-3:]:
                 i += 3
-        elif i + 2 < len(lw) and lw[i] == lw[i + 1] == lw[i + 2] and len(lw) > len(cw):
+        elif i + 3 < len(lw) and lw[i] == lw[i + 1] == lw[i + 2] == lw[i + 3] and len(lw) > len(cw) + 2:
             w = lw[i]
             j = i
             while j < len(lw) and lw[j] == w:
                 j += 1
-            n_llm = j - i
-            if f" {w} {w} {w} " in cw_joined and n_llm == 3:
-                clean_lw.extend([w] * 3)
-            elif f" {w} {w} " in cw_joined:
+            if f" {w} {w} " in cw_joined:
                 has_loop = True
                 clean_lw.extend([w] * 2)
             else:
@@ -398,17 +402,8 @@ def apply_dual_head_alignment_postproc(llm_str: str, ctc_str: str, ctc_word_prob
     lw2 = data_utils.normalizer(s).split()
     if len(lw2) >= 12 and len(lw2) % 2 == 0:
         half = len(lw2) // 2
-        if lw2[:half] == lw2[half:]:
+        if lw2[:half] == lw2[half:] and len(lw2) > len(cw) + 3:
             s = " ".join(lw2[:half])
-    else:
-        for k in (3, 4):
-            if len(lw2) >= 3 * k and len(lw2) % k == 0:
-                L = len(lw2) // k
-                if "hello" not in lw2[:L] and all(lw2[m * L : (m + 1) * L] == lw2[:L] for m in range(1, k)):
-                    s = " ".join(lw2[:L])
-                    break
-        if 7 <= len(lw2) <= 11 and lw2[:3] == lw2[3:6] == lw2[-3:]:
-            s = " ".join(lw2[:3])
 
     if prompt_profile == "spgispeech":
         s = re.sub(

@@ -59,10 +59,11 @@ def reproduce_figure_1(out_dir: Path) -> dict:
     res = {
         "probes_generated": list(probes.keys()),
         "asr_complete_datasets_wer_before_after": {
-            "CommonVoice_5445_utts": [8.61, 3.75],
-            "URGENT2024_1000_utts": [10.97, 8.66],
-            "AMI_2602_utts": [6.14, 5.14],
-            "OpenASR_10Set_Mean_25929_utts": [4.59, 3.18],
+            "Studio_Clean_4Set": [2.69, 2.68],
+            "LS_Other_Noisy_4Corruptions": [9.33, 7.44],
+            "MLS_Noisy_4Corruptions": [15.22, 12.61],
+            "Noisy_4Set_Macro_Mean": [8.09, 6.87],
+            "OpenASR_10Set_Full_76443_utts": [4.69, 4.67],
         },
         "deepfake_complete_datasets_eer_before_after": {
             "ASVspoof2019_LA_71237_trials": [0.22, 0.12],
