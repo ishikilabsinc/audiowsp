@@ -1,0 +1,66 @@
+{
+  "datasets": {
+    "ami_cleaned": {
+      "n_utts": 7715,
+      "nvidia_base_wer": 7.81,
+      "ishiki_wsp_multi_wer": 6.1,
+      "gain": -1.71
+    },
+    "gigaspeech": {
+      "n_utts": 18757,
+      "nvidia_base_wer": 7.26,
+      "ishiki_wsp_multi_wer": 6.75,
+      "gain": -0.51
+    },
+    "spgispeech": {
+      "n_utts": 39341,
+      "nvidia_base_wer": 1.92,
+      "ishiki_wsp_multi_wer": 1.73,
+      "gain": -0.19
+    },
+    "urgent2024": {
+      "n_utts": 1000,
+      "nvidia_base_wer": 10.98,
+      "ishiki_wsp_multi_wer": 8.51,
+      "gain": -2.47
+    },
+    "urgent_clean": {
+      "n_utts": 1000,
+      "nvidia_base_wer": 4.39,
+      "ishiki_wsp_multi_wer": 3.7,
+      "gain": -0.69
+    },
+    "monsoon": {
+      "n_utts": 2102,
+      "nvidia_base_wer": 3.65,
+      "ishiki_wsp_multi_wer": 2.81,
+      "gain": -0.84
+    },
+    "voxpopuli": {
+      "n_utts": 628,
+      "nvidia_base_wer": 1.89,
+      "ishiki_wsp_multi_wer": 1.72,
+      "gain": -0.17
+    },
+    "ls_clean": {
+      "n_utts": 2620,
+      "nvidia_base_wer": 1.1,
+      "ishiki_wsp_multi_wer": 0.85,
+      "gain": -0.25
+    },
+    "ls_other": {
+      "n_utts": 2939,
+      "nvidia_base_wer": 2.66,
+      "ishiki_wsp_multi_wer": 1.8,
+      "gain": -0.86
+    },
+    "earnings22": {
+      "n_utts": 341,
+      "nvidia_base_wer": 5.27,
+      "ishiki_wsp_multi_wer": 4.73,
+      "gain": -0.54
+    }
+  },
+  "mean_10_base": 4.69,
+  "mean_10_wsp_multi": 3.87
+}
