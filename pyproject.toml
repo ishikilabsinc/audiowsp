@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "audiowsp"
+version = "0.5.0"
+description = "Weight-Space Programming & One-Forward-Pass Optimization Harness for Audio Models"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+  {name = "Amit Kumar Singh Yadav", email = "amit@ishikilabs.ai"},
+]
+dependencies = [
+  "torch>=2.0.0",
+  "numpy>=1.22.0",
+]
+
+[project.scripts]
+audiowsp = "harness.__main__:main"
