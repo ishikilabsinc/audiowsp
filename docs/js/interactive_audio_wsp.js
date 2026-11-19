@@ -137,14 +137,14 @@
         0,
         panelW,
         H,
-        "A. Speech Recognition Word Error Rate (WER %, Lower is Better)",
-        80,
+        "A. Speech Recognition WER (%) on Complete Public Datasets",
+        12,
         "%",
         [
-          { label: "Studio .WAV", orig: 0.0, cur: 0.0, color: "#1f77b4" },
-          { label: "Social .MP3", orig: 66.7, cur: 66.7 * (1 - g), color: "#e67e22" },
-          { label: "8kHz Phone Clip", orig: 75.0, cur: 75.0 * (1 - g), color: "#d93a4b" },
-          { label: "4-Set Noisy ASR", orig: 8.09, cur: 8.09 - (8.09 - 6.87) * g, color: "#118659" },
+          { label: "CommonVoice (5.4K)", orig: 8.61, cur: 8.61 - (8.61 - 3.75) * g, color: "#e67e22" },
+          { label: "URGENT24 (1.0K)", orig: 10.97, cur: 10.97 - (10.97 - 8.66) * g, color: "#d93a4b" },
+          { label: "AMI (2.6K)", orig: 6.14, cur: 6.14 - (6.14 - 5.14) * g, color: "#1f77b4" },
+          { label: "10-Set Avg (25.9K)", orig: 4.59, cur: 4.59 - (4.59 - 3.18) * g, color: "#118659" },
         ]
       );
 
@@ -153,14 +153,14 @@
         0,
         panelW,
         H,
-        "B. Deepfake Detection Equal Error Rate (EER %, Lower is Better)",
+        "B. Deepfake Detection EER (%) on Complete Public Datasets",
         16,
         "%",
         [
-          { label: "Studio (ASV19)", orig: 0.22, cur: 0.22 - (0.22 - 0.12) * g, color: "#1f77b4" },
-          { label: "Codec (ASV21 DF)", orig: 8.32, cur: 8.32 - (8.32 - 1.98) * g, color: "#e67e22" },
-          { label: "Phone (ASV21 LA)", orig: 8.11, cur: 8.11 - (8.11 - 1.42) * g, color: "#7b64b8" },
-          { label: "In-The-Wild", orig: 11.22, cur: 11.22 - (11.22 - 2.51) * g, color: "#118659" },
+          { label: "ASV19 (71.2K)", orig: 0.22, cur: 0.22 - (0.22 - 0.12) * g, color: "#1f77b4" },
+          { label: "ASV21 DF (533.9K)", orig: 8.32, cur: 8.32 - (8.32 - 1.98) * g, color: "#e67e22" },
+          { label: "ASV21 LA (148.2K)", orig: 8.11, cur: 8.11 - (8.11 - 1.42) * g, color: "#7b64b8" },
+          { label: "In-The-Wild (31.8K)", orig: 11.22, cur: 11.22 - (11.22 - 2.51) * g, color: "#118659" },
         ]
       );
     }
