@@ -163,6 +163,11 @@
       color: #1b3b2b;
     }
     .bench-table tr:nth-child(even) td { background: #fafdfb; }
+    .best-cell {
+      background: #dff3e8 !important;
+      color: #0b6640;
+      font-weight: 700;
+    }
   </style>
   <script src="js/cites.js"></script>
   <script src="js/interactive_audio_wsp.js"></script>
@@ -598,71 +603,71 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://datashare.ed.ac.uk/items/31074a11-b6f6-4e92-a4ad-07093f8c0c45"><strong>ASVspoof 2019 LA</strong></a> · [<a href="https://arxiv.org/abs/1911.01601">Paper</a>]</td>
           <td>Eval (<code>71.2K</code>)</td>
           <td><code>0.22%</code> / <code>0.9997</code></td>
-          <td><a href="https://huggingface.co/datasets/SpeechAntiSpoofingBenchmarks/ASVspoof2019_LA/resolve/5215859c8597f5d7ca746469453c1db8079b738b/submissions/last-net.yaml">LaST-Net</a> (317M): <code>0.09%</code> · <a href="https://arxiv.org/pdf/2504.05657">Nes2NetX</a> (318M): <code>0.12%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/datasets/SpeechAntiSpoofingBenchmarks/ASVspoof2019_LA/resolve/5215859c8597f5d7ca746469453c1db8079b738b/submissions/last-net.yaml">LaST-Net</a> (317M): <strong><code>0.09%</code></strong> · <a href="https://arxiv.org/pdf/2504.05657">Nes2NetX</a> (318M): <code>0.12%</code></td>
           <td><strong>Yes</strong> (25.4K train + 24.8K dev)</td>
           <td><code>3.0K</code> train + <code>600</code> dev (<code>0</code> eval)</td>
-          <td><strong><code>0.12%</code></strong> / <code>0.99999</code></td>
-          <td><strong><code>0.16%</code></strong> / <code>0.99996</code></td>
+          <td><code>0.12%</code> / <code>0.99999</code></td>
+          <td><code>0.16%</code> / <code>0.99996</code></td>
         </tr>
         <tr>
           <td><a href="https://zenodo.org/records/4837263"><strong>ASVspoof 2021 LA</strong></a> · [<a href="https://arxiv.org/abs/2109.00537">Paper</a>]</td>
           <td>Eval (<code>148.2K</code>)</td>
           <td><code>8.11%</code> / <code>0.9779</code></td>
-          <td><a href="https://www.isca-archive.org/interspeech_2025/kim25j_interspeech.pdf">XLS-R Conformer</a>: <code>0.69%</code></td>
+          <td class="best-cell"><a href="https://www.isca-archive.org/interspeech_2025/kim25j_interspeech.pdf">XLS-R Conformer</a>: <strong><code>0.69%</code></strong></td>
           <td>Trained on ASV19 LA train</td>
           <td><strong><code>0</code> clips</strong> (ASV19 + PSTN probes)</td>
-          <td><strong><code>1.42%</code></strong> / <code>0.9964</code></td>
-          <td><strong><code>1.51%</code></strong> / <code>0.9959</code></td>
+          <td><code>1.42%</code> / <code>0.9964</code></td>
+          <td><code>1.51%</code> / <code>0.9959</code></td>
         </tr>
         <tr>
           <td><a href="https://zenodo.org/records/4837263"><strong>ASVspoof 2021 DF</strong></a> · [<a href="https://arxiv.org/abs/2109.00537">Paper</a>]</td>
           <td>Eval (<code>533.9K</code>)</td>
           <td><code>6.63%</code> / <code>8.32%</code></td>
-          <td><a href="https://arxiv.org/html/2611.04634v1">VeriSpoof-Base</a> (2.85B): <code>0.97%</code> · <a href="https://ieeexplore.ieee.org/document/10909468">XLSR-Mamba</a> (319M): <code>1.88%</code></td>
+          <td class="best-cell"><a href="https://arxiv.org/html/2611.04634v1">VeriSpoof-Base</a> (2.85B): <strong><code>0.97%</code></strong> · <a href="https://ieeexplore.ieee.org/document/10909468">XLSR-Mamba</a> (319M): <code>1.88%</code></td>
           <td>Multi-corpus (8 corpora)</td>
           <td><strong><code>0</code> clips</strong> (ASV19/5 + codec probes)</td>
-          <td><strong><code>1.98%</code></strong> / <code>0.9983</code></td>
-          <td><strong><code>2.19%</code></strong> / <code>0.9980</code></td>
+          <td><code>1.98%</code> / <code>0.9983</code></td>
+          <td><code>2.19%</code> / <code>0.9980</code></td>
         </tr>
         <tr>
           <td><a href="https://deepfake-total.com/in_the_wild"><strong>In-The-Wild (ITW)</strong></a> · [<a href="https://www.isca-archive.org/interspeech_2022/muller22_interspeech.pdf">Paper</a>]</td>
           <td>Full (<code>31.8K</code>)</td>
           <td><code>11.22%</code> / <code>0.9572</code></td>
-          <td><a href="https://huggingface.co/datasets/SpeechAntiSpoofingBenchmarks/InTheWild/resolve/e861d1f7af89260574ed4c2bbc2c6be24c103f13/submissions/utcn-xlsr2b-logreg.yaml">UTCN-XLSR2B</a> (433M): <code>0.37%</code> · <a href="https://huggingface.co/Speech-Arena-2025/DF_Arena_1B_V_1">DF-Arena-1B</a> (1B): <code>0.91%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/datasets/SpeechAntiSpoofingBenchmarks/InTheWild/resolve/e861d1f7af89260574ed4c2bbc2c6be24c103f13/submissions/utcn-xlsr2b-logreg.yaml">UTCN-XLSR2B</a> (433M): <strong><code>0.37%</code></strong> · <a href="https://huggingface.co/Speech-Arena-2025/DF_Arena_1B_V_1">DF-Arena-1B</a> (1B): <code>0.91%</code></td>
           <td>7-corpus fit + ITW selection</td>
           <td><strong><code>0</code> clips</strong> in forward-pass set</td>
-          <td><strong><code>2.51%</code></strong> / <code>0.9958</code></td>
-          <td><strong><code>2.72%</code></strong> / <code>0.9951</code></td>
+          <td><code>2.51%</code> / <code>0.9958</code></td>
+          <td><code>2.72%</code> / <code>0.9951</code></td>
         </tr>
         <tr>
           <td><a href="https://zenodo.org/records/7603208"><strong>DECRO (EN + ZH)</strong></a> · [<a href="https://github.com/petrichorwq/DECRO-dataset">Paper</a>]</td>
           <td>Eval (<code>37.3K</code>)</td>
           <td><code>9.57%</code> / <code>0.9583</code></td>
-          <td><a href="https://huggingface.co/datasets/SpeechAntiSpoofingBenchmarks/DECRO/resolve/7938186b3ed84b9802c17085d5151df7b299d8d7/submissions/spectra-aasist.yaml">Spectra-AASIST</a> (316M): <code>0.17%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/datasets/SpeechAntiSpoofingBenchmarks/DECRO/resolve/7938186b3ed84b9802c17085d5151df7b299d8d7/submissions/spectra-aasist.yaml">Spectra-AASIST</a> (316M): <strong><code>0.17%</code></strong></td>
           <td>Undisclosed (Arena)</td>
           <td><strong><code>0</code> DECRO clips</strong> (<code>1.28K</code> CFAD)</td>
-          <td><strong><code>1.30%</code></strong> / <code>0.9986</code></td>
-          <td><strong><code>1.41%</code></strong> / <code>0.9980</code></td>
+          <td><code>1.30%</code> / <code>0.9986</code></td>
+          <td><code>1.41%</code> / <code>0.9980</code></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/jungjee/asvspoof5"><strong>ASVspoof 5 (Track 1)</strong></a> · [<a href="https://www.isca-archive.org/asvspoof_2024/wang24_asvspoof.pdf">Paper</a>]</td>
           <td>Eval (<code>680.8K</code>)</td>
           <td><code>16.25%</code> / <code>0.9003</code></td>
-          <td><a href="https://speech-arena-2025-speech-df-arena.hf.space/">VELMA-2</a> (316M, Prop.): <code>0.38%</code> · <a href="https://arxiv.org/html/2604.01330">NSGA-II Fusion</a> (6.6B): <code>2.37%</code></td>
+          <td class="best-cell"><a href="https://speech-arena-2025-speech-df-arena.hf.space/">VELMA-2</a> (316M, Prop.): <strong><code>0.38%</code></strong> · <a href="https://arxiv.org/html/2604.01330">NSGA-II Fusion</a> (6.6B): <strong><code>2.37%</code></strong></td>
           <td><strong>Yes</strong> (ASV5 train + dev)</td>
           <td><code>5.0K</code> train + <code>3.44K</code> dev (<code>0</code> eval)</td>
-          <td><strong><code>5.73%</code></strong> / <code>0.9856</code></td>
-          <td><strong><code>5.80%</code></strong> / <code>0.9857</code></td>
+          <td><code>5.73%</code> / <code>0.9856</code></td>
+          <td><code>5.80%</code> / <code>0.9857</code></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/isjwdu/DFADD"><strong>DFADD</strong></a> · [<a href="https://arxiv.org/html/2409.08731">Paper</a>]</td>
           <td>Test (<code>3.8K</code>)</td>
           <td><code>11.88%</code> / <code>0.9436</code></td>
-          <td><a href="https://arxiv.org/html/2611.04634v1">VeriSpoof-Base</a> (2.85B): <code>0.00%</code> · <a href="https://openreview.net/pdf?id=acJMIXJg2u">XLSR+SLS</a> (340M): <code>7.54%</code></td>
+          <td class="best-cell"><a href="https://arxiv.org/html/2611.04634v1">VeriSpoof-Base</a> (2.85B): <strong><code>0.00%</code></strong> · <a href="https://openreview.net/pdf?id=acJMIXJg2u">XLSR+SLS</a> (340M): <code>7.54%</code></td>
           <td><strong>Yes</strong> (full DFADD train)</td>
           <td><code>704</code> train + <code>350</code> dev aliases</td>
-          <td><strong><code>0.27%</code></strong> / <code>0.99995</code></td>
-          <td><strong><code>0.53%</code></strong> / <code>0.99991</code></td>
+          <td><code>0.27%</code> / <code>0.99995</code></td>
+          <td><code>0.53%</code> / <code>0.99991</code></td>
         </tr>
         <tr>
           <td><a href="https://zenodo.org/records/6560159"><strong>TIMIT-TTS (Clean)</strong></a> · [<a href="https://arxiv.org/pdf/2209.08000v1">Paper</a>]</td>
@@ -671,8 +676,8 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://arxiv.org/html/2409.16077">Standard MoE</a>: <code>0.93%</code> (<code>0.9512</code> AUC)</td>
           <td><strong>No</strong> (unseen test)</td>
           <td><strong><code>0</code> clips</strong> (unseen)</td>
-          <td><strong><code>0.01%</code></strong> / <code>0.999998</code></td>
-          <td><strong><code>0.03%</code></strong> / <code>0.999997</code></td>
+          <td class="best-cell"><strong><code>0.01%</code></strong> / <strong><code>0.999998</code></strong></td>
+          <td><code>0.03%</code> / <code>0.999997</code></td>
         </tr>
         <tr>
           <td><a href="https://zenodo.org/records/6560159"><strong>TIMIT-TTS (DTW)</strong></a> · [<a href="https://arxiv.org/pdf/2209.08000v1">Paper</a>]</td>
@@ -681,8 +686,8 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://arxiv.org/pdf/2209.08000v1">RawNet2 Baseline</a> (17.6M): <code>0.7800</code> AUC</td>
           <td><strong>No</strong> (ASV19-trained)</td>
           <td><strong><code>0</code> clips</strong> (unseen)</td>
-          <td><strong><code>0.69%</code></strong> / <code>0.9995</code></td>
-          <td><strong><code>0.93%</code></strong> / <code>0.9997</code></td>
+          <td class="best-cell"><strong><code>0.69%</code></strong> / <code>0.9995</code></td>
+          <td><code>0.93%</code> / <code>0.9997</code></td>
         </tr>
         <tr>
           <td><a href="https://zenodo.org/records/6560159"><strong>TIMIT-TTS (Augmented)</strong></a> · [<a href="https://arxiv.org/pdf/2209.08000v1">Paper</a>]</td>
@@ -691,8 +696,8 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://arxiv.org/pdf/2209.08000v1">RawNet2 Baseline</a> (17.6M): <code>0.9300</code> AUC</td>
           <td><strong>No</strong> (ASV19-trained)</td>
           <td><strong><code>0</code> clips</strong> (unseen)</td>
-          <td><strong><code>0.46%</code></strong> / <code>0.9996</code></td>
-          <td><strong><code>1.17%</code></strong> / <code>0.9994</code></td>
+          <td class="best-cell"><strong><code>0.46%</code></strong> / <strong><code>0.9996</code></strong></td>
+          <td><code>1.17%</code> / <code>0.9994</code></td>
         </tr>
         <tr>
           <td><a href="https://zenodo.org/records/6560159"><strong>TIMIT-TTS (DTW + Aug)</strong></a> · [<a href="https://arxiv.org/pdf/2209.08000v1">Paper</a>]</td>
@@ -701,8 +706,8 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://www.isca-archive.org/interspeech_2024/pascu24_interspeech.pdf">XLS-R 2B + LogReg</a> (2B): <code>3.60%</code></td>
           <td><strong>No</strong> (ASV19 train + dev)</td>
           <td><strong><code>0</code> clips</strong> (unseen)</td>
-          <td><strong><code>1.85%</code></strong> / <code>0.9972</code></td>
-          <td><strong><code>1.86%</code></strong> / <code>0.9983</code></td>
+          <td class="best-cell"><strong><code>1.85%</code></strong> / <code>0.9972</code></td>
+          <td><code>1.86%</code> / <code>0.9983</code></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/purdueviperlab/MULTISpoof"><strong>MULTISpoof</strong></a> · [<a href="https://upcommons.upc.edu/entities/publication/63f9ddc9-d4b4-4965-be84-b7ce669dded1">Paper</a>]</td>
@@ -711,38 +716,38 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://cmsworkshops.com/Asilomar2026/view_paper.php?PaperNum=1333">Asilomar 2026</a> (no public test table)</td>
           <td>N/A</td>
           <td><code>1.33K</code> val clips (<code>0</code> test)</td>
-          <td><strong><code>2.94%</code></strong> / <code>0.9964</code></td>
-          <td><strong><code>3.32%</code></strong> / <code>0.9955</code></td>
+          <td class="best-cell"><strong><code>2.94%</code></strong> / <strong><code>0.9964</code></strong></td>
+          <td><code>3.32%</code> / <code>0.9955</code></td>
         </tr>
         <tr>
           <td><a href="https://bil.eecs.yorku.ca/datasets/"><strong>Fake-or-Real (for-norm)</strong></a> · [<a href="https://www.isca-archive.org/interspeech_2019/reimao19_interspeech.pdf">Paper</a>]</td>
           <td>Testing (<code>4.6K</code>)</td>
           <td><code>7.42%</code> / <code>0.9816</code></td>
-          <td><a href="https://arxiv.org/html/2611.04634v1">VeriSpoof-Plus</a> (2.85B): <code>0.09%</code> · <a href="https://openreview.net/pdf?id=acJMIXJg2u">XLSR+SLS</a> (340M): <code>5.08%</code></td>
+          <td class="best-cell"><a href="https://arxiv.org/html/2611.04634v1">VeriSpoof-Plus</a> (2.85B): <strong><code>0.09%</code></strong> · <a href="https://openreview.net/pdf?id=acJMIXJg2u">XLSR+SLS</a> (340M): <code>5.08%</code></td>
           <td><strong>Yes</strong> (full for-norm train)</td>
           <td><strong><code>0</code> clips</strong> (unseen)</td>
-          <td><strong><code>3.13%</code></strong> / <code>0.9953</code></td>
-          <td><strong><code>4.29%</code></strong> / <code>0.9912</code></td>
+          <td><code>3.13%</code> / <code>0.9953</code></td>
+          <td><code>4.29%</code> / <code>0.9912</code></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/mueller91/MLAAD"><strong>MLAAD</strong></a> · [<a href="https://arxiv.org/html/2401.09512">Paper</a>]</td>
           <td>Eval (<code>64.0K</code>)</td>
           <td><code>15.40%</code> / <code>0.9120</code></td>
-          <td><a href="https://arxiv.org/html/2608.24639">AASIST Voiced/Unvoiced</a>: <code>5.82%</code> · <a href="https://aclanthology.org/2026.trustaudio-1.1.pdf">WavLM-LDA</a>: <code>10.00%</code></td>
+          <td class="best-cell"><a href="https://arxiv.org/html/2608.24639">AASIST Voiced/Unvoiced</a>: <strong><code>5.82%</code></strong> · <a href="https://aclanthology.org/2026.trustaudio-1.1.pdf">WavLM-LDA</a>: <code>10.00%</code></td>
           <td><strong>Yes</strong> (custom MLAAD splits)</td>
           <td><code>664</code> train + <code>200</code> dev aliases</td>
-          <td><strong><code>6.84%</code></strong> / <code>0.9785</code></td>
-          <td><strong><code>7.51%</code></strong> / <code>0.9730</code></td>
+          <td><code>6.84%</code> / <code>0.9785</code></td>
+          <td><code>7.51%</code> / <code>0.9730</code></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/purdueviperlab/diffssd"><strong>DiffSSD</strong></a> · [<a href="https://arxiv.org/html/2409.13049">Paper</a>]</td>
           <td>Test (<code>54.6K</code>)</td>
           <td><code>18.90%</code> / <code>0.8840</code></td>
-          <td><a href="https://arxiv.org/html/2607.12584">Wiener-Hopf 2D CNN</a> (0.42M): <code>2.95%</code> · <a href="https://arxiv.org/html/2409.13049">Wav2Vec2 Baseline</a>: <code>3.00%</code></td>
+          <td class="best-cell"><a href="https://arxiv.org/html/2607.12584">Wiener-Hopf 2D CNN</a> (0.42M): <strong><code>2.95%</code></strong> · <a href="https://arxiv.org/html/2409.13049">Wav2Vec2 Baseline</a>: <code>3.00%</code></td>
           <td><strong>Yes</strong> (full ~70K DiffSSD train)</td>
           <td><code>755</code> train + <code>249</code> val aliases</td>
-          <td><strong><code>8.92%</code></strong> / <code>0.9742</code></td>
-          <td><strong><code>9.77%</code></strong> / <code>0.9691</code></td>
+          <td><code>8.92%</code> / <code>0.9742</code></td>
+          <td><code>9.77%</code> / <code>0.9691</code></td>
         </tr>
       </tbody>
     </table>
@@ -773,7 +778,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>5.66%</code></td>
           <td><code>0</code> AMI clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>5.97%</code></td>
-          <td><strong><code>5.14%</code></strong></td>
+          <td class="best-cell"><strong><code>5.14%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>Earnings22-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2203.15591">Paper</a>]</td>
@@ -782,7 +787,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.19%</code></td>
           <td><code>0</code> Earnings22 clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>4.07%</code></td>
-          <td><strong><code>3.54%</code></strong></td>
+          <td class="best-cell"><strong><code>3.54%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>GigaSpeech-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2106.06909">Paper</a>]</td>
@@ -791,7 +796,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.34%</code></td>
           <td><code>0</code> GigaSpeech clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>4.28%</code></td>
-          <td><strong><code>3.55%</code></strong></td>
+          <td class="best-cell"><strong><code>3.55%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>SPGISpeech</strong></a> · [<a href="https://arxiv.org/abs/2104.02014">Paper</a>]</td>
@@ -800,7 +805,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/nvidia/canary-qwen-2.5b">Canary-Qwen-2.5B</a> / <a href="https://huggingface.co/nvidia/parakeet-tdt-0.6b-v2">Parakeet-TDT</a>: <code>1.42%</code></td>
           <td><code>0</code> SPGISpeech clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>1.41%</code></td>
-          <td><strong><code>1.21%</code></strong></td>
+          <td class="best-cell"><strong><code>1.21%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard"><strong>URGENT 2024</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
@@ -809,7 +814,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/StagesLabs/StagesLabs-Whisper-Large-v3">StagesLabs-Whisper-Large-v3</a>: <code>9.45%</code></td>
           <td><code>0</code> URGENT24 clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>10.72%</code></td>
-          <td><strong><code>8.66%</code></strong></td>
+          <td class="best-cell"><strong><code>8.66%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard"><strong>URGENT 2024 (Clean)</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
@@ -818,7 +823,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/FireRedTeam/FireRedASR-AED-L">FireRedASR2-AED</a>: <code>4.68%</code></td>
           <td><code>0</code> URGENT24 clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>5.99%</code></td>
-          <td><strong><code>4.02%</code></strong></td>
+          <td class="best-cell"><strong><code>4.02%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/voice-arena-leaderboard/Monsoon-en-IN-test"><strong>Voice Arena Monsoon (en-IN)</strong></a> · [<a href="https://huggingface.co/datasets/voice-arena-leaderboard/Monsoon-en-IN-test">Repo</a>]</td>
@@ -827,7 +832,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>3.32%</code></td>
           <td><code>0</code> Monsoon clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>3.26%</code></td>
-          <td><strong><code>2.34%</code></strong></td>
+          <td class="best-cell"><strong><code>2.34%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>VoxPopuli-AA-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2101.00390">Paper</a>]</td>
@@ -836,7 +841,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>1.28%</code></td>
           <td><code>0</code> VoxPopuli clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>1.23%</code></td>
-          <td><strong><code>0.90%</code></strong></td>
+          <td class="best-cell"><strong><code>0.90%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-clean)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
@@ -845,7 +850,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard">MusicAudio-Qwen2-7B</a>: <code>1.08%</code></td>
           <td><a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data/blob/main/practice_dev/dev_clean.parquet"><code>dev-clean</code> (2,703)</a> (<code>0</code> test)</td>
           <td><code>1.10%</code></td>
-          <td><strong><code>0.58%</code></strong></td>
+          <td class="best-cell"><strong><code>0.58%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-other)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
@@ -854,7 +859,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>2.07%</code></td>
           <td><a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data/blob/main/practice_dev/dev_other.parquet"><code>dev-other</code> (2,864)</a> (<code>0</code> test)</td>
           <td><code>2.02%</code></td>
-          <td><strong><code>1.90%</code></strong></td>
+          <td class="best-cell"><strong><code>1.90%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>TED-LIUM (test)</strong></a> · [<a href="https://arxiv.org/abs/1805.04699">Paper</a>]</td>
@@ -863,7 +868,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>2.28%</code></td>
           <td><a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data/blob/main/practice_dev/tedlium_dev.parquet"><code>tedlium-dev</code> (591)</a> (<code>0</code> test)</td>
           <td><code>2.41%</code></td>
-          <td><strong><code>1.83%</code></strong></td>
+          <td class="best-cell"><strong><code>1.83%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>Multilingual LibriSpeech (en)</strong></a> · [<a href="https://arxiv.org/abs/2012.03411">Paper</a>]</td>
@@ -872,7 +877,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>3.64%</code></td>
           <td><a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data/blob/main/practice_dev/mls_dev.parquet"><code>mls-dev</code> (3,807)</a> (<code>0</code> test)</td>
           <td><code>3.82%</code></td>
-          <td><strong><code>3.10%</code></strong></td>
+          <td class="best-cell"><strong><code>3.10%</code></strong></td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>Common Voice (en)</strong></a> · [<a href="https://arxiv.org/abs/1912.06670">Paper</a>]</td>
@@ -881,25 +886,25 @@ python -m harness run-wsp --task both</code></pre>
           <td><a href="https://huggingface.co/StagesLabs/StagesLabs-Whisper-Large-v3">StagesLabs-Whisper-Large-v3</a>: <code>6.45%</code></td>
           <td><code>0</code> Common Voice clips (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">LibriSpeech dev</a>)</td>
           <td><code>5.95%</code></td>
-          <td><strong><code>3.75%</code></strong></td>
+          <td class="best-cell"><strong><code>3.75%</code></strong></td>
         </tr>
         <tr style="background:#e8f5ee;">
           <td><strong>Mean WER (10 Public Leaderboard Sets)</strong></td>
           <td><strong><code>25,929</code> utts</strong></td>
-          <td><strong><code>4.59%</code></strong></td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <strong><code>4.59%</code> (#1)</strong></td>
+          <td><code>4.59%</code></td>
+          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.59%</code> (#1)</td>
           <td><a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data"><code>9,965</code> public dev utts</a> (<code>0</code> test)</td>
-          <td><strong><code>4.27%</code></strong></td>
-          <td><strong><code>3.18%</code></strong></td>
+          <td><code>4.27%</code></td>
+          <td class="best-cell"><strong><code>3.18%</code></strong></td>
         </tr>
         <tr style="background:#e8f5ee;">
           <td><strong>Mean WER (8 Main Short-Form Sets)</strong></td>
           <td><strong><code>14,605</code> utts</strong></td>
-          <td><strong><code>4.76%</code></strong></td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <strong><code>4.76%</code> (#1)</strong></td>
+          <td><code>4.76%</code></td>
+          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.76%</code> (#1)</td>
           <td><a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data"><code>9,965</code> public dev utts</a> (<code>0</code> test)</td>
-          <td><strong><code>4.62%</code></strong></td>
-          <td><strong><code>3.67%</code></strong></td>
+          <td><code>4.62%</code></td>
+          <td class="best-cell"><strong><code>3.67%</code></strong></td>
         </tr>
       </tbody>
     </table>
