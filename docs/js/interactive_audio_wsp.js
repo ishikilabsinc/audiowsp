@@ -85,13 +85,34 @@
           ? "100% (Fully Edited WSP Weights W_WSP)"
           : `${Math.round(g * 100)}% Edited (W = (1−γ)W_orig + γW_WSP)`;
 
+      const asrMp3El = document.getElementById("b1-asr-mp3");
+      const mp3BadgeEl = document.getElementById("b1-mp3-wer-badge");
+      if (asrMp3El && mp3BadgeEl) {
+        if (g < 0.35) {
+          asrMp3El.textContent = '"HURSHWOOD WALKED BEFORE MENTALLY ERRING TING THE DEAP POINT OF TE TI PELATION"';
+          asrMp3El.style.color = "#d93a4b";
+          mp3BadgeEl.textContent = "66.7% WER (8 / 12 words wrong)";
+          mp3BadgeEl.style.color = "#d93a4b";
+        } else if (g < 0.75) {
+          asrMp3El.textContent = '"HURSTWOOD WALKED THE FLOOR MENTALLY ARRANGING THE DEAP POINTS OF HIS SITUATION"';
+          asrMp3El.style.color = "#d97706";
+          mp3BadgeEl.textContent = "8.3% WER (1 / 12 words wrong)";
+          mp3BadgeEl.style.color = "#d97706";
+        } else {
+          asrMp3El.textContent = '"HURSTWOOD WALKED THE FLOOR MENTALLY ARRANGING THE CHIEF POINTS OF HIS SITUATION"';
+          asrMp3El.style.color = "#118659";
+          mp3BadgeEl.textContent = "0.0% WER (All 12 words correct!)";
+          mp3BadgeEl.style.color = "#118659";
+        }
+      }
+
       const asrTelEl = document.getElementById("b1-asr-tel");
       const werBadgeEl = document.getElementById("b1-tel-wer-badge");
       if (asrTelEl && werBadgeEl) {
         if (g < 0.35) {
           asrTelEl.textContent = '"ET WHO HAD WALKED BEFORE MIOY ERNENE TI FINE TE TE TEDERD"';
           asrTelEl.style.color = "#d93a4b";
-          werBadgeEl.textContent = "75.0% WER (12 / 16 words wrong)";
+          werBadgeEl.textContent = "75.0% WER (9 / 12 words wrong)";
           werBadgeEl.style.color = "#d93a4b";
         } else if (g < 0.75) {
           asrTelEl.textContent = '"HURSTWOOD WALKED THE FLOOR MENTALLY ARRANGING THE CHIEF..."';
@@ -120,8 +141,8 @@
         80,
         "%",
         [
-          { label: "Studio .WAV", orig: 8.3, cur: 8.3 - 8.3 * g, color: "#1f77b4" },
-          { label: "Social .MP3", orig: 8.3, cur: 8.3 - 8.3 * g, color: "#e67e22" },
+          { label: "Studio .WAV", orig: 0.0, cur: 0.0, color: "#1f77b4" },
+          { label: "Social .MP3", orig: 66.7, cur: 66.7 * (1 - g), color: "#e67e22" },
           { label: "8kHz Phone Clip", orig: 75.0, cur: 75.0 * (1 - g), color: "#d93a4b" },
           { label: "4-Set Noisy ASR", orig: 8.09, cur: 8.09 - (8.09 - 6.87) * g, color: "#118659" },
         ]
