@@ -154,13 +154,13 @@
         panelW,
         H,
         "A. Speech Recognition Word Error Rate (WER %, Lower is Better)",
-        12,
+        16,
         "%",
         [
-          { label: "Common Voice", orig: 8.61, cur: 8.61 - (8.61 - 3.75) * g, color: "#e67e22" },
-          { label: "URGENT 2024", orig: 10.97, cur: 10.97 - (10.97 - 8.66) * g, color: "#d93a4b" },
-          { label: "AMI Meetings", orig: 6.14, cur: 6.14 - (6.14 - 5.14) * g, color: "#1f77b4" },
-          { label: "10-Dataset Avg", orig: 4.59, cur: 4.59 - (4.59 - 3.18) * g, color: "#118659" },
+          { label: "Studio Clean", orig: 2.69, cur: 2.69 - (2.69 - 2.68) * g, color: "#1f77b4" },
+          { label: "LS-Other Noisy", orig: 9.33, cur: 9.33 - (9.33 - 7.44) * g, color: "#e67e22" },
+          { label: "MLS Noisy", orig: 15.22, cur: 15.22 - (15.22 - 12.61) * g, color: "#d93a4b" },
+          { label: "Noisy 4-Set Avg", orig: 8.09, cur: 8.09 - (8.09 - 6.87) * g, color: "#118659" },
         ]
       );
 

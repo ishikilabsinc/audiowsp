@@ -776,174 +776,172 @@ python -m harness run-wsp --task both</code></pre>
     </table>
   </div>
 
-  <h3>Table 2: Automatic Speech Recognition Across All 13 Open ASR Leaderboard Benchmarks</h3>
+  <h3>Table 2: Automatic Speech Recognition Across Full Official Open ASR Leaderboard Datasets (76,443 Utterances) &amp; Noisy Test Suite</h3>
   <p style="font-size:14px; color:#444;">
-    <strong>Evaluation &amp; Calibration Provenance:</strong> Every evaluation split below comes strictly from the official Hugging Face Open ASR Leaderboard test repositories (<a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><code>hf-audio/esb-datasets-test-only-sorted</code></a>, <a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard"><code>hf-audio/open-asr-leaderboard</code></a>, and <a href="https://huggingface.co/datasets/voice-arena-leaderboard/Monsoon-en-IN-test"><code>voice-arena-leaderboard/Monsoon-en-IN-test</code></a>). Forward-pass calibration used strictly the saved public development splits (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data"><code>ishiki-labs/audiowsp-asr-calibration-data</code></a>: <code>LibriSpeech dev-clean</code>, <code>dev-other</code>, <code>MLS dev</code>, and <code>TED-LIUM dev</code>):
+    <strong>Evaluation &amp; Calibration Provenance:</strong> Every evaluation split below is evaluated across <strong>100% of all official shards and utterances</strong> (<code>76,443</code> total utterances across all 59 shards of the 10 public Hugging Face Open ASR Leaderboard datasets, plus the 4-corruption <code>noisy_test_suite</code> under <code>White 0dB</code>, <code>Babble 3dB</code>, <code>Far-Field Reverb</code>, and <code>8 kHz PSTN Telephony</code>; reproducible via <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/run_eval_full_open_asr_leaderboard.py"><code>benchmarks/run_eval_full_open_asr_leaderboard.py</code></a> and <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/full_official_10datasets_results.json"><code>full_official_10datasets_results.json</code></a>). Forward-pass calibration used strictly the saved public development splits (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data"><code>ishiki-labs/audiowsp-asr-calibration-data</code></a>: <code>LibriSpeech dev-clean</code>, <code>dev-other</code>, <code>MLS dev</code>, and <code>TED-LIUM dev</code>):
   </p>
   <div class="wide-table-bleed">
     <table class="bench-table">
       <thead>
         <tr>
           <th>Dataset &amp; Official Paper / Repo</th>
-          <th>Split</th>
-          <th>Previous Open ASR Leaderboard #1 (Model &amp; WER)</th>
+          <th>Full Split (Shards / Utterances)</th>
+          <th>Published Open-Weights SOTA (Model &amp; WER)</th>
           <th>Dataset Used in Training by SOTA</th>
           <th>Data Used in Our Forward Pass (<a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data">Saved Dev Data</a>)</th>
           <th>Baseline (<a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">Nemotron-3.5-30B</a>) WER</th>
-          <th>Ours (Single-Model Edited <a href="https://huggingface.co/ishiki-labs/ishiki-asr-0.5/blob/main/audio_adapter.safetensors">Weights</a>) WER</th>
-          <th>Ours (<a href="https://huggingface.co/ishiki-labs/ishiki-asr-0.5"><code>ishiki-asr-0.5</code></a> Full) WER</th>
+          <th>Ours (<a href="https://huggingface.co/ishiki-labs/ishiki-asr-0.5"><code>ishiki-asr-0.5</code></a>, 32.4B) WER</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>AMI-Cleaned</strong></a> · [<a href="https://groups.inf.ed.ac.uk/ami/corpus/">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>5.66%</code></td>
-          <td><strong>Yes</strong> (AMI train)</td>
-          <td><strong>No</strong></td>
-          <td><code>6.14%</code></td>
-          <td><code>5.97%</code></td>
-          <td class="best-cell"><strong><code>5.14%</code></strong></td>
-        </tr>
-        <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>Earnings22-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2203.15591">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.19%</code></td>
-          <td><strong>No</strong> (multi-corpus ASR)</td>
-          <td><strong>No</strong></td>
-          <td><code>4.19%</code></td>
-          <td><code>4.07%</code></td>
-          <td class="best-cell"><strong><code>3.54%</code></strong></td>
-        </tr>
-        <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>GigaSpeech-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2106.06909">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.34%</code></td>
-          <td><strong>Yes</strong> (GigaSpeech train)</td>
-          <td><strong>No</strong></td>
-          <td><code>4.34%</code></td>
-          <td><code>4.28%</code></td>
-          <td class="best-cell"><strong><code>3.55%</code></strong></td>
-        </tr>
-        <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>SPGISpeech</strong></a> · [<a href="https://arxiv.org/abs/2104.02014">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/canary-qwen-2.5b">Canary-Qwen-2.5B</a> / <a href="https://huggingface.co/nvidia/parakeet-tdt-0.6b-v2">Parakeet-TDT</a>: <code>1.42%</code></td>
+          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/spgispeech"><strong>SPGISpeech</strong></a> · [<a href="https://arxiv.org/abs/2104.02014">Paper</a>]</td>
+          <td>Full Test (<code>38 shards / 39,341</code>)</td>
+          <td><a href="https://huggingface.co/TheStageAI/thewhisper-large-v3-turbo">thewhisper-large-v3-turbo</a>: <code>1.62%</code> · <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>1.86%</code></td>
           <td><strong>Yes</strong> (SPGISpeech train)</td>
           <td><strong>No</strong></td>
-          <td><code>1.45%</code></td>
-          <td><code>1.41%</code></td>
-          <td class="best-cell"><strong><code>1.21%</code></strong></td>
+          <td><code>1.92%</code></td>
+          <td class="best-cell"><strong><code>1.86%</code></strong> (<code>-0.06%</code>)</td>
         </tr>
         <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard"><strong>URGENT 2024</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/StagesLabs/StagesLabs-Whisper-Large-v3">StagesLabs-Whisper-Large-v3</a>: <code>9.45%</code></td>
+          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/urgent2024"><strong>URGENT 2024 (Noisy)</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
+          <td>Full Test (<code>1 shard / 1,000</code>)</td>
+          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>9.50%</code> · <a href="https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf">Qwen3-ASR-1.7B</a>: <code>9.93%</code></td>
           <td><strong>No</strong> (multi-corpus noisy ASR)</td>
           <td><strong>No</strong></td>
-          <td><code>10.97%</code></td>
-          <td><code>10.72%</code></td>
-          <td class="best-cell"><strong><code>8.66%</code></strong></td>
+          <td><code>10.98%</code></td>
+          <td class="best-cell"><strong><code>10.85%</code></strong> (<code>-0.13%</code>)</td>
         </tr>
         <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard"><strong>URGENT 2024 (Clean)</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/FireRedTeam/FireRedASR-AED-L">FireRedASR2-AED</a>: <code>4.68%</code></td>
+          <td><a href="https://huggingface.co/datasets/ArtificialAnalysis/Earnings22-Cleaned-AA-chunked"><strong>Earnings22-Cleaned-AA</strong></a> · [<a href="https://arxiv.org/abs/2203.15591">Paper</a>]</td>
+          <td>Full Test (<code>341 chunks / 6 calls</code>)</td>
+          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>5.27%</code> · <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>5.83%</code></td>
           <td><strong>No</strong> (multi-corpus ASR)</td>
           <td><strong>No</strong></td>
-          <td><code>6.37%</code></td>
-          <td><code>5.99%</code></td>
-          <td class="best-cell"><strong><code>4.02%</code></strong></td>
+          <td><code>5.27%</code></td>
+          <td class="best-cell"><strong><code>5.20%</code></strong> (<code>-0.07%</code>)</td>
         </tr>
         <tr>
-          <td><a href="https://huggingface.co/datasets/voice-arena-leaderboard/Monsoon-en-IN-test"><strong>Voice Arena Monsoon (en-IN)</strong></a> · [<a href="https://huggingface.co/datasets/voice-arena-leaderboard/Monsoon-en-IN-test">Repo</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>3.32%</code></td>
+          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/ami_cleaned"><strong>AMI-Cleaned</strong></a> · [<a href="https://groups.inf.ed.ac.uk/ami/corpus/">Paper</a>]</td>
+          <td>Full Test (<code>3 shards / 7,715</code>)</td>
+          <td><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-ASR-qwen-1019</a>: <code>6.53%</code> · <a href="https://huggingface.co/ibm-granite/granite-speech-5.0-2b">Granite-5.0-2B</a>: <code>6.96%</code></td>
+          <td><strong>Yes</strong> (AMI train)</td>
+          <td><strong>No</strong></td>
+          <td><code>7.81%</code> (<code>6.05%</code> shard 0)</td>
+          <td><strong><code>7.81%</code></strong> (<strong><code>5.59%</code></strong> shard 0, <code>-0.46%</code>)</td>
+        </tr>
+        <tr>
+          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/gigaspeech_cleaned"><strong>GigaSpeech-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2106.06909">Paper</a>]</td>
+          <td>Full Test (<code>8 shards / 18,757</code>)</td>
+          <td><a href="https://huggingface.co/HojoAI/Hojo-ASR-V1">Hojo-ASR-V1</a>: <code>6.14%</code> · <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>6.41%</code></td>
+          <td><strong>Yes</strong> (GigaSpeech 10,000h train)</td>
+          <td><strong>No</strong></td>
+          <td><code>7.26%</code></td>
+          <td><strong><code>7.26%</code></strong> (<code>0.00%</code>)</td>
+        </tr>
+        <tr>
+          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/urgent2024_clean"><strong>URGENT 2024 (Clean)</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
+          <td>Full Test (<code>1 shard / 1,000</code>)</td>
+          <td><a href="https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf">Qwen3-ASR-1.7B</a>: <code>4.30%</code> · <a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">Nemotron-3.5-30B</a>: <code>4.39%</code></td>
           <td><strong>No</strong> (multi-corpus ASR)</td>
           <td><strong>No</strong></td>
-          <td><code>3.32%</code></td>
-          <td><code>3.26%</code></td>
-          <td class="best-cell"><strong><code>2.34%</code></strong></td>
+          <td><code>4.39%</code></td>
+          <td><strong><code>4.39%</code></strong> (<code>0.00%</code>)</td>
         </tr>
         <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>VoxPopuli-AA-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2101.00390">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>1.28%</code></td>
+          <td><a href="https://huggingface.co/datasets/VoiceArena/Monsoon_en_IN_test"><strong>Voice Arena Monsoon (en-IN)</strong></a> · [<a href="https://huggingface.co/datasets/VoiceArena/Monsoon_en_IN_test">Repo</a>]</td>
+          <td>Full Test (<code>4 shards / 2,102</code>)</td>
+          <td><a href="https://huggingface.co/Edge0/ARK-ASR-0.6B">ARK-ASR-0.6B</a>: <code>3.43%</code> · <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>3.44%</code></td>
+          <td><strong>No</strong> (multi-corpus ASR)</td>
+          <td><strong>No</strong></td>
+          <td><code>3.65%</code></td>
+          <td><strong><code>3.65%</code></strong> (<code>0.00%</code>)</td>
+        </tr>
+        <tr>
+          <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/voxpopuli_cleaned_aa"><strong>VoxPopuli-AA-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2101.00390">Paper</a>]</td>
+          <td>Full Test (<code>1 shard / 628</code>)</td>
+          <td><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-ASR-qwen-1019</a>: <code>1.47%</code> · <a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">Nemotron-3.5-30B</a>: <code>1.89%</code></td>
           <td><strong>Yes</strong> (VoxPopuli train)</td>
           <td><strong>No</strong></td>
-          <td><code>1.28%</code></td>
-          <td><code>1.23%</code></td>
-          <td class="best-cell"><strong><code>0.90%</code></strong></td>
+          <td><code>1.89%</code></td>
+          <td><strong><code>1.89%</code></strong> (<code>0.00%</code>)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-clean)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/spaces/hf-audio/open_asr_leaderboard">MusicAudio-Qwen2-7B</a>: <code>1.08%</code></td>
+          <td>Full Test (<code>1 shard / 2,620</code>)</td>
+          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>0.97%</code> · <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>1.03%</code></td>
           <td><strong>Yes</strong> (LibriSpeech 960h)</td>
           <td><strong>Yes</strong> (<code>2.7K</code> dev-clean)</td>
-          <td><code>1.12%</code></td>
           <td><code>1.10%</code></td>
-          <td class="best-cell"><strong><code>0.58%</code></strong></td>
+          <td><strong><code>1.10%</code></strong> (<code>0.00%</code>)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-other)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>2.07%</code></td>
+          <td>Full Test (<code>1 shard / 2,939</code>)</td>
+          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>2.05%</code> · <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>2.18%</code></td>
           <td><strong>Yes</strong> (LibriSpeech 960h)</td>
           <td><strong>Yes</strong> (<code>2.86K</code> dev-other)</td>
-          <td><code>2.07%</code></td>
-          <td><code>2.02%</code></td>
-          <td class="best-cell"><strong><code>1.90%</code></strong></td>
-        </tr>
-        <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>TED-LIUM (test)</strong></a> · [<a href="https://arxiv.org/abs/1805.04699">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>2.28%</code></td>
-          <td><strong>Yes</strong> (TED-LIUM train)</td>
-          <td><strong>Yes</strong> (<code>591</code> dev)</td>
-          <td><code>2.45%</code></td>
-          <td><code>2.41%</code></td>
-          <td class="best-cell"><strong><code>1.83%</code></strong></td>
-        </tr>
-        <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>Multilingual LibriSpeech (en)</strong></a> · [<a href="https://arxiv.org/abs/2012.03411">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe-03-2026</a>: <code>3.64%</code></td>
-          <td><strong>Yes</strong> (MLS EN train)</td>
-          <td><strong>Yes</strong> (<code>3.8K</code> dev)</td>
-          <td><code>3.82%</code></td>
-          <td><code>3.82%</code></td>
-          <td class="best-cell"><strong><code>3.10%</code></strong></td>
-        </tr>
-        <tr>
-          <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>Common Voice (en)</strong></a> · [<a href="https://arxiv.org/abs/1912.06670">Paper</a>]</td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/StagesLabs/StagesLabs-Whisper-Large-v3">StagesLabs-Whisper-Large-v3</a>: <code>6.45%</code></td>
-          <td><strong>Yes</strong> (Common Voice train)</td>
-          <td><strong>No</strong></td>
-          <td><code>8.61%</code></td>
-          <td><code>5.95%</code></td>
-          <td class="best-cell"><strong><code>3.75%</code></strong></td>
+          <td><code>2.66%</code></td>
+          <td><strong><code>2.66%</code></strong> (<code>0.00%</code>)</td>
         </tr>
         <tr style="background:#e8f5ee;">
-          <td><strong>Mean WER (10 Public Leaderboard Sets)</strong></td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.59%</code> (#1)</td>
+          <td><strong>Mean WER (All 10 Official Leaderboard Sets)</strong></td>
+          <td><strong><code>59 Shards / 76,443 Utts</code></strong></td>
+          <td><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-ASR-qwen-1019</a>: <code>4.40%</code> · <a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">Nemotron-3.5-30B</a>: <code>4.69%</code></td>
           <td><strong>Yes</strong></td>
           <td><strong><code>9.97K</code> public dev utts</strong></td>
-          <td><code>4.59%</code></td>
-          <td><code>4.27%</code></td>
-          <td class="best-cell"><strong><code>3.18%</code></strong></td>
+          <td><code>4.69%</code></td>
+          <td class="best-cell"><strong><code>4.67%</code></strong> (<code>0</code> regressions on 10/10 sets)</td>
+        </tr>
+        <tr style="background:#f4f9f6;">
+          <td colspan="7" style="font-weight:700; color:#118659; padding-top:12px;">
+            Locked 4-Corruption Acoustic Robustness Suite (<code>White 0dB</code>, <code>Babble 3dB</code>, <code>Far-Field Reverb</code>, <code>8 kHz PSTN Telephony</code> — <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/nemotron_locked_test_deep_stack_results.json">Audit JSON</a>)
+          </td>
+        </tr>
+        <tr>
+          <td><strong>LibriSpeech (test-clean) — 4 Corruptions</strong></td>
+          <td>Noisy Suite</td>
+          <td>25-Epoch <code>AdamW</code> Backprop: <code>3.68%</code> · 1-Pass <code>Ridge</code>: <code>3.61%</code></td>
+          <td><strong>Yes</strong> (LibriSpeech 960h)</td>
+          <td><strong>Yes</strong> (<code>170</code> dev probes)</td>
+          <td><code>3.61%</code></td>
+          <td class="best-cell"><strong><code>3.25%</code></strong> (<code>-0.36%</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>LibriSpeech (test-other) — 4 Corruptions</strong></td>
+          <td>Noisy Suite</td>
+          <td>25-Epoch <code>AdamW</code> Backprop: <code>9.04%</code> · 1-Pass <code>Ridge</code>: <code>8.56%</code></td>
+          <td><strong>Yes</strong> (LibriSpeech 960h)</td>
+          <td><strong>Yes</strong> (<code>170</code> dev probes)</td>
+          <td><code>9.33%</code></td>
+          <td class="best-cell"><strong><code>7.44%</code></strong> (<code>-1.89%</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>TED-LIUM (test) — 4 Corruptions</strong></td>
+          <td>Noisy Suite</td>
+          <td>25-Epoch <code>AdamW</code> Backprop: <code>4.07%</code> · 1-Pass <code>Ridge</code>: <code>4.21%</code></td>
+          <td><strong>Yes</strong> (TED-LIUM train)</td>
+          <td><strong>Yes</strong> (<code>170</code> dev probes)</td>
+          <td><code>4.21%</code></td>
+          <td class="best-cell"><strong><code>3.76%</code></strong> (<code>-0.45%</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>Multilingual LibriSpeech (en) — 4 Corruptions</strong></td>
+          <td>Noisy Suite</td>
+          <td>25-Epoch <code>AdamW</code> Backprop: <code>14.84%</code> · 1-Pass <code>Ridge</code>: <code>14.86%</code></td>
+          <td><strong>Yes</strong> (MLS EN train)</td>
+          <td><strong>Yes</strong> (<code>170</code> dev probes)</td>
+          <td><code>15.22%</code></td>
+          <td class="best-cell"><strong><code>12.61%</code></strong> (<code>-2.61%</code>)</td>
         </tr>
         <tr style="background:#e8f5ee;">
-          <td><strong>Mean WER (8 Main Short-Form Sets)</strong></td>
-          <td>Test</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">NVIDIA-Nemotron-3.5-30B</a>: <code>4.76%</code> (#1)</td>
+          <td><strong>Mean WER (4-Dataset Noisy Test Suite)</strong></td>
+          <td><strong><code>4 Corruptions × 4 Sets</code></strong></td>
+          <td>25-Epoch <code>AdamW</code> Backprop: <code>7.91%</code> · 1-Pass <code>Ridge</code>: <code>7.81%</code></td>
           <td><strong>Yes</strong></td>
-          <td><strong>No</strong> (<code>0</code> in-domain clips)</td>
-          <td><code>4.76%</code></td>
-          <td><code>4.62%</code></td>
-          <td class="best-cell"><strong><code>3.67%</code></strong></td>
+          <td><strong>Yes</strong> (<code>170</code> dev probes)</td>
+          <td><code>8.09%</code> (<code>2.69%</code> clean)</td>
+          <td class="best-cell"><strong><code>6.87%</code></strong> (<code>-1.22%</code> noisy, <code>2.68%</code> clean)</td>
         </tr>
       </tbody>
     </table>

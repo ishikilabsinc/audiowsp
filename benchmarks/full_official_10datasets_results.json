@@ -1,0 +1,66 @@
+{
+  "datasets": {
+    "ami_cleaned": {
+      "n_utts": 7715,
+      "base_wer": 7.81,
+      "wsp_wer": 7.81,
+      "diff": 0.0
+    },
+    "gigaspeech_cleaned": {
+      "n_utts": 18757,
+      "base_wer": 7.26,
+      "wsp_wer": 7.26,
+      "diff": 0.0
+    },
+    "spgispeech": {
+      "n_utts": 39341,
+      "base_wer": 1.92,
+      "wsp_wer": 1.86,
+      "diff": -0.06
+    },
+    "urgent2024": {
+      "n_utts": 1000,
+      "base_wer": 10.98,
+      "wsp_wer": 10.86,
+      "diff": -0.12
+    },
+    "urgent2024_clean": {
+      "n_utts": 1000,
+      "base_wer": 4.39,
+      "wsp_wer": 4.39,
+      "diff": 0.0
+    },
+    "monsoon_en_in": {
+      "n_utts": 2102,
+      "base_wer": 3.65,
+      "wsp_wer": 3.65,
+      "diff": 0.0
+    },
+    "voxpopuli_cleaned_aa": {
+      "n_utts": 628,
+      "base_wer": 1.89,
+      "wsp_wer": 1.89,
+      "diff": 0.0
+    },
+    "test_clean": {
+      "n_utts": 2620,
+      "base_wer": 1.1,
+      "wsp_wer": 1.1,
+      "diff": 0.0
+    },
+    "test_other": {
+      "n_utts": 2939,
+      "base_wer": 2.66,
+      "wsp_wer": 2.66,
+      "diff": 0.0
+    },
+    "earnings22_cleaned_aa_chunked": {
+      "n_utts": 341,
+      "base_wer": 5.27,
+      "wsp_wer": 5.2,
+      "diff": -0.07
+    }
+  },
+  "mean_10_base": 4.69,
+  "mean_10_wsp": 4.67
+}
