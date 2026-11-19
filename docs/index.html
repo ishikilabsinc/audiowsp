@@ -374,10 +374,18 @@
 
   <h3>Visualizing Signal-vs-Noise Channel Filtering Across 1,280 Channels</h3>
   <p>
-    In our 32.4B Speech Recognition model (<code>Nemotron-3.5</code>), the Conformer encoder outputs <strong>1,280 channels</strong> per frame. When background noise or room echo is present, some channels carry strong clean speech while other channels carry mostly noise.
+    In our 32.4B Speech Recognition model (<code>Nemotron-3.5</code>), the Conformer encoder outputs a 1,280-dimensional vector per audio frame. How do we measure how much <strong>clean speech</strong> versus <strong>background noise</strong> each channel carries—without needing a separate speaker diarizer?
   </p>
   <p>
-    We sort all 1,280 channels by the ratio of <strong>Clean Speech Power (Green Bars)</strong> to <strong>Background Noise Power (Red Bars)</strong>. As shown in the interactive chart below, only the <strong>top 96 channels</strong> have more speech than noise (Green &gt; Red). In the remaining <strong>1,184 channels</strong>, noise is louder than speech (Red &gt; Green)! Keeping only the top 96 channels when fitting the encoder-to-LLM bridge drops 4-dataset noisy Word Error Rate from <code>8.09%</code> (Unedited) and <code>7.81%</code> (Keep All 1,280) down to <strong>6.87%</strong>:
+    We reuse the exact same paired audio setup from Block 1:
+  </p>
+  <ol>
+    <li><strong>Take a clean studio utterance \(x_{\text{clean}}\) and create a noisy copy \(\tilde{x}_{\text{noisy}}\)</strong> (by adding background babble noise, room echo, or 8 kHz telephone filtering to that exact same recording).</li>
+    <li><strong>Pass both through the encoder:</strong> Because the speaker and frame timestamps are identical, \(H_{\text{clean}} = H(x_{\text{clean}})\) is the pure speech activation, and the difference \(\Delta H_{\text{noise}} = H(\tilde{x}_{\text{noisy}}) - H(x_{\text{clean}})\) is the pure noise shift inside the encoder.</li>
+    <li><strong>Compare their variance per channel:</strong> The variance of \(H_{\text{clean}}\) gives the <strong>Clean Speech Power (\(\Sigma_{\text{clean}}\), Green Bars)</strong>, and the variance of \(\Delta H_{\text{noise}}\) gives the <strong>Background Noise Power (\(\Sigma_{\text{noise}}\), Red Bars)</strong>.</li>
+  </ol>
+  <p>
+    When we sort all 1,280 eigen-channels by the ratio of Clean Speech Power to Background Noise Power (\(\Sigma_{\text{clean}}\vec{v}_k = \lambda_k \Sigma_{\text{noise}}\vec{v}_k\)), only the <strong>top 96 channels</strong> have more speech than noise (Green &gt; Red). In the remaining <strong>1,184 channels</strong>, noise is louder than speech (Red &gt; Green)! Keeping only the top 96 channels when fitting the encoder-to-LLM bridge drops 4-dataset noisy Word Error Rate from <code>8.09%</code> (Unedited) and <code>7.81%</code> (Keep All 1,280) down to <strong>6.87%</strong>:
   </p>
 
   <div class="interactive-box">
