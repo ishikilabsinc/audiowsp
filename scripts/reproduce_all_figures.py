@@ -183,7 +183,7 @@ def reproduce_figure_5(out_dir: Path) -> dict:
     print("=== Figure 5: Multi-Tap Ablation ===")
     H = torch.randn(4, 50, 64)
     Phi_3 = MultiTapTemporalLifter.build_k_tap_context(H, k_taps=3)
-    Q_pos = lift_rectified_quadratic_rkhs(H.mean(dim=1), torch.zeros(64), torch.ones(64), torch.ones(64))
+    Q_pos = lift_rectified_quadratic_rkhs(H.mean(dim=1), torch.zeros(64), torch.ones(64))
     res = {
         "phi3_shape": list(Phi_3.shape),
         "q_pos_shape": list(Q_pos.shape),
