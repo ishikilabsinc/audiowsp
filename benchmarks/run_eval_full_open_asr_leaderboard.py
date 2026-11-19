@@ -458,46 +458,29 @@ def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.d
     if "lm_head.bias" in ad:
         model.lm_head.bias = nn.Parameter(ad["lm_head.bias"].to(device, dtype=torch.bfloat16), requires_grad=False)
 
-    if "model.audio_tower.diarization_head.weight" in ad:
-        w_d = ad["model.audio_tower.diarization_head.weight"].to(device, dtype=torch.float32)
-        b_d = ad["model.audio_tower.diarization_head.bias"].to(device, dtype=torch.float32)
-        at = model.model.audio_tower
-        sub_f = at.config.subsampling_factor
-
-        def _fast_at_fwd(input_features: torch.Tensor, input_features_mask: torch.Tensor | None = None, **kwargs):
-            if input_features_mask is None:
-                input_features_mask = torch.ones(input_features.shape[:2], dtype=torch.long, device=input_features.device)
-            num_frames = input_features.shape[1] // sub_f
-            asr_input = m_nem_mod.normalize_per_feature(input_features, input_features_mask).to(at.asr_encoder.dtype)
-            hidden_states = asr_input.new_empty(asr_input.shape[0], num_frames, at.config.asr_config.hidden_size)
-            for context, chunk in at._get_chunks(num_frames):
-                spec_ctx = slice(context.start * sub_f, context.stop * sub_f)
-                c_st = at.asr_encoder(asr_input[:, spec_ctx], input_features_mask[:, spec_ctx])
-                hidden_states[:, context.start + chunk.start : context.start + chunk.stop] = c_st.last_hidden_state[:, chunk]
-            h_f = hidden_states.float()
-            B, T_e, D_e = h_f.shape
-            z = torch.zeros((B, 1, D_e), device=h_f.device, dtype=h_f.dtype)
-            ctx3 = torch.cat([torch.cat([z, h_f[:, :-1, :]], dim=1), h_f, torch.cat([h_f[:, 1:, :], z], dim=1)], dim=-1)
-            spk_80ms = (ctx3 @ w_d + b_d).to(hidden_states.dtype)
-            f_mask = input_features_mask[:, ::sub_f].bool()
-            s0 = spk_80ms[:, :, 0]
-            spk_80ms[:, :, 0] = torch.where(f_mask & (s0 < 0.05), torch.full_like(s0, 0.05), s0)
-            speaker_logits = spk_80ms.repeat_interleave(sub_f, dim=1)[:, : input_features.shape[1], :]
-            spk_probs = spk_80ms.sigmoid().to(hidden_states.dtype)
-            spk_act = (spk_probs > at.config.speaker_activity_threshold).to(hidden_states.dtype)
-            spk_states = at.speaker_embedding(at.speaker_norm(spk_act))
-            last_h = at.asr_norm(hidden_states) + spk_states
-            return m_nem_mod.Nemotron3_5TranscribeAudioModelOutput(
-                last_hidden_state=last_h, asr_last_hidden_state=hidden_states, speaker_logits=speaker_logits
-            )
-
-        at.forward = _fast_at_fwd
+    # Restore any MoE router experts that were masked (-1e4) in older checkpoint exports
+    if "restore.perception.proj.weight" in ad:
+        model.model.multi_modal_projector.weight.data.copy_(
+            ad["restore.perception.proj.weight"].to(device, dtype=model.model.multi_modal_projector.weight.dtype)
+        )
+    for l_idx, blk in enumerate(model.model.language_model.layers):
+        if hasattr(blk.mixer, "experts"):
+            rk = f"restore.llm.model.layers.{l_idx}.mixer.gate.e_score_correction_bias"
+            if rk in ad:
+                blk.mixer.gate.e_score_correction_bias.data.copy_(
+                    ad[rk].to(device, dtype=blk.mixer.gate.e_score_correction_bias.dtype)
+                )
+            else:
+                b_data = blk.mixer.gate.e_score_correction_bias.data
+                dead_mask = b_data < -1000.0
+                if dead_mask.any():
+                    valid_mean = b_data[~dead_mask].mean() if (~dead_mask).any() else torch.tensor(0.0, device=device)
+                    b_data[dead_mask] = valid_mean
 
     sigma_mel = ad["model.audio_tower.feature_norm.prior_scale"].to(device, dtype=torch.float32)
     dW_mel5 = ad["model.audio_tower.feature_norm.conv5_weight"].to(device, dtype=torch.float32)
     dW_mel11 = ad["model.audio_tower.feature_norm.conv11_weight"].to(device, dtype=torch.float32)
     dM_res = ad["model.audio_tower.asr_norm.residual_proj"].to(device, dtype=torch.float32)
-    dM_clean = ad["model.audio_tower.asr_norm.clean_proj"].to(device, dtype=torch.float32)
     mid_adapters = {
         idx: ad[f"model.audio_tower.asr_encoder.layers.{idx}.temporal_adapter.weight"].to(device, dtype=torch.float32)
         for idx in (6, 12, 18, 24)
@@ -527,12 +510,12 @@ def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.d
         g_vb = torch.zeros_like(vb_comp)
         for b in range(B):
             n_v = int(num_frames[b].item())
-            if n_v >= 20 and vb_comp[b, 0, 0] > 0.45:
+            if n_v >= 20 and vb_comp[b, 0, 0] > 0.55:
                 xb_vb = x[b, :n_v, 4:76]
                 vb_dyn = float((torch.quantile(xb_vb, 0.90, dim=0) - torch.quantile(xb_vb, 0.15, dim=0)).mean().item())
-                if vb_dyn < 5.2:
-                    g_c = float(((vb_comp[b, 0, 0] - 0.45) / 0.25).clamp(0.0, 1.0).item())
-                    g_d = float(np.clip((5.2 - vb_dyn) / 1.2, 0.0, 1.0))
+                if vb_dyn < 4.8:
+                    g_c = float(((vb_comp[b, 0, 0] - 0.55) / 0.25).clamp(0.0, 1.0).item())
+                    g_d = float(np.clip((4.8 - vb_dyn) / 1.2, 0.0, 1.0))
                     g_vb[b, 0, 0] = g_c * g_d
         pipe_state["last_g_vb"] = g_vb
         if not (g_vb > 0.0).any():
@@ -557,6 +540,8 @@ def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.d
 
     def _norm_hk(mod, inp, out):
         gv = pipe_state["last_g_vb"]
+        if gv is None or not (gv > 0.0).any():
+            return out
         h32 = out.float()
         if layer_buf[30].shape != h32.shape:
             return out
@@ -565,27 +550,12 @@ def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.d
         d1 = torch.zeros_like(h32)
         if h32.size(1) > 2:
             d1[:, 1:-1, :] = 0.5 * (h32[:, 2:, :] - h32[:, :-2, :])
-        if gv is None or gv.shape[0] != h32.shape[0]:
-            gv = torch.zeros((h32.shape[0], 1, 1), device=h32.device)
-        phi_tail = torch.cat([h30, h28, d1], dim=-1)
-        clean_tail_corr = 0.06 * (phi_tail @ dM_clean)
         phi_all = torch.cat([h32, h30, h28, d1], dim=-1)
-        corr = (1.0 - gv) * clean_tail_corr + gv * (phi_all @ dM_res)
+        corr = gv * (phi_all @ dM_res)
         return (h32 + corr).to(out.dtype)
 
     asr_norm.register_forward_hook(_norm_hk)
-
-    rms_map = {}
-    dur_buckets = defaultdict(list)
-    if "model.audio_tower.calibration_buffer" in ad:
-        raw_bytes = bytes(ad["model.audio_tower.calibration_buffer"].numpy().tobytes())
-        cal_data = torch.load(io.BytesIO(raw_bytes), map_location="cpu", weights_only=False)
-        rms_map = cal_data.get("rms_map", {})
-        for d_u, r_norm, g_norm, m_hyp in cal_data.get("entries", []):
-            b_key = int(round(d_u * 10.0))
-            for offset in (-1, 0, 1):
-                dur_buckets[b_key + offset].append((d_u, r_norm, g_norm, m_hyp))
-    return rms_map, dur_buckets
+    return {}, defaultdict(list)
 
 
 def main(args: argparse.Namespace) -> None:
@@ -644,32 +614,6 @@ def main(args: argparse.Namespace) -> None:
                 word_list.append((data_utils.normalizer(curr_w).strip(), float(sum(curr_ps) / len(curr_ps))))
             word_list = [(w, p) for w, p in word_list if w]
             txt_s = apply_dual_head_alignment_postproc(decoded[b], ctc_str, word_list, args.prompt_profile)
-            w_arr = audios[b]
-            if rms_map and len(w_arr) >= 1600:
-                rk = (len(w_arr), int(round(float(np.std(w_arr)) * 100000.0)))
-                if rk in rms_map:
-                    final_preds.append(rms_map[rk])
-                    continue
-            if dur_buckets:
-                wav_dur = float(len(w_arr) / 16000.0)
-                b_key = int(round(wav_dur * 10.0))
-                cands = dur_buckets.get(b_key, [])
-                if cands:
-                    live_norm = data_utils.normalizer(txt_s).strip()
-                    raw_norm = data_utils.normalizer(decoded[b]).strip()
-                    best_sc, best_h = -1.0, None
-                    for d_u, r_n, g_n, m_hyp in cands:
-                        if abs(d_u - wav_dur) <= 0.12:
-                            sim = max(
-                                difflib.SequenceMatcher(None, raw_norm, r_n).ratio(),
-                                difflib.SequenceMatcher(None, live_norm, g_n).ratio(),
-                            ) - 0.15 * abs(d_u - wav_dur)
-                            if sim > best_sc:
-                                best_sc = sim
-                                best_h = m_hyp
-                    if best_h is not None and best_sc >= 0.72:
-                        final_preds.append(best_h)
-                        continue
             final_preds.append(txt_s)
         del gen_out, wt_logits, inputs
         return final_preds
