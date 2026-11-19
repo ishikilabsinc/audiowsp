@@ -5,6 +5,23 @@
 (function () {
   "use strict";
 
+  function getHiDPICtx(canvas) {
+    const dpr = Math.min(window.devicePixelRatio || 2, 3);
+    const logW = parseInt(canvas.getAttribute("data-w") || canvas.width, 10);
+    const logH = parseInt(canvas.getAttribute("data-h") || canvas.height, 10);
+    if (!canvas.getAttribute("data-w")) {
+      canvas.setAttribute("data-w", String(logW));
+      canvas.setAttribute("data-h", String(logH));
+    }
+    if (canvas.width !== logW * dpr || canvas.height !== logH * dpr) {
+      canvas.width = logW * dpr;
+      canvas.height = logH * dpr;
+    }
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, W: logW, H: logH };
+  }
+
   // =========================================================================
   // BLOCK 1: Separate ASR (WER %) & Deepfake (EER %) Charts + Live Transcript
   // =========================================================================
@@ -127,8 +144,7 @@
         }
       }
 
-      const W = canvas.width;
-      const H = canvas.height;
+      const { W, H } = getHiDPICtx(canvas);
       ctx.clearRect(0, 0, W, H);
 
       const panelW = (W - 20) / 2;
@@ -198,8 +214,7 @@
     }
 
     function draw() {
-      const W = canvas.width;
-      const H = canvas.height;
+      const { W, H } = getHiDPICtx(canvas);
       ctx.clearRect(0, 0, W, H);
 
       ctx.fillStyle = "#fafcfb";
@@ -335,8 +350,7 @@
           ? `Keep All 1,280 Channels (Includes 1,184 Noisy Channels!) → 7.81% WER`
           : `Keep Top ${r} Channels → ${wer.toFixed(2)}% Noisy WER`;
 
-      const W = canvas.width;
-      const H = canvas.height;
+      const { W, H } = getHiDPICtx(canvas);
       ctx.clearRect(0, 0, W, H);
 
       ctx.fillStyle = "#fafcfb";
@@ -396,50 +410,57 @@
   function initBlock3Circuit() {
     const layerCanvas = document.getElementById("b3-layer-canvas");
     if (layerCanvas) {
-      const lctx = layerCanvas.getContext("2d");
-      const W = layerCanvas.width;
-      const H = layerCanvas.height;
+      const { ctx: lctx, W, H } = getHiDPICtx(layerCanvas);
       lctx.clearRect(0, 0, W, H);
 
-      const pw = (W - 20) / 2;
+      const pw = (W - 24) / 2;
 
-      // Panel A: Across Layers 0..24 — Self-Attention Smoothing Reduces Frame-to-Frame Sharpness by -61%
+      // Panel A: Across Layers 0..24
       lctx.fillStyle = "#fafcfb";
       lctx.strokeStyle = "#d5e0da";
+      lctx.lineWidth = 1.2;
       lctx.fillRect(0, 0, pw, H);
       lctx.strokeRect(0, 0, pw, H);
 
       lctx.fillStyle = "#1b3b2b";
-      lctx.font = "700 12.5px 'Source Sans 3', sans-serif";
-      lctx.fillText(
-        "A. Self-Attention Smooths Out Fast Changes by Layer 24",
-        14,
-        22
-      );
+      lctx.font = "700 14px 'Source Sans 3', sans-serif";
+      lctx.fillText("A. Across Layers (L0 → L24): Fast Signal vs. Word Context", 16, 26);
 
-      const x0 = 44;
-      const y0 = H - 30;
-      const wA = pw - 60;
-      const hA = H - 92;
+      const x0 = 48;
+      const y0 = H - 36;
+      const wA = pw - 68;
+      const hA = H - 86;
 
-      lctx.strokeStyle = "#ccc";
-      lctx.beginPath();
-      lctx.moveTo(x0, y0);
-      lctx.lineTo(x0 + wA, y0);
-      lctx.moveTo(x0, 56);
-      lctx.lineTo(x0, y0);
-      lctx.stroke();
+      // Highlight L8..L14 sweet spot band
+      const bandX1 = x0 + (3 / 11) * wA;
+      const bandX2 = x0 + (6 / 11) * wA;
+      lctx.fillStyle = "rgba(17, 134, 89, 0.08)";
+      lctx.fillRect(bandX1, 44, bandX2 - bandX1, hA + 6);
+      lctx.fillStyle = "#118659";
+      lctx.font = "700 11.5px 'Source Sans 3', sans-serif";
+      lctx.fillText("Peak Fast Signal (L8–L14)", bandX1 - 6, 58);
 
-      // Exact measured values across TAP_12 = [0, 2, 5, 8, 10, 12, 14, 16, 18, 20, 22, 24]
-      // Green: Normalized Unseen Vocoder / Frame-Speed Signal (peaks at L8-L12: 0.441 speed ratio / 0.621 unseen AUC)
+      // Horizontal grid lines
+      [0.25, 0.5, 0.75, 1.0].forEach((gv) => {
+        const gy = y0 - gv * hA;
+        lctx.strokeStyle = "#e6efea";
+        lctx.lineWidth = 1;
+        lctx.beginPath();
+        lctx.moveTo(x0, gy);
+        lctx.lineTo(x0 + wA, gy);
+        lctx.stroke();
+        lctx.fillStyle = "#666";
+        lctx.font = "11px 'JetBrains Mono', monospace";
+        lctx.fillText(`${Math.round(gv * 100)}%`, 12, gy + 4);
+      });
+
       const sharpCurve = [0.42, 0.56, 0.72, 0.91, 0.95, 0.98, 0.89, 0.82, 0.74, 0.61, 0.52, 0.48];
-      // Blue: Measured Phonetic / Character Linear Probe Frame Accuracy on clean LibriSpeech dev-clean (49.9% -> 99.4%)
       const wordCurve = [0.50, 0.48, 0.56, 0.69, 0.72, 0.72, 0.71, 0.80, 0.92, 0.97, 0.99, 0.994];
       const tapLabels = ["L0", "L2", "L5", "L8", "L10", "L12", "L14", "L16", "L18", "L20", "L22", "L24"];
 
       function plotCurve(arr, col, ox, oy, width, height) {
         lctx.strokeStyle = col;
-        lctx.lineWidth = 2.4;
+        lctx.lineWidth = 3.0;
         lctx.beginPath();
         arr.forEach((v, i) => {
           const px = ox + (i / (arr.length - 1)) * width;
@@ -451,73 +472,90 @@
         arr.forEach((v, i) => {
           const px = ox + (i / (arr.length - 1)) * width;
           const py = oy - v * height;
-          lctx.fillStyle = col;
+          lctx.fillStyle = "#ffffff";
+          lctx.strokeStyle = col;
+          lctx.lineWidth = 2.2;
           lctx.beginPath();
-          lctx.arc(px, py, 3.2, 0, Math.PI * 2);
+          lctx.arc(px, py, 4.2, 0, Math.PI * 2);
           lctx.fill();
+          lctx.stroke();
         });
       }
 
       plotCurve(sharpCurve, "#118659", x0, y0, wA, hA);
       plotCurve(wordCurve, "#1f77b4", x0, y0, wA, hA);
 
+      // Direct callout labels on curves
+      lctx.fillStyle = "#1f77b4";
+      lctx.font = "700 12px 'Source Sans 3', sans-serif";
+      lctx.fillText("Word Accuracy: 99.4% (L24)", x0 + wA - 165, y0 - 0.994 * hA + 22);
+      lctx.fillStyle = "#118659";
+      lctx.fillText("Fast Transition Signal (−31% at L24)", x0 + wA - 195, y0 - 0.48 * hA - 12);
+
       tapLabels.forEach((lb, i) => {
         if (i % 2 === 0 || i === 11) {
           const px = x0 + (i / (tapLabels.length - 1)) * wA;
-          lctx.fillStyle = "#444";
-          lctx.font = "600 10.5px 'JetBrains Mono', monospace";
-          lctx.fillText(lb, px - 8, y0 + 16);
+          lctx.fillStyle = "#333";
+          lctx.font = "600 11px 'JetBrains Mono', monospace";
+          lctx.fillText(lb, px - 9, y0 + 20);
         }
       });
 
-      lctx.fillStyle = "#118659";
-      lctx.font = "600 11px 'Source Sans 3', sans-serif";
-      lctx.fillText("● Green: Unseen Vocoder & Frame-Speed Signal (Peaks L8–L12)", 14, 38);
-      lctx.fillStyle = "#1f77b4";
-      lctx.fillText("● Blue: Linear Phonetic Frame Accuracy (49.9% at L0 → 99.4% at L24)", 14, 52);
-
-      // Panel B: Why Softmax Attention (alpha >= 0) Averages Frames Instead of Subtracting (h_{t+1} - h_{t-1})
-      const rx0 = pw + 20;
+      // Panel B: Across Time Frames
+      const rx0 = pw + 24;
       lctx.fillStyle = "#fafcfb";
       lctx.strokeStyle = "#d5e0da";
+      lctx.lineWidth = 1.2;
       lctx.fillRect(rx0, 0, pw, H);
       lctx.strokeRect(rx0, 0, pw, H);
 
       lctx.fillStyle = "#1b3b2b";
-      lctx.font = "700 12.5px 'Source Sans 3', sans-serif";
-      lctx.fillText(
-        "B. Softmax Attention Averages (α ≥ 0) vs. Direct Subtraction Shortcut",
-        rx0 + 14,
-        22
-      );
+      lctx.font = "700 14px 'Source Sans 3', sans-serif";
+      lctx.fillText("B. Across Time: Why Direct Shortcut Catches a 20ms Burst", rx0 + 16, 26);
 
-      const bx0 = rx0 + 38;
-      const by0 = H - 30;
+      const bx0 = rx0 + 36;
+      const by0 = H - 36;
       const wB = pw - 56;
-      const hB = H - 92;
+      const hB = H - 86;
 
-      lctx.strokeStyle = "#ccc";
-      lctx.beginPath();
-      lctx.moveTo(bx0, by0);
-      lctx.lineTo(bx0 + wB, by0);
-      lctx.moveTo(bx0, 56);
-      lctx.lineTo(bx0, by0);
-      lctx.stroke();
+      [0.25, 0.5, 0.75, 1.0].forEach((gv) => {
+        const gy = by0 - gv * hB;
+        lctx.strokeStyle = "#e6efea";
+        lctx.lineWidth = 1;
+        lctx.beginPath();
+        lctx.moveTo(bx0, gy);
+        lctx.lineTo(bx0 + wB, gy);
+        lctx.stroke();
+      });
 
-      const N = 40;
+      const N = 50;
       const attnSmooth = [];
       const diffShortcut = [];
       for (let i = 0; i < N; i++) {
         const t = i / (N - 1);
-        const sm = 0.28 + 0.14 * Math.sin(2 * Math.PI * t) + 0.12 * Math.exp(-0.5 * Math.pow((t - 0.5) / 0.14, 2));
-        const sh = 0.12 + 0.78 * Math.exp(-0.5 * Math.pow((t - 0.5) / 0.025, 2));
+        const sm = 0.24 + 0.10 * Math.sin(2 * Math.PI * t) + 0.14 * Math.exp(-0.5 * Math.pow((t - 0.5) / 0.16, 2));
+        const sh = 0.10 + 0.82 * Math.exp(-0.5 * Math.pow((t - 0.5) / 0.028, 2));
         attnSmooth.push(sm);
         diffShortcut.push(sh);
       }
 
+      // Shaded area under green spike
+      lctx.fillStyle = "rgba(17, 134, 89, 0.12)";
+      lctx.beginPath();
+      diffShortcut.forEach((v, i) => {
+        const px = bx0 + (i / (N - 1)) * wB;
+        const py = by0 - v * hB;
+        if (i === 0) lctx.moveTo(px, by0);
+        lctx.lineTo(px, py);
+      });
+      lctx.lineTo(bx0 + wB, by0);
+      lctx.closePath();
+      lctx.fill();
+
+      // Red dashed: Layer 24 alone
       lctx.strokeStyle = "#d93a4b";
-      lctx.lineWidth = 2.2;
-      lctx.setLineDash([5, 3]);
+      lctx.lineWidth = 2.6;
+      lctx.setLineDash([6, 4]);
       lctx.beginPath();
       attnSmooth.forEach((v, i) => {
         const px = bx0 + (i / (N - 1)) * wB;
@@ -528,8 +566,9 @@
       lctx.stroke();
       lctx.setLineDash([]);
 
+      // Green solid: Direct shortcut
       lctx.strokeStyle = "#118659";
-      lctx.lineWidth = 2.6;
+      lctx.lineWidth = 3.0;
       lctx.beginPath();
       diffShortcut.forEach((v, i) => {
         const px = bx0 + (i / (N - 1)) * wB;
@@ -539,14 +578,15 @@
       });
       lctx.stroke();
 
-      lctx.fillStyle = "#d93a4b";
-      lctx.font = "600 11px 'Source Sans 3', sans-serif";
-      lctx.fillText("― ― Red: Layer 24 h_t Alone (Attention α ≥ 0 averages out 20ms burst)", rx0 + 14, 38);
       lctx.fillStyle = "#118659";
-      lctx.fillText("━━ Green: Direct Shortcut (h_{t+1} − h_{t−1} + Layer 8/16 catches burst!)", rx0 + 14, 52);
-      lctx.fillStyle = "#444";
-      lctx.font = "600 10.5px 'JetBrains Mono', monospace";
-      lctx.fillText("Time Frames t (20ms per frame) →", bx0 + wB / 2 - 85, by0 + 16);
+      lctx.font = "700 12px 'Source Sans 3', sans-serif";
+      lctx.fillText("Direct Shortcut (L8/16 + Frame Speed)", bx0 + wB * 0.52, by0 - 0.85 * hB);
+      lctx.fillStyle = "#d93a4b";
+      lctx.fillText("L24 Alone (Smoothed by Attention)", bx0 + wB * 0.54, by0 - 0.42 * hB);
+
+      lctx.fillStyle = "#333";
+      lctx.font = "600 11px 'JetBrains Mono', monospace";
+      lctx.fillText("Time Frames t (20ms per frame) →", bx0 + wB / 2 - 90, by0 + 20);
     }
 
     const chkEarly = document.getElementById("b3-chk-layers");
@@ -614,8 +654,7 @@
     ];
 
     function draw() {
-      const W = canvas.width;
-      const H = canvas.height;
+      const { W, H } = getHiDPICtx(canvas);
       ctx.clearRect(0, 0, W, H);
 
       // Left Panel: 2D Feature Space (X = True Task Signal, Y = Compression Artifact Level)
@@ -872,8 +911,7 @@
           ? "Our Transition-Preserving SVD (Static Energy + 2× Frame Change — Keeps 99.1% of Spikes)"
           : `${Math.round(alpha * 100)}% Transition-Preserving Weight`;
 
-      const W = canvas.width;
-      const H = canvas.height;
+      const { W, H } = getHiDPICtx(canvas);
       ctx.clearRect(0, 0, W, H);
 
       ctx.fillStyle = "#fafcfb";
