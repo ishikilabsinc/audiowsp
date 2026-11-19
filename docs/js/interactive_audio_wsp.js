@@ -746,8 +746,9 @@
         ctx.lineTo(ox, H - 26);
         ctx.stroke();
         ctx.fillStyle = "#118659";
-        ctx.font = "700 12px 'Source Sans 3', sans-serif";
-        ctx.fillText("1-Pass OFP Boundary (Locked Vertical: w_aug = 0)", ox - 195, 36);
+        ctx.font = "700 11.5px 'Source Sans 3', sans-serif";
+        ctx.fillText("1-Pass OFP Boundary", ox - 135, 34);
+        ctx.fillText("(Locked Vertical: w_aug = 0)", ox - 165, 49);
       }
 
       // Right Panel: Visual Explanation & Bar Comparison
@@ -811,22 +812,23 @@
         }
       });
 
-      // Bottom Right Mini Bar Comparison
+      // Bottom Right Mini Bar Comparison (including 25-Epoch AdamW + Data Augmentation!)
       const bars = [
-        { label: "25-Epoch AdamW (Tilted Shortcut)", val: 6.95, col: "#d93a4b" },
-        { label: "1-Pass OFP (Vertical Locked w_aug=0)", val: 4.12, col: "#118659" },
+        { label: "25-Epoch AdamW (Unaugmented)", val: 6.95, col: "#d93a4b" },
+        { label: "25-Epoch AdamW + Data Augmentation", val: 5.84, col: "#e67e22" },
+        { label: "1-Pass OFP (Exact Lock c_aug^T w = 0)", val: 4.12, col: "#118659" },
       ];
       bars.forEach((b, idx) => {
-        const by = H - 58 + idx * 24;
+        const by = H - 72 + idx * 21;
         ctx.fillStyle = "#333";
-        ctx.font = "600 11.5px 'Source Sans 3', sans-serif";
-        ctx.fillText(b.label, rx0, by + 12);
-        const bw = (b.val / 8.0) * 140;
+        ctx.font = "600 11px 'Source Sans 3', sans-serif";
+        ctx.fillText(b.label, rx0, by + 11);
+        const bw = (b.val / 8.0) * 135;
         ctx.fillStyle = b.col;
-        ctx.fillRect(rx0 + 215, by, bw, 15);
+        ctx.fillRect(rx0 + 215, by, bw, 14);
         ctx.fillStyle = "#111";
-        ctx.font = "700 11.5px 'JetBrains Mono', monospace";
-        ctx.fillText(`${b.val}% EER`, rx0 + 220 + bw, by + 12);
+        ctx.font = "700 11px 'JetBrains Mono', monospace";
+        ctx.fillText(`${b.val}% EER`, rx0 + 220 + bw, by + 11);
       });
 
       if (caption) {
