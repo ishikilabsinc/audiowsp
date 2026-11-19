@@ -507,9 +507,16 @@
   </div>
 
   <div class="math-callout">
-    <strong>Why 1 Forward Pass Is Enough:</strong> In a single forward pass (`torch.inference_mode()`), we collect the feature correlation matrix \(A = \Phi^T \Pi \Phi + \lambda I\), the task separation vector \(\vec{d}_{\text{task}}\), and the vertical compression shift \(C_{\text{aug}} = \mathbb{E}[\Phi(\text{MP3}) - \Phi(\text{WAV})]\). Solving for the weights \(W\) with sensitivity to \(C_{\text{aug}}\) locked to zero (\(C_{\text{aug}}^T W = 0\)) has an exact closed-form solution:
-    $$W_{\text{OFP}} = A^{-1}\vec{d}_{\text{task}} - A^{-1}C_{\text{aug}}\left(C_{\text{aug}}^T A^{-1} C_{\text{aug}}\right)^{-1} C_{\text{aug}}^T A^{-1}\vec{d}_{\text{task}}$$
-    This single pass reduces sensitivity to compression shortcuts to <strong>0.0</strong> and achieves <strong>4.12% Equal Error Rate</strong> across 4 unseen deepfake datasets (vs. <strong>6.95%</strong> for 25-epoch <code>AdamW</code> and <strong>5.84%</strong> for 25-epoch <code>AdamW</code> with data augmentation).
+    <strong>Why 1 Forward Pass Is Enough (Every Term Defined):</strong> In a single forward pass (<code>torch.inference_mode()</code>), we solve the closed-form equation:
+    $$W_{\text{OFP}} = A^{-1}\vec{d}_{\text{task}} - A^{-1}C_{\text{aug}}\left(C_{\text{aug}}^T A^{-1} C_{\text{aug}}\right)^{-1} C_{\text{aug}}^T A^{-1}\vec{d}_{\text{task}}, \qquad \text{where } A = \Phi^T \Pi \Phi + \lambda I$$
+    <ul style="margin:8px 0 8px; padding-left:20px; font-size:15px; line-height:1.5;">
+      <li>\(\Phi \in \mathbb{R}^{N \times D}\): The feature matrix across \(N\) practice audio clips (each row \(\Phi_i \in \mathbb{R}^D\) is the \(D\)-dimensional feature vector from Block 3 for clip \(i\)).</li>
+      <li>\(\Pi = \text{diag}(\pi_1, \dots, \pi_N) \in \mathbb{R}^{N \times N}\): A diagonal sample-weighting matrix that gives \(1.5\times\) higher weight \(\pi_i\) to hard boundary clips (where the base model is uncertain) and lower weight to easy clips.</li>
+      <li>\(\lambda > 0\) and \(I \in \mathbb{R}^{D \times D}\): The \(\ell_2\) regularization scalar \(\lambda\) and the \(D \times D\) identity matrix \(I\), ensuring \(A\) is invertible and keeping weight magnitudes small.</li>
+      <li>\(\vec{d}_{\text{task}} = \Phi^T \Pi y \in \mathbb{R}^D\): The task correlation vector between the features \(\Phi\) and the target labels \(y\).</li>
+      <li>\(C_{\text{aug}} = \mathbb{E}[\Phi(\tilde{x}_{\text{aug}}) - \Phi(x_{\text{clean}})] \in \mathbb{R}^{D \times J}\): The \(J\) augmentation shift vectors (MP3, 8 kHz telephone, room echo) measured in Block 1.</li>
+    </ul>
+    Because multiplying \(W_{\text{OFP}}\) by \(C_{\text{aug}}^T\) gives \(C_{\text{aug}}^T W_{\text{OFP}} = C_{\text{aug}}^T A^{-1}\vec{d}_{\text{task}} - C_{\text{aug}}^T A^{-1}\vec{d}_{\text{task}} = \mathbf{0}\), sensitivity to those augmentation shortcuts is locked to <strong>0.0</strong>—achieving <strong>4.12% Equal Error Rate</strong> across 4 unseen deepfake datasets (vs. <strong>6.95%</strong> for 25-epoch <code>AdamW</code> and <strong>5.84%</strong> for 25-epoch <code>AdamW</code> with data augmentation).
   </div>
 
   <h3>How Is This Different From Standard Data Augmentation?</h3>
