@@ -318,7 +318,7 @@
     First, let's define what a "direction" in a hidden layer means:
   </p>
   <ul>
-    <li>In <code>Wav2Vec2</code> Layer 20, each audio frame is represented by a list of <strong>1,024 numbers</strong> (a vector in \(\mathbb{R}^{1024}\)).</li>
+    <li>In <code>Wav2Vec2</code> Layer 20, each audio frame is a 1,024-dimensional vector.</li>
     <li><strong>The Augmentation Sensitivity Direction (\(\vec{v}_{\text{aug}}\)):</strong> We take the activation differences \(\Delta H_t = H_t(\text{Telephone}) - H_t(\text{Studio})\) across practice clips and take their top singular vector (via Singular Value Decomposition, <code>SVD</code>). This unit vector \(\vec{v}_{\text{aug}}\) points in the direction that telephone/MP3 compression pushes the neurons.</li>
     <li><strong>The Task Direction (\(\vec{v}_{\text{task}}\)):</strong> On the same practice clips, we compute the average vector of Fake voices minus the average vector of Real voices, \(\vec{v}_{\text{task}} = \frac{\mu_{\text{fake}} - \mu_{\text{real}}}{\|\mu_{\text{fake}} - \mu_{\text{real}}\|_2}\). This unit vector points in the direction the model uses to solve the task.</li>
   </ul>
