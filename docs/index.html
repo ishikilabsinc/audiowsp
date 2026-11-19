@@ -422,16 +422,13 @@
   <p>
     In addition to connecting earlier layers into the output layer, we also connect adjacent frames \([h_{t-1}, h_t, h_{t+1}]\) so the output layer can measure <strong>frame-to-frame speed</strong> \(\frac{1}{2}(h_{t+1} - h_{t-1})\)—which spikes during rapid <strong>stop consonants</strong> (such as the crisp <code>"p"</code>, <code>"t"</code>, and <code>"k"</code> sounds in speech, denoted <code>/p/</code>, <code>/t/</code>, <code>/k/</code>)—and we score anomalies on one side only via \(\log(1 + \max(0, z)^2)\) so real human voices on the negative tail (\(z \le 0\)) receive zero false-alarm penalty.
   </p>
-  <p>
-    <strong>Check boxes 1, 2, and 3 in order below</strong> to connect each tap into the output layer and see the measured drop in error rate:
-  </p>
 
   <div class="interactive-box">
     <div class="widget-toolbar" style="justify-content:flex-start; gap:16px;">
       <label style="font-weight:600; color:#555;"><input type="checkbox" checked disabled> Baseline (Layer 24 Only)</label>
-      <label style="font-weight:700; cursor:pointer; color:#118659;"><input id="b3-chk-layers" type="checkbox" checked> 1. Connect Earlier Layers (Layers 8 &amp; 16)</label>
-      <label style="font-weight:700; cursor:pointer; color:#1f77b4;"><input id="b3-chk-speed" type="checkbox" checked> 2. Connect Adjacent Frames (Frame Speed)</label>
-      <label style="font-weight:700; cursor:pointer; color:#7b64b8;"><input id="b3-chk-onesided" type="checkbox" checked> 3. Connect One-Sided Anomaly Scoring</label>
+      <label style="font-weight:700; cursor:pointer; color:#118659;"><input id="b3-chk-layers" type="checkbox"> 1. Connect Earlier Layers (Layers 8 &amp; 16)</label>
+      <label style="font-weight:700; cursor:pointer; color:#1f77b4;"><input id="b3-chk-speed" type="checkbox"> 2. Connect Adjacent Frames (Frame Speed)</label>
+      <label style="font-weight:700; cursor:pointer; color:#7b64b8;"><input id="b3-chk-onesided" type="checkbox"> 3. Connect One-Sided Anomaly Scoring</label>
     </div>
 
     <svg viewBox="0 0 900 185" style="width:100%; height:auto; display:block; background:#fafcfb; border:1px solid #d5e0da; border-radius:8px;">
@@ -448,18 +445,18 @@
       <line x1="282" y1="44" x2="316" y2="44" stroke="#888" stroke-width="1.5" />
       <line x1="426" y1="44" x2="545" y2="44" stroke="#118659" stroke-width="2.5" />
 
-      <g id="svg-wire-layers" opacity="1.0">
+      <g id="svg-wire-layers" opacity="0.15">
         <path d="M 83 64 L 83 88 L 545 88" fill="none" stroke="#2e996a" stroke-width="2.2" />
         <path d="M 227 64 L 227 88" fill="none" stroke="#2e996a" stroke-width="2.2" />
         <text x="95" y="82" fill="#118659" font-size="11.5" font-weight="bold">1. Multi-Layer Tap (Early Pitch/Phase + Mid Formants)</text>
       </g>
 
-      <g id="svg-wire-speed" opacity="1.0">
+      <g id="svg-wire-speed" opacity="0.15">
         <path d="M 398 64 L 398 124 L 545 124" fill="none" stroke="#1f77b4" stroke-width="2.2" />
         <text x="95" y="118" fill="#1f77b4" font-size="11.5" font-weight="bold">2. Frame Speed Tap: 0.5 · (h_{t+1} − h_{t−1})</text>
       </g>
 
-      <g id="svg-wire-onesided" opacity="1.0">
+      <g id="svg-wire-onesided" opacity="0.15">
         <path d="M 398 124 L 398 158 L 545 158" fill="none" stroke="#7b64b8" stroke-width="2.2" />
         <text x="95" y="152" fill="#7b64b8" font-size="11.5" font-weight="bold">3. One-Sided Anomaly Tap: log(1 + max(0, z)²)</text>
       </g>
@@ -473,13 +470,13 @@
       <rect x="692" y="20" width="188" height="150" rx="8" fill="#f1f8f4" stroke="#2e996a" stroke-width="1.5" />
       <text x="706" y="44" fill="#1b3b2b" font-size="12" font-weight="bold">Measured Benchmark Error:</text>
       <text x="706" y="72" fill="#444" font-size="11.5">ASVspoof 2021 DF:</text>
-      <text id="b3-stat-df21" x="706" y="90" fill="#118659" font-size="14" font-weight="bold" font-family="monospace">1.98% EER</text>
+      <text id="b3-stat-df21" x="706" y="90" fill="#118659" font-size="14" font-weight="bold" font-family="monospace">8.32% EER</text>
       <text x="706" y="114" fill="#444" font-size="11.5">In-The-Wild Deepfake:</text>
-      <text id="b3-stat-itw" x="706" y="132" fill="#118659" font-size="14" font-weight="bold" font-family="monospace">2.51% EER</text>
-      <text x="706" y="154" fill="#444" font-size="11.5">Noisy ASR: <tspan id="b3-stat-asr" fill="#1f77b4" font-weight="bold" font-family="monospace">6.87% WER</tspan></text>
+      <text id="b3-stat-itw" x="706" y="132" fill="#118659" font-size="14" font-weight="bold" font-family="monospace">11.22% EER</text>
+      <text x="706" y="154" fill="#444" font-size="11.5">Noisy ASR: <tspan id="b3-stat-asr" fill="#1f77b4" font-weight="bold" font-family="monospace">8.09% WER</tspan></text>
     </svg>
     <p style="margin:10px 0 0; font-size:13.5px; color:#444; line-height:1.45;">
-      <strong>Figure 5:</strong> Interactive multi-tap ablation circuit showing how connecting (1) earlier transformer layers, (2) adjacent time frames \([h_{t-1}, h_{t+1}]\) for frame-to-frame speed, and (3) one-sided squared anomaly scoring \(\log(1+\max(0,z)^2)\) into the output layer \(W\) reduces error across complete public test sets: <code>ASVspoof 2021 DF</code> (533,928 trials), <code>In-The-Wild</code> (31,779 trials), and the 4-dataset noisy ASR suite (10,797 utterances). [<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py">Reproduce Figure 5: <code>python scripts/reproduce_all_figures.py --figure 5</code></a>]
+      <strong>Figure 5 (How Multi-Layer &amp; Frame-Speed Context Helps):</strong> <strong>Check boxes 1, 2, and 3 in order above to connect each tap into the output layer \(W\) and see the measured drop in error rate</strong> across complete public test sets: <code>ASVspoof 2021 DF</code> (533,928 trials, dropping from <code>8.32%</code> to <code>1.98%</code> EER), <code>In-The-Wild</code> (31,779 trials, dropping from <code>11.22%</code> to <code>2.51%</code> EER), and the 4-dataset noisy ASR suite (10,797 utterances, dropping from <code>8.09%</code> to <code>6.87%</code> WER). [<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py">Reproduce Figure 5: <code>python scripts/reproduce_all_figures.py --figure 5</code></a>]
     </p>
   </div>
 
