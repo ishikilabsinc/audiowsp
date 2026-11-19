@@ -910,6 +910,7 @@
           : alpha === 1
           ? "Our Transition-Preserving SVD (Static Energy + 2× Frame Change — Keeps 99.1% of Spikes)"
           : `${Math.round(alpha * 100)}% Transition-Preserving Weight`;
+      valLabel.style.color = alpha > 0.5 ? "#118659" : "#d93a4b";
 
       const { W, H } = getHiDPICtx(canvas);
       ctx.clearRect(0, 0, W, H);
