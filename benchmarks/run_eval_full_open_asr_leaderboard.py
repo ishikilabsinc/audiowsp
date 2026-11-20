@@ -494,118 +494,192 @@ def decode_utterance_unified_mbr(utt_hyps_weighted, is_spgi=False, long_verbatim
 
 
 
-def _resolve_ds_key(dataset_path: str, dataset_name: str, split: str) -> str:
-    dp = (dataset_path or "").lower()
-    dn = (dataset_name or "").lower()
-    sp = (split or "").lower()
-    combined = f"{dp} {dn} {sp}"
-    if "ami" in combined:
-        return "ami_cleaned"
-    if "gigaspeech" in combined:
-        return "gigaspeech"
-    if "spgispeech" in combined:
-        return "spgispeech"
-    if "urgent2024_clean" in combined or "urgent_clean" in combined:
-        return "urgent_clean"
-    if "urgent2024" in combined or "urgent" in combined:
-        return "urgent2024"
-    if "monsoon" in combined:
-        return "monsoon"
-    if "voxpopuli" in combined:
-        return "voxpopuli"
-    if "earnings22" in combined or "earnings" in combined:
-        return "earnings22"
-    if "librispeech" in combined or "test.clean" in combined or "test-clean" in combined or "test_clean" in combined:
-        if "other" in combined:
-            return "ls_other"
-        return "ls_clean"
-    if "test.other" in combined or "test-other" in combined or "test_other" in combined:
-        return "ls_other"
-    return ""
+
+def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndarray], device: torch.device, batch_size: int, is_spgi: bool) -> list[str]:
+    """Runs a single auxiliary open-weights tower 100% live on the GPU from raw 16kHz audio waveforms."""
+    import runpy, sys
+    from transformers import (
+        AutoConfig, AutoModel, AutoModelForCausalLM, AutoModelForMultimodalLM,
+        AutoModelForSpeechSeq2Seq, AutoProcessor, AutoTokenizer
+    )
+    from transformers.utils import cached_file
+
+    preds_all: list[str] = []
+    dev_str = f"cuda:{device.index or 0}" if device.type == "cuda" else "cpu"
+
+    if tag == "hojo":
+        from hojo_asr import HOJO_ASR
+        mdl = HOJO_ASR.load_model(repo_id, device=device.index if device.type == "cuda" else -1)
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            res = mdl.run_infer(b_aud, batch_size=len(b_aud))
+            preds_all.extend([clean_for_profile(r["text"], is_spgi) for r in res])
+        del mdl
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag in ("higgs", "higgs8b"):
+        for fn in ["transcribe.py", "higgs_audio_collator.py", "modeling_higgs_audio_xcodec.py", "utils.py", "common.py", "configuration_higgs_audio.py"]:
+            cached_file(repo_id, fn)
+        t_path = cached_file(repo_id, "transcribe.py")
+        m_dir = os.path.dirname(t_path)
+        sys.path.insert(0, m_dir)
+        try:
+            mod_g = runpy.run_path(t_path)
+        finally:
+            sys.path.pop(0)
+        transcribe_batch = mod_g["transcribe_batch"]
+        mdl = AutoModel.from_pretrained(repo_id, torch_dtype=torch.bfloat16, trust_remote_code=True, attn_implementation="eager", device_map=dev_str).eval()
+        tok = AutoTokenizer.from_pretrained(repo_id, trust_remote_code=True)
+        mdl.audio_out_bos_token_id = tok.convert_tokens_to_ids("<|audio_out_bos|>")
+        mdl.audio_eos_token_id = tok.convert_tokens_to_ids("<|audio_eos|>")
+        hb = max(1, batch_size // 2)
+        for s in range(0, len(eval_audios), hb):
+            b_aud = eval_audios[s : s + hb]
+            out_t = transcribe_batch(mdl, tok, b_aud, sample_rates=16000, max_new_tokens=512)
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in out_t])
+        del mdl, tok
+        torch.cuda.empty_cache()
+        return preds_all
+
+    cfg = AutoConfig.from_pretrained(repo_id, trust_remote_code=True)
+    proc = AutoProcessor.from_pretrained(repo_id, trust_remote_code=True)
+    mtype = getattr(cfg, "model_type", "").lower()
+
+    if tag in ("musci", "oruk") or "qwen3_asr" in mtype:
+        mdl = AutoModelForMultimodalLM.from_pretrained(repo_id, torch_dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            inputs = proc.apply_transcription_request(audio=b_aud, language="en").to(device, dtype=torch.bfloat16)
+            p_len = inputs["input_ids"].shape[1]
+            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
+            dec = proc.decode(p_ids[:, p_len:], return_format="transcription_only")
+            if isinstance(dec, str):
+                dec = [dec]
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag == "cohere":
+        mdl = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id, torch_dtype=torch.bfloat16).to(device).eval()
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            inputs = proc(b_aud, sampling_rate=16000, return_tensors="pt", language="en", punctuation=False).to(device, dtype=torch.bfloat16)
+            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
+            dec = proc.decode(p_ids, skip_special_tokens=True, audio_chunk_index=inputs.get("audio_chunk_index"), language="en")
+            preds_all.extend([clean_for_profile(re.sub(r"\s+", " ", t.replace("(", " ").replace(")", " ")), is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag == "granite":
+        mdl = AutoModelForMultimodalLM.from_pretrained(repo_id, torch_dtype=torch.bfloat16).to(device).eval()
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            inputs = proc.apply_transcription_request(audio=b_aud, language="en").to(device, dtype=torch.bfloat16)
+            p_len = inputs["input_ids"].shape[1]
+            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
+            dec = proc.decode(p_ids[:, p_len:], skip_special_tokens=True)
+            if isinstance(dec, str):
+                dec = [dec]
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag == "whisper":
+        mdl = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id, torch_dtype=torch.bfloat16).to(device).eval()
+        if hasattr(mdl.generation_config, "forced_decoder_ids"):
+            mdl.generation_config.forced_decoder_ids = None
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            inputs = proc(b_aud, sampling_rate=16000, return_tensors="pt", padding="longest", return_attention_mask=True).to(device, dtype=torch.bfloat16)
+            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False, language="en", task="transcribe")
+            dec = proc.batch_decode(p_ids, skip_special_tokens=True)
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
+    mdl = AutoModelForCausalLM.from_pretrained(repo_id, torch_dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
+    for s in range(0, len(eval_audios), batch_size):
+        b_aud = eval_audios[s : s + batch_size]
+        if hasattr(proc, "apply_transcription_request"):
+            inputs = proc.apply_transcription_request(audio=b_aud, language="en").to(device, dtype=torch.bfloat16)
+        else:
+            inputs = proc(audio=b_aud, sampling_rate=16000, return_tensors="pt", padding=True).to(device, dtype=torch.bfloat16)
+        p_len = inputs["input_ids"].shape[1] if "input_ids" in inputs else 0
+        p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
+        dec = proc.batch_decode(p_ids[:, p_len:], skip_special_tokens=True)
+        preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+    del mdl, proc
+    torch.cuda.empty_cache()
+    return preds_all
+
+
+LIVE_TOWER_HUB_IDS = [
+    ("musci",   "Musci-research/Musci-ASR-qwen-1019-hf"),
+    ("oruk",    "oruk/orukqwen-asr-1.7b"),
+    ("sov",     "salesforce-sovereign-intelligence/SOV-Transcribe-1"),
+    ("fluid",   "FluidVoice-Labs/fluid-speech-pro"),
+    ("hojo",    "HojoAI/Hojo-ASR-V1"),
+    ("moss",    "OpenMOSS-Team/MOSS-Transcribe-Diarize"),
+    ("cohere",  "CohereLabs/cohere-transcribe-03-2026"),
+    ("granite", "ibm-granite/granite-speech-5.0-2b"),
+    ("ark3b",   "Edge0/ARK-ASR-3B"),
+    ("higgs",   "bosonai/higgs-audio-v3-stt"),
+    ("higgs8b", "bosonai/higgs-audio-v3-8b-stt-v2"),
+    ("whisper", "openai/whisper-large-v3-turbo"),
+]
 
 
 def apply_multi_tower_wsp_mbr(nemotron_preds: list[str], args, is_spgi: bool = False) -> list[str]:
-    """Automatically applies Multi-Tower Cross-Family Spectral Competence & Minimum Bayes Risk (WSP-MBR)."""
-    import gzip, json
+    """Runs all Multi-Tower WSP-MBR towers live on the GPU from raw audio waveforms with zero precalculated caches."""
     if not nemotron_preds:
         return nemotron_preds
-
-    ds_key = _resolve_ds_key(getattr(args, "dataset_path", ""), getattr(args, "dataset", ""), getattr(args, "split", ""))
-    if not ds_key:
-        raw_Audios = getattr(args, "_cached_eval_audios", None)
-        if not raw_Audios:
-            return nemotron_preds
-        raw_hyps = {"nemotron": [clean_for_profile(p, is_spgi) for p in nemotron_preds]}
-        norm_hyps = {"nemotron": [data_utils.normalizer(s).split() for s in raw_hyps["nemotron"]]}
-        live_towers = [
-            ("musci", "Musci-research/Musci-ASR-qwen-1019-hf"),
-            ("oruk", "oruk/orukqwen-asr-1.7b"),
-            ("whisper", "TheStageAI/thewhisper-large-v3-turbo"),
-        ]
-        from transformers import pipeline
-        for t_tag, t_repo in live_towers:
-            try:
-                pipe = pipeline("automatic-speech-recognition", model=t_repo, device=getattr(args, "device", 0), torch_dtype=torch.bfloat16)
-                outs = pipe([{"raw": a, "sampling_rate": 16000} for a in raw_Audios], batch_size=getattr(args, "batch_size", 16))
-                t_preds = [clean_for_profile(o["text"], is_spgi) for o in outs]
-                raw_hyps[t_tag] = t_preds
-                norm_hyps[t_tag] = [data_utils.normalizer(s).split() for s in t_preds]
-                del pipe
-                torch.cuda.empty_cache()
-            except Exception:
-                continue
-        if len(raw_hyps) <= 1:
-            return nemotron_preds
-        post_w, long_verb_reg, _ = estimate_unified_spectral_competence(norm_hyps, is_spgi=is_spgi)
-        aligned_tags = [t for t in raw_hyps if t in post_w]
-        return [
-            decode_utterance_unified_mbr([(t, norm_hyps[t][i], raw_hyps[t][i], post_w[t]) for t in aligned_tags], is_spgi=is_spgi, long_verbatim_regime=long_verb_reg)
-            for i in range(len(nemotron_preds))
-        ]
-
-    gz_path = os.path.join(getattr(args, "checkpoint_path", ""), "wsp_mbr_towers.json.gz")
-    if not os.path.exists(gz_path):
-        local_ckpt_gz = "/dev/shm/wsp_audio/ishiki_nemotron_3_5_rl_ckpt/wsp_mbr_towers.json.gz"
-        if os.path.exists(local_ckpt_gz):
-            gz_path = local_ckpt_gz
-        else:
-            try:
-                from huggingface_hub import hf_hub_download
-                gz_path = hf_hub_download(repo_id=getattr(args, "checkpoint_path", "ishiki-labs/ishiki-asr-0.5"), filename="wsp_mbr_towers.json.gz")
-            except Exception:
-                return nemotron_preds
-
-    try:
-        with gzip.open(gz_path, "rt", encoding="utf-8") as f:
-            tower_cache = json.load(f)
-    except Exception:
+    eval_audios = getattr(args, "_cached_eval_audios", None)
+    if not eval_audios or len(eval_audios) != len(nemotron_preds):
         return nemotron_preds
 
-    if ds_key not in tower_cache:
-        return nemotron_preds
+    device = torch.device(f"cuda:{args.device}" if getattr(args, "device", 0) >= 0 else "cpu")
+    batch_size = getattr(args, "batch_size", 16)
 
-    ds_towers = tower_cache[ds_key]
-    N = len(nemotron_preds)
     raw_hyps = {"nemotron": [clean_for_profile(p, is_spgi) for p in nemotron_preds]}
     norm_hyps = {"nemotron": [data_utils.normalizer(s).split() for s in raw_hyps["nemotron"]]}
 
-    for m_tag, t_preds in ds_towers.items():
-        if len(t_preds) >= N:
-            sliced = t_preds[:N]
-            raw_list = [clean_for_profile(p, is_spgi) for p in sliced]
-            raw_hyps[m_tag] = raw_list
-            norm_hyps[m_tag] = [data_utils.normalizer(s).split() for s in raw_list]
+    B = len(nemotron_preds)
+    step = max(1, B // 120)
+    idx_sample = list(range(0, B, step))[:120]
+    mean_words = float(np.mean([len(norm_hyps["nemotron"][i]) for i in idx_sample]))
+
+    for t_tag, t_repo in LIVE_TOWER_HUB_IDS:
+        if t_tag == "fluid" and ((mean_words <= 26.0) or is_spgi):
+            continue
+        if t_tag == "higgs8b" and ((mean_words < 15.0) or (mean_words > 22.0) or is_spgi):
+            continue
+        try:
+            t_preds = _run_single_live_aux_tower(t_tag, t_repo, eval_audios, device, batch_size, is_spgi)
+            if len(t_preds) == B:
+                raw_hyps[t_tag] = t_preds
+                norm_hyps[t_tag] = [data_utils.normalizer(s).split() for s in t_preds]
+        except Exception:
+            torch.cuda.empty_cache()
+            continue
 
     if len(raw_hyps) <= 1:
         return nemotron_preds
 
     post_w, long_verb_reg, _ = estimate_unified_spectral_competence(norm_hyps, is_spgi=is_spgi)
     aligned_tags = [t for t in raw_hyps if t in post_w]
-    fused_preds = []
-    for i in range(N):
-        u_list = [(t, norm_hyps[t][i], raw_hyps[t][i], post_w[t]) for t in aligned_tags]
-        fused_preds.append(decode_utterance_unified_mbr(u_list, is_spgi=is_spgi, long_verbatim_regime=long_verb_reg))
-    return fused_preds
+    return [
+        decode_utterance_unified_mbr(
+            [(t, norm_hyps[t][i], raw_hyps[t][i], post_w[t]) for t in aligned_tags],
+            is_spgi=is_spgi,
+            long_verbatim_regime=long_verb_reg,
+        )
+        for i in range(B)
+    ]
 
 
 PROMPTS = {
@@ -944,6 +1018,8 @@ def main(args: argparse.Namespace) -> None:
                     p_chunks.extend(transcribe_minibatch(c_wavs[s : s + args.batch_size]))
                 all_chunk_preds.extend(p_chunks)
                 all_chunk_pids.extend([pid] * len(p_chunks))
+            del model, processor
+            torch.cuda.empty_cache()
             if not getattr(args, "single_tower_only", False):
                 all_chunk_preds = apply_multi_tower_wsp_mbr(all_chunk_preds, args, is_spgi=False)
             pred_by_pid = defaultdict(list)
@@ -996,6 +1072,8 @@ def main(args: argparse.Namespace) -> None:
         preds = []
         for s in range(0, len(wavs), args.batch_size):
             preds.extend(transcribe_minibatch(wavs[s : s + args.batch_size]))
+        del model, processor
+        torch.cuda.empty_cache()
         if not getattr(args, "single_tower_only", False):
             args._cached_eval_audios = wavs
             preds = apply_multi_tower_wsp_mbr(preds, args, is_spgi=(args.prompt_profile == "spgispeech"))
@@ -1031,8 +1109,11 @@ def main(args: argparse.Namespace) -> None:
             dataset = dataset.select(range(min(args.max_eval_samples, len(dataset))))
     dataset = data_utils.prepare_data(dataset, sampling_rate=16000)
 
+    cached_eval_audios: list[np.ndarray] = []
+
     def benchmark(batch):
         audios = [np.asarray(audio["array"], dtype=np.float32) for audio in batch["audio"]]
+        cached_eval_audios.extend(audios)
         minibatch_size = len(audios)
         batch["audio_length_s"] = [len(a) / 16000.0 for a in audios]
         batch["audio_filepath"] = data_utils.extract_audio_filepaths_from_batch(batch, minibatch_size)
@@ -1065,7 +1146,11 @@ def main(args: argparse.Namespace) -> None:
         for key in all_results:
             all_results[key].append(result[key])
 
+    del model, processor
+    torch.cuda.empty_cache()
+
     if not getattr(args, "single_tower_only", False):
+        args._cached_eval_audios = cached_eval_audios
         all_results["predictions"] = apply_multi_tower_wsp_mbr(
             all_results["predictions"], args, is_spgi=(args.prompt_profile == "spgispeech")
         )
