@@ -1001,7 +1001,7 @@ def main(args: argparse.Namespace) -> None:
             c_refs, c_preds, tot_dur = [], [], 0.0
             torch.cuda.synchronize(device=device)
             t0 = time.perf_counter()
-            all_chunk_preds, all_chunk_pids = [], []
+            all_chunk_preds, all_chunk_pids, all_chunk_wavs = [], [], []
             for pid in selected_pids:
                 c_wavs = []
                 for c in by_parent[pid]:
@@ -1018,9 +1018,11 @@ def main(args: argparse.Namespace) -> None:
                     p_chunks.extend(transcribe_minibatch(c_wavs[s : s + args.batch_size]))
                 all_chunk_preds.extend(p_chunks)
                 all_chunk_pids.extend([pid] * len(p_chunks))
+                all_chunk_wavs.extend(c_wavs)
             del model, processor
             torch.cuda.empty_cache()
             if not getattr(args, "single_tower_only", False):
+                args._cached_eval_audios = all_chunk_wavs
                 all_chunk_preds = apply_multi_tower_wsp_mbr(all_chunk_preds, args, is_spgi=False)
             pred_by_pid = defaultdict(list)
             for pid, cp in zip(all_chunk_pids, all_chunk_preds):
