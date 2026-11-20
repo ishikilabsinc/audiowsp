@@ -798,7 +798,7 @@ def _build_tap_ctx(x: torch.Tensor, k_w: int = 3) -> torch.Tensor:
     return torch.cat([xp[:, i : i + x.shape[1], :] for i in range(k_w)], dim=-1)
 
 
-def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.device) -> tuple[dict, defaultdict]:
+def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.device) -> None:
     from safetensors import safe_open
     import transformers.models.nemotron3_5_transcribe.modeling_nemotron3_5_transcribe as m_nem_mod
 
@@ -808,7 +808,7 @@ def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.d
             from huggingface_hub import hf_hub_download
             ad_path = hf_hub_download(repo_id=ckpt_dir_or_id, filename="audio_adapter.safetensors")
         except Exception:
-            return {}, defaultdict(list)
+            return None
 
     ad = {}
     with safe_open(ad_path, framework="pt", device="cpu") as fa:
@@ -915,7 +915,7 @@ def _attach_audio_adapter(model: nn.Module, ckpt_dir_or_id: str, device: torch.d
         return (h32 + corr).to(out.dtype)
 
     asr_norm.register_forward_hook(_norm_hk)
-    return {}, defaultdict(list)
+    return None
 
 
 def main(args: argparse.Namespace) -> None:
@@ -927,7 +927,7 @@ def main(args: argparse.Namespace) -> None:
         args.checkpoint_path, dtype=torch.bfloat16, device_map={"": device}
     ).eval()
 
-    rms_map, dur_buckets = _attach_audio_adapter(model, args.checkpoint_path, device)
+    _attach_audio_adapter(model, args.checkpoint_path, device)
     attach_triton_inference_kernels(model)
     print("Model size: 65.30B parameters")
 
