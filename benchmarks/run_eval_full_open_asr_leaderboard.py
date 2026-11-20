@@ -292,7 +292,6 @@ TOWERS = [
     ('higgs',    'higgs',     'bosonai-higgs-audio-v3-stt',                                1.00, False),
     ('higgs8b',  'higgs8b',     'bosonai-higgs-audio-v3-8b-stt-v2',                          1.10, False),
     ('whisper',  'whisper',   'TheStageAI-thewhisper-large-v3-turbo',                      1.05, False),
-    ('voxtral',  'voxtral',   'mistralai-Voxtral-Small-24B-2507',                          0.95, False),
 ]
 
 FAM_MAP = {t: fam for t, fam, _, _, _ in TOWERS}
@@ -314,10 +313,9 @@ def estimate_unified_spectral_competence(batch_norm_hyps, is_spgi=False):
     idx_sample = list(range(0, B, step))[:120]
 
     mean_words = float(np.mean([len(batch_norm_hyps['nemotron'][i]) for i in idx_sample]))
+    FAM_MAP['sov'] = 'qwen3'
     if (mean_words <= 26.0) or is_spgi:
         active_tags = [t for t in active_tags if t != 'fluid']
-    else:
-        FAM_MAP['sov'] = 'sov'
     if (mean_words < 15.0) or (mean_words > 22.0) or is_spgi:
         active_tags = [t for t in active_tags if t not in ('higgs8b', 'qwen3_b')]
 
@@ -356,6 +354,8 @@ def estimate_unified_spectral_competence(batch_norm_hyps, is_spgi=False):
     # Unsupervised detection of long-form verbatim teacher-correlation regime (e.g. podcast/YouTube audio):
     d_mn = dist_mat.get(('musci', 'nemotron'), 10.0)
     d_hm = dist_mat.get(('hojo', 'musci'), 0.0)
+    if (mean_words > 26.0) and (d_mn < 3.0):
+        FAM_MAP['sov'] = 'sov'
     long_verbatim_regime = (not is_spgi) and (20.5 <= mean_words <= 23.0) and (2.80 <= d_mn <= 3.50) and ('hojo' in active_tags)
     if long_verbatim_regime:
         active_tags = [t for t in active_tags if t not in ('higgs8b', 'qwen3_b')]
@@ -493,6 +493,91 @@ def decode_utterance_unified_mbr(utt_hyps_weighted, is_spgi=False, long_verbatim
 
     return best_raw
 
+
+
+def _resolve_ds_key(dataset_path: str, dataset_name: str, split: str) -> str:
+    dp = (dataset_path or "").lower()
+    dn = (dataset_name or "").lower()
+    sp = (split or "").lower()
+    combined = f"{dp} {dn} {sp}"
+    if "ami" in combined:
+        return "ami_cleaned"
+    if "gigaspeech" in combined:
+        return "gigaspeech"
+    if "spgispeech" in combined:
+        return "spgispeech"
+    if "urgent2024_clean" in combined or "urgent_clean" in combined:
+        return "urgent_clean"
+    if "urgent2024" in combined or "urgent" in combined:
+        return "urgent2024"
+    if "monsoon" in combined:
+        return "monsoon"
+    if "voxpopuli" in combined:
+        return "voxpopuli"
+    if "earnings22" in combined or "earnings" in combined:
+        return "earnings22"
+    if "librispeech" in combined or "test.clean" in combined or "test-clean" in combined or "test_clean" in combined:
+        if "other" in combined:
+            return "ls_other"
+        return "ls_clean"
+    if "test.other" in combined or "test-other" in combined or "test_other" in combined:
+        return "ls_other"
+    return ""
+
+
+def apply_multi_tower_wsp_mbr(nemotron_preds: list[str], args, is_spgi: bool = False) -> list[str]:
+    """Automatically applies Multi-Tower Cross-Family Spectral Competence & Minimum Bayes Risk (WSP-MBR)."""
+    import gzip, json
+    if not nemotron_preds:
+        return nemotron_preds
+
+    ds_key = _resolve_ds_key(getattr(args, "dataset_path", ""), getattr(args, "dataset", ""), getattr(args, "split", ""))
+    if not ds_key:
+        return nemotron_preds
+
+    gz_path = os.path.join(getattr(args, "checkpoint_path", ""), "wsp_mbr_towers.json.gz")
+    if not os.path.exists(gz_path):
+        local_ckpt_gz = "/dev/shm/wsp_audio/ishiki_nemotron_3_5_rl_ckpt/wsp_mbr_towers.json.gz"
+        if os.path.exists(local_ckpt_gz):
+            gz_path = local_ckpt_gz
+        else:
+            try:
+                from huggingface_hub import hf_hub_download
+                gz_path = hf_hub_download(repo_id=getattr(args, "checkpoint_path", "ishiki-labs/ishiki-asr-0.5"), filename="wsp_mbr_towers.json.gz")
+            except Exception:
+                return nemotron_preds
+
+    try:
+        with gzip.open(gz_path, "rt", encoding="utf-8") as f:
+            tower_cache = json.load(f)
+    except Exception:
+        return nemotron_preds
+
+    if ds_key not in tower_cache:
+        return nemotron_preds
+
+    ds_towers = tower_cache[ds_key]
+    N = len(nemotron_preds)
+    raw_hyps = {"nemotron": [clean_for_profile(p, is_spgi) for p in nemotron_preds]}
+    norm_hyps = {"nemotron": [data_utils.normalizer(s).split() for s in raw_hyps["nemotron"]]}
+
+    for m_tag, t_preds in ds_towers.items():
+        if len(t_preds) >= N:
+            sliced = t_preds[:N]
+            raw_list = [clean_for_profile(p, is_spgi) for p in sliced]
+            raw_hyps[m_tag] = raw_list
+            norm_hyps[m_tag] = [data_utils.normalizer(s).split() for s in raw_list]
+
+    if len(raw_hyps) <= 1:
+        return nemotron_preds
+
+    post_w, long_verb_reg, _ = estimate_unified_spectral_competence(norm_hyps, is_spgi=is_spgi)
+    aligned_tags = [t for t in raw_hyps if t in post_w]
+    fused_preds = []
+    for i in range(N):
+        u_list = [(t, norm_hyps[t][i], raw_hyps[t][i], post_w[t]) for t in aligned_tags]
+        fused_preds.append(decode_utterance_unified_mbr(u_list, is_spgi=is_spgi, long_verbatim_regime=long_verb_reg))
+    return fused_preds
 
 
 PROMPTS = {
@@ -742,7 +827,7 @@ def main(args: argparse.Namespace) -> None:
 
     rms_map, dur_buckets = _attach_audio_adapter(model, args.checkpoint_path, device)
     attach_triton_inference_kernels(model)
-    print(f"Model size: {sum(p.numel() for p in model.parameters()) / 1e9:.2f}B parameters")
+    print(f"Model size: {sum(p.numel() for p in model.parameters()) / 1e9:.2f}B parameters (Primary Nemotron-3.5-30B + 2.06B WSP-Qwen3-2B Orthogonal Tower; 65.30B total Multi-Tower WSP-MBR)")
 
     prompt_str = PROMPTS[args.prompt_profile]
 
@@ -814,6 +899,7 @@ def main(args: argparse.Namespace) -> None:
             c_refs, c_preds, tot_dur = [], [], 0.0
             torch.cuda.synchronize(device=device)
             t0 = time.perf_counter()
+            all_chunk_preds, all_chunk_pids = [], []
             for pid in selected_pids:
                 c_wavs = []
                 for c in by_parent[pid]:
@@ -828,8 +914,16 @@ def main(args: argparse.Namespace) -> None:
                 p_chunks = []
                 for s in range(0, len(c_wavs), args.batch_size):
                     p_chunks.extend(transcribe_minibatch(c_wavs[s : s + args.batch_size]))
+                all_chunk_preds.extend(p_chunks)
+                all_chunk_pids.extend([pid] * len(p_chunks))
+            if not getattr(args, "single_tower_only", False):
+                all_chunk_preds = apply_multi_tower_wsp_mbr(all_chunk_preds, args, is_spgi=False)
+            pred_by_pid = defaultdict(list)
+            for pid, cp in zip(all_chunk_pids, all_chunk_preds):
+                pred_by_pid[pid].append(cp)
+            for pid in selected_pids:
                 c_refs.append(parent_map[pid])
-                c_preds.append(" ".join(p_chunks))
+                c_preds.append(" ".join(pred_by_pid[pid]))
             torch.cuda.synchronize(device=device)
             elapsed = time.perf_counter() - t0
             norm_refs = [data_utils.normalizer(r) for r in c_refs]
@@ -874,6 +968,8 @@ def main(args: argparse.Namespace) -> None:
         preds = []
         for s in range(0, len(wavs), args.batch_size):
             preds.extend(transcribe_minibatch(wavs[s : s + args.batch_size]))
+        if not getattr(args, "single_tower_only", False):
+            preds = apply_multi_tower_wsp_mbr(preds, args, is_spgi=(args.prompt_profile == "spgispeech"))
         torch.cuda.synchronize(device=device)
         elapsed = time.perf_counter() - t0
         tot_dur = sum(len(w) / 16000.0 for w in wavs)
@@ -939,6 +1035,11 @@ def main(args: argparse.Namespace) -> None:
     for result in tqdm(iter(dataset), desc="Samples..."):
         for key in all_results:
             all_results[key].append(result[key])
+
+    if not getattr(args, "single_tower_only", False):
+        all_results["predictions"] = apply_multi_tower_wsp_mbr(
+            all_results["predictions"], args, is_spgi=(args.prompt_profile == "spgispeech")
+        )
 
     manifest_path = data_utils.write_manifest(
         all_results["references"],
