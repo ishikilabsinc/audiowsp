@@ -97,11 +97,11 @@ def reproduce_figure_2(out_dir: Path) -> dict:
 
     W = torch.eye(D)
     W_naive = W @ (torch.eye(D) - v_aug.T @ v_aug)
-    task_retained_naive = float(torch.linalg.norm(W_naive @ v_task.T).item()) * 100.0
+    task_retained_naive = float((v_task @ W_naive @ v_task.T).item()) * 100.0
 
     u_perp = F.normalize(v_aug - (v_aug @ v_task.T) * v_task, dim=-1)
     W_orth = W @ (torch.eye(D) - u_perp.T @ u_perp)
-    task_retained_orth = float(torch.linalg.norm(W_orth @ v_task.T).item()) * 100.0
+    task_retained_orth = float((v_task @ W_orth @ v_task.T).item()) * 100.0
 
     res = {
         "dot_product_v_aug_v_task": round(float((v_aug @ v_task.T).item()), 4),
