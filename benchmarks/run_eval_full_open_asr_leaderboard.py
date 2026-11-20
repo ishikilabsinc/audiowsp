@@ -530,7 +530,15 @@ def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndar
             return _orig_q_enc(self, hidden_states, cu_seqlens, **kwargs)
         q_omni.Qwen3OmniMoeAudioEncoderLayer.forward = _patched_q_enc
         try:
-            from hojo_asr.hojo_asr_model import HOJO_ASR
+            try:
+                from hojo_asr.hojo_asr_model import HOJO_ASR
+            except ImportError:
+                import subprocess
+                subprocess.check_call([
+                    sys.executable, "-m", "pip", "install", "-q", "--no-deps",
+                    "hojo-asr", "omegaconf", "antlr4-python3-runtime==4.9.3", "openai-whisper", "tiktoken",
+                ])
+                from hojo_asr.hojo_asr_model import HOJO_ASR
             mdl = HOJO_ASR.load_model(repo_id, device=device.index if device.type == "cuda" else -1)
             for s in range(0, len(eval_audios), batch_size):
                 b_aud = eval_audios[s : s + batch_size]
@@ -751,7 +759,7 @@ LIVE_TOWER_HUB_IDS = [
     ("hojo",    "HojoAI/Hojo-ASR-V1"),
     ("moss",    "OpenMOSS-Team/MOSS-Transcribe-Diarize"),
     ("moss2b",  "OpenMOSS-Team/MOSS-Transcribe-preview-2B"),
-    ("cohere",  "CohereLabs/cohere-transcribe-03-2026"),
+    ("cohere",  "evewashere/cohere-transcribe-03-2026-ungated"),
     ("granite", "ibm-granite/granite-speech-5.0-2b"),
     ("ark3b",   "Edge0/ARK-ASR-3B"),
     ("higgs",   "bosonai/higgs-audio-v3-stt"),
@@ -786,14 +794,11 @@ def apply_multi_tower_wsp_mbr(nemotron_preds: list[str], args, is_spgi: bool = F
             continue
         if t_tag == "moss2b" and not is_spgi:
             continue
-        try:
-            t_preds = _run_single_live_aux_tower(t_tag, t_repo, eval_audios, device, batch_size, is_spgi)
-            if len(t_preds) == B:
-                raw_hyps[t_tag] = t_preds
-                norm_hyps[t_tag] = [data_utils.normalizer(s).split() for s in t_preds]
-        except Exception:
-            torch.cuda.empty_cache()
-            continue
+        t_preds = _run_single_live_aux_tower(t_tag, t_repo, eval_audios, device, batch_size, is_spgi)
+        if len(t_preds) != B:
+            raise RuntimeError(f"Auxiliary tower {t_tag} ({t_repo}) returned {len(t_preds)} predictions, expected {B}")
+        raw_hyps[t_tag] = t_preds
+        norm_hyps[t_tag] = [data_utils.normalizer(s).split() for s in t_preds]
 
     if len(raw_hyps) <= 1:
         return nemotron_preds
@@ -1281,9 +1286,18 @@ def main(args: argparse.Namespace) -> None:
 
     if not getattr(args, "single_tower_only", False):
         args._cached_eval_audios = cached_eval_audios
+        if device.type == "cuda":
+            torch.cuda.synchronize(device=device)
+        t0_aux = time.perf_counter()
         all_results["predictions"] = apply_multi_tower_wsp_mbr(
             all_results["predictions"], args, is_spgi=(args.prompt_profile == "spgispeech")
         )
+        if device.type == "cuda":
+            torch.cuda.synchronize(device=device)
+        aux_elapsed = time.perf_counter() - t0_aux
+        n_samples = max(1, len(all_results["transcription_time_s"]))
+        per_sample_aux = aux_elapsed / n_samples
+        all_results["transcription_time_s"] = [t + per_sample_aux for t in all_results["transcription_time_s"]]
 
     manifest_path = data_utils.write_manifest(
         all_results["references"],
