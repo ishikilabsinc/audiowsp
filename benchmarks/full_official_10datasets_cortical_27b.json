@@ -1,0 +1,308 @@
+{
+  "model_size_b": 27.48,
+  "datasets": {
+    "ami_cleaned": {
+      "n_utts": 7715,
+      "base_wer": 7.81,
+      "prev_65b_wer": 5.96,
+      "cortical_27b_wer": 5.9,
+      "delta_vs_65b": -0.06,
+      "gain_vs_base": -1.91,
+      "top_towers": [
+        [
+          "musci",
+          1.3442297841483117
+        ],
+        [
+          "whisper",
+          1.05
+        ],
+        [
+          "nemotron",
+          0.9878954304439531
+        ],
+        [
+          "higgs",
+          0.9379336755514167
+        ],
+        [
+          "moss",
+          0.916640211138872
+        ]
+      ]
+    },
+    "gigaspeech": {
+      "n_utts": 18757,
+      "base_wer": 7.26,
+      "prev_65b_wer": 6.15,
+      "cortical_27b_wer": 6.13,
+      "delta_vs_65b": -0.02,
+      "gain_vs_base": -1.13,
+      "top_towers": [
+        [
+          "musci",
+          1.4
+        ],
+        [
+          "sov",
+          1.1400097372771008
+        ],
+        [
+          "nemotron",
+          1.033553025284793
+        ],
+        [
+          "cohere",
+          0.9961052034763428
+        ],
+        [
+          "higgs",
+          0.930195626329939
+        ]
+      ]
+    },
+    "spgispeech": {
+      "n_utts": 39341,
+      "base_wer": 1.92,
+      "prev_65b_wer": 1.54,
+      "cortical_27b_wer": 1.48,
+      "delta_vs_65b": -0.06,
+      "gain_vs_base": -0.44,
+      "top_towers": [
+        [
+          "whisper",
+          1.05
+        ],
+        [
+          "moss2b",
+          0.932515283138502
+        ],
+        [
+          "hojo",
+          0.8504028035416213
+        ],
+        [
+          "moss",
+          0.8297947865275502
+        ],
+        [
+          "musci",
+          0.7855174337021117
+        ]
+      ]
+    },
+    "urgent2024": {
+      "n_utts": 1000,
+      "base_wer": 10.98,
+      "prev_65b_wer": 8.69,
+      "cortical_27b_wer": 8.23,
+      "delta_vs_65b": -0.46,
+      "gain_vs_base": -2.75,
+      "top_towers": [
+        [
+          "oruk",
+          1.2
+        ],
+        [
+          "musci",
+          1.0675336906545294
+        ],
+        [
+          "nem_fp8",
+          0.9944192448350514
+        ],
+        [
+          "fluid",
+          0.9637783166232344
+        ],
+        [
+          "qwen3_b",
+          0.9264873556606397
+        ]
+      ]
+    },
+    "urgent_clean": {
+      "n_utts": 1000,
+      "base_wer": 4.39,
+      "prev_65b_wer": 3.63,
+      "cortical_27b_wer": 3.6,
+      "delta_vs_65b": -0.03,
+      "gain_vs_base": -0.79,
+      "top_towers": [
+        [
+          "nemotron",
+          1.3
+        ],
+        [
+          "oruk",
+          1.0022368121243797
+        ],
+        [
+          "cohere",
+          0.7206019684413344
+        ],
+        [
+          "sov",
+          0.6681383018460347
+        ],
+        [
+          "higgs",
+          0.6236290588507808
+        ]
+      ]
+    },
+    "monsoon": {
+      "n_utts": 2102,
+      "base_wer": 3.65,
+      "prev_65b_wer": 2.62,
+      "cortical_27b_wer": 2.6,
+      "delta_vs_65b": -0.02,
+      "gain_vs_base": -1.05,
+      "top_towers": [
+        [
+          "sov",
+          1.15
+        ],
+        [
+          "musci",
+          0.9517753646522089
+        ],
+        [
+          "nemotron",
+          0.9112214272004007
+        ],
+        [
+          "oruk",
+          0.8200375412403001
+        ],
+        [
+          "ark3b",
+          0.8162408027280462
+        ]
+      ]
+    },
+    "voxpopuli": {
+      "n_utts": 628,
+      "base_wer": 1.89,
+      "prev_65b_wer": 1.43,
+      "cortical_27b_wer": 1.34,
+      "delta_vs_65b": -0.09,
+      "gain_vs_base": -0.55,
+      "top_towers": [
+        [
+          "musci",
+          1.3478783880235192
+        ],
+        [
+          "sov",
+          1.15
+        ],
+        [
+          "fluid",
+          1.1089214853830551
+        ],
+        [
+          "oruk",
+          1.0050224363902387
+        ],
+        [
+          "nemotron",
+          0.9197284789359433
+        ]
+      ]
+    },
+    "ls_clean": {
+      "n_utts": 2620,
+      "base_wer": 1.1,
+      "prev_65b_wer": 0.83,
+      "cortical_27b_wer": 0.82,
+      "delta_vs_65b": -0.01,
+      "gain_vs_base": -0.28,
+      "top_towers": [
+        [
+          "higgs8b",
+          1.3
+        ],
+        [
+          "ark3b",
+          0.9186320123094638
+        ],
+        [
+          "musci",
+          0.9014032390746205
+        ],
+        [
+          "higgs",
+          0.8689123536300449
+        ],
+        [
+          "granite",
+          0.8537320872709215
+        ]
+      ]
+    },
+    "ls_other": {
+      "n_utts": 2939,
+      "base_wer": 2.66,
+      "prev_65b_wer": 1.65,
+      "cortical_27b_wer": 1.63,
+      "delta_vs_65b": -0.02,
+      "gain_vs_base": -1.03,
+      "top_towers": [
+        [
+          "higgs8b",
+          1.1
+        ],
+        [
+          "musci",
+          1.045000827698176
+        ],
+        [
+          "cohere",
+          0.9617867313197365
+        ],
+        [
+          "nemotron",
+          0.8540361191319302
+        ],
+        [
+          "ark3b",
+          0.7590459419127453
+        ]
+      ]
+    },
+    "earnings22": {
+      "n_utts": 341,
+      "base_wer": 5.27,
+      "prev_65b_wer": 4.11,
+      "cortical_27b_wer": 4.09,
+      "delta_vs_65b": -0.02,
+      "gain_vs_base": -1.18,
+      "top_towers": [
+        [
+          "nemotron",
+          1.1941438380746832
+        ],
+        [
+          "sov",
+          1.15
+        ],
+        [
+          "musci",
+          0.8375864166838091
+        ],
+        [
+          "oruk",
+          0.740872073907223
+        ],
+        [
+          "granite",
+          0.6352719198964006
+        ]
+      ]
+    }
+  },
+  "mean_10_base": 4.69,
+  "mean_10_prev_65b": 3.66,
+  "mean_10_cortical_27b": 3.58
+}
