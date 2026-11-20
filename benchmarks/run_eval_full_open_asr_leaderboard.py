@@ -498,27 +498,61 @@ def decode_utterance_unified_mbr(utt_hyps_weighted, is_spgi=False, long_verbatim
 def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndarray], device: torch.device, batch_size: int, is_spgi: bool) -> list[str]:
     """Runs a single auxiliary open-weights tower 100% live on the GPU from raw 16kHz audio waveforms."""
     import runpy, sys
+    import torchaudio
+    import soundfile as sf
     from transformers import (
         AutoConfig, AutoModel, AutoModelForCausalLM, AutoModelForMultimodalLM,
-        AutoModelForSpeechSeq2Seq, AutoProcessor, AutoTokenizer
+        AutoModelForSpeechSeq2Seq, AutoProcessor, AutoTokenizer, GenerationConfig,
+        ParakeetForTDT, PreTrainedTokenizerBase
     )
+    from transformers.cache_utils import DynamicCache
     from transformers.utils import cached_file
+    import transformers.models.whisper.modeling_whisper as w_mod
+    import transformers.models.qwen3_omni_moe.modeling_qwen3_omni_moe as q_omni
 
     preds_all: list[str] = []
     dev_str = f"cuda:{device.index or 0}" if device.type == "cuda" else "cpu"
 
     if tag == "hojo":
-        from hojo_asr import HOJO_ASR
-        mdl = HOJO_ASR.load_model(repo_id, device=device.index if device.type == "cuda" else -1)
-        for s in range(0, len(eval_audios), batch_size):
-            b_aud = eval_audios[s : s + batch_size]
-            res = mdl.run_infer(b_aud, batch_size=len(b_aud))
-            preds_all.extend([clean_for_profile(r["text"], is_spgi) for r in res])
-        del mdl
-        torch.cuda.empty_cache()
+        if not hasattr(PreTrainedTokenizerBase, "additional_special_tokens"):
+            PreTrainedTokenizerBase.additional_special_tokens = property(
+                lambda self: getattr(self, "_additional_special_tokens", ["<|im_start|>", "<|im_end|>"])
+            )
+        if not hasattr(torchaudio, "load"):
+            def _ta_load(f, *a, **kw):
+                w, sr = sf.read(f, dtype="float32")
+                t = torch.from_numpy(w)
+                return (t.unsqueeze(0) if t.ndim == 1 else t.T), sr
+            torchaudio.load = _ta_load
+        _orig_q_enc = q_omni.Qwen3OmniMoeAudioEncoderLayer.forward
+        def _patched_q_enc(self, hidden_states, cu_seqlens, attention_mask=None, **kwargs):
+            return _orig_q_enc(self, hidden_states, cu_seqlens, **kwargs)
+        q_omni.Qwen3OmniMoeAudioEncoderLayer.forward = _patched_q_enc
+        try:
+            from hojo_asr.hojo_asr_model import HOJO_ASR
+            mdl = HOJO_ASR.load_model(repo_id, device=device.index if device.type == "cuda" else -1)
+            for s in range(0, len(eval_audios), batch_size):
+                b_aud = eval_audios[s : s + batch_size]
+                res = mdl.run_infer(b_aud, batch_size=len(b_aud))
+                preds_all.extend([clean_for_profile(r["text"], is_spgi) for r in res])
+            del mdl
+        finally:
+            q_omni.Qwen3OmniMoeAudioEncoderLayer.forward = _orig_q_enc
+            torch.cuda.empty_cache()
         return preds_all
 
     if tag in ("higgs", "higgs8b"):
+        if not hasattr(DynamicCache, "get_max_cache_shape"):
+            DynamicCache.get_max_cache_shape = lambda self: -1
+        if not hasattr(GenerationConfig, "generation_kwargs"):
+            GenerationConfig.generation_kwargs = {}
+        _orig_w_layer_fwd = w_mod.WhisperEncoderLayer.forward
+        def _tuple_w_layer_fwd(self, hidden_states, attention_mask=None, *args, **kwargs):
+            if attention_mask is not None and attention_mask.dtype == torch.bool:
+                attention_mask = torch.where(attention_mask, 0.0, float(torch.finfo(hidden_states.dtype).min)).to(hidden_states.dtype)
+            out = _orig_w_layer_fwd(self, hidden_states, attention_mask, *args, **kwargs)
+            return out if isinstance(out, tuple) else (out, None)
+
         for fn in ["transcribe.py", "higgs_audio_collator.py", "modeling_higgs_audio_xcodec.py", "utils.py", "common.py", "configuration_higgs_audio.py"]:
             cached_file(repo_id, fn)
         t_path = cached_file(repo_id, "transcribe.py")
@@ -529,25 +563,63 @@ def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndar
         finally:
             sys.path.pop(0)
         transcribe_batch = mod_g["transcribe_batch"]
-        mdl = AutoModel.from_pretrained(repo_id, torch_dtype=torch.bfloat16, trust_remote_code=True, attn_implementation="eager", device_map=dev_str).eval()
+        mdl = AutoModel.from_pretrained(repo_id, dtype=torch.bfloat16, trust_remote_code=True, attn_implementation="eager", device_map=dev_str).eval()
+        dim = getattr(mdl.config.text_config, "head_dim", mdl.config.text_config.hidden_size // mdl.config.text_config.num_attention_heads)
+        rp = getattr(mdl.config.text_config, "rope_parameters", None) or {}
+        base = float(rp.get("rope_theta", getattr(mdl.config.text_config, "rope_theta", 1000000.0)))
+        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2, dtype=torch.float32, device=dev_str) / dim))
+        mdl.rotary_emb.register_buffer("inv_freq", inv_freq, persistent=False)
+
         tok = AutoTokenizer.from_pretrained(repo_id, trust_remote_code=True)
         mdl.audio_out_bos_token_id = tok.convert_tokens_to_ids("<|audio_out_bos|>")
         mdl.audio_eos_token_id = tok.convert_tokens_to_ids("<|audio_eos|>")
-        hb = max(1, batch_size // 2)
-        for s in range(0, len(eval_audios), hb):
-            b_aud = eval_audios[s : s + hb]
-            out_t = transcribe_batch(mdl, tok, b_aud, sample_rates=16000, max_new_tokens=512)
-            preds_all.extend([clean_for_profile(t, is_spgi) for t in out_t])
-        del mdl, tok
-        torch.cuda.empty_cache()
+        for dec_l in mdl.layers:
+            _orig_df = dec_l.forward
+            def _mk_df(fn):
+                def _df(*a, past_key_value=None, **kw):
+                    if past_key_value is not None and "past_key_values" not in kw:
+                        kw["past_key_values"] = past_key_value
+                    r = fn(*a, **kw)
+                    return r if isinstance(r, tuple) else (r, None)
+                return _df
+            dec_l.forward = _mk_df(_orig_df)
+
+        orig_umk = mdl.__class__._update_model_kwargs_for_generation
+        def _mk_umk(fn):
+            def _umk(self, outputs, model_kwargs, is_encoder_decoder=False, num_new_tokens=1, extend_attention_mask=True):
+                if getattr(outputs, "attention_mask", None) is not None:
+                    model_kwargs["attention_mask"] = outputs.attention_mask
+                return fn(self, outputs, model_kwargs, is_encoder_decoder=is_encoder_decoder, num_new_tokens=num_new_tokens, extend_attention_mask=extend_attention_mask)
+            return _umk
+        mdl.__class__._update_model_kwargs_for_generation = _mk_umk(orig_umk)
+
+        orig_cls_s = mdl.__class__._sample
+        def _mk_s(orig_fn):
+            def _s(self, input_ids, logits_processor, stopping_criteria, generation_config, synced_gpus=False, streamer=None, past_key_values_buckets=None, **kw):
+                kw.pop("tokenizer", None)
+                kw.pop("cache_position", None)
+                kw["use_cache"] = True
+                if kw.get("attention_mask") is None:
+                    kw["attention_mask"] = torch.ones_like(input_ids)
+                return orig_fn(self, input_ids, logits_processor, stopping_criteria, generation_config, synced_gpus, streamer, past_key_values_buckets, **kw)
+            return _s
+        mdl.__class__._sample = _mk_s(orig_cls_s)
+        w_mod.WhisperEncoderLayer.forward = _tuple_w_layer_fwd
+        try:
+            hb = max(1, batch_size // 2)
+            for s in range(0, len(eval_audios), hb):
+                b_aud = eval_audios[s : s + hb]
+                out_t = transcribe_batch(mdl, tok, b_aud, sample_rates=16000, max_new_tokens=512)
+                preds_all.extend([clean_for_profile(t, is_spgi) for t in out_t])
+        finally:
+            w_mod.WhisperEncoderLayer.forward = _orig_w_layer_fwd
+            del mdl, tok
+            torch.cuda.empty_cache()
         return preds_all
 
-    cfg = AutoConfig.from_pretrained(repo_id, trust_remote_code=True)
-    proc = AutoProcessor.from_pretrained(repo_id, trust_remote_code=True)
-    mtype = getattr(cfg, "model_type", "").lower()
-
-    if tag in ("musci", "oruk") or "qwen3_asr" in mtype:
-        mdl = AutoModelForMultimodalLM.from_pretrained(repo_id, torch_dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
+    if tag in ("musci", "oruk"):
+        mdl = AutoModelForMultimodalLM.from_pretrained(repo_id, dtype=torch.bfloat16, trust_remote_code=False).to(device).eval()
+        proc = AutoProcessor.from_pretrained("Qwen/Qwen3-ASR-1.7B-hf", trust_remote_code=False)
         for s in range(0, len(eval_audios), batch_size):
             b_aud = eval_audios[s : s + batch_size]
             inputs = proc.apply_transcription_request(audio=b_aud, language="en").to(device, dtype=torch.bfloat16)
@@ -561,8 +633,87 @@ def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndar
         torch.cuda.empty_cache()
         return preds_all
 
+    if tag == "sov":
+        mdl = AutoModelForMultimodalLM.from_pretrained(repo_id, dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
+        proc = AutoProcessor.from_pretrained(repo_id, trust_remote_code=True)
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            inputs = proc.apply_transcription_request(audio=b_aud).to(device, dtype=torch.bfloat16)
+            p_len = inputs["input_ids"].shape[1]
+            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
+            dec = proc.batch_decode(p_ids[:, p_len:], skip_special_tokens=True)
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag == "fluid":
+        mdl = ParakeetForTDT.from_pretrained(repo_id, dtype=torch.bfloat16).to(device).eval()
+        proc = AutoProcessor.from_pretrained(repo_id)
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            inputs = proc(b_aud, sampling_rate=16000, return_tensors="pt").to(device, dtype=torch.bfloat16)
+            p_ids = mdl.generate(**inputs)
+            seq = p_ids.sequences if hasattr(p_ids, "sequences") else p_ids
+            dec = proc.batch_decode(seq, skip_special_tokens=True)
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag == "granite":
+        mdl = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id, dtype=torch.bfloat16).to(device).eval()
+        proc = AutoProcessor.from_pretrained(repo_id)
+        prompt = proc.tokenizer.apply_chat_template([{"role": "user", "content": "<|audio|>can you transcribe the speech into a written format?"}], tokenize=False, add_generation_prompt=True)
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            inputs = proc([prompt] * len(b_aud), b_aud, device=device, return_tensors="pt").to(device, dtype=torch.bfloat16)
+            p_len = inputs["input_ids"].shape[1]
+            p_ids = mdl.generate(**inputs, max_new_tokens=200, do_sample=False)
+            dec = proc.batch_decode(p_ids[:, p_len:], skip_special_tokens=True)
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag == "ark3b":
+        mdl = AutoModelForCausalLM.from_pretrained(repo_id, dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
+        proc = AutoProcessor.from_pretrained(repo_id, trust_remote_code=True, fix_mistral_regex=True)
+        tok = AutoTokenizer.from_pretrained(repo_id, trust_remote_code=True, fix_mistral_regex=True)
+        tok.padding_side = "left"
+        if hasattr(proc, "tokenizer"):
+            proc.tokenizer.padding_side = "left"
+        for s in range(0, len(eval_audios), batch_size):
+            b_aud = eval_audios[s : s + batch_size]
+            convs = [[{"role": "user", "content": [{"type": "audio", "array": a, "sampling_rate": 16000}, {"type": "text", "text": "Please transcribe this audio."}]}] for a in b_aud]
+            inp_raw = proc.apply_chat_template(convs, return_tensors="pt", sampling_rate=16000, audio_padding="longest", add_generation_prompt=True, text_kwargs={"padding": "longest"})
+            inputs = {k: (v.to(device, dtype=torch.bfloat16) if k == "audios" else v.to(device)) for k, v in dict(inp_raw).items() if torch.is_tensor(v)}
+            p_len = inputs["input_ids"].shape[1]
+            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False, pad_token_id=tok.pad_token_id or tok.eos_token_id)
+            dec = tok.batch_decode(p_ids[:, p_len:], skip_special_tokens=True)
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc, tok
+        torch.cuda.empty_cache()
+        return preds_all
+
+    if tag == "moss":
+        mdl = AutoModelForCausalLM.from_pretrained(repo_id, dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
+        proc = AutoProcessor.from_pretrained(repo_id, trust_remote_code=True)
+        prompt = proc.apply_chat_template([{"role": "user", "content": [{"type": "audio"}, {"type": "text", "text": "Transcribe the audio."}]}], tokenize=False, add_generation_prompt=True)
+        for a in eval_audios:
+            inputs = proc(text=[prompt], audio=[a], max_length=131072, return_tensors="pt")
+            inputs = {k: (v.to(device, dtype=torch.bfloat16) if v.is_floating_point() else v.to(device)) for k, v in dict(inputs).items() if torch.is_tensor(v)}
+            p_len = inputs["input_ids"].shape[1]
+            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
+            dec = proc.tokenizer.batch_decode(p_ids[:, p_len:], skip_special_tokens=True)
+            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
+        del mdl, proc
+        torch.cuda.empty_cache()
+        return preds_all
+
     if tag == "cohere":
-        mdl = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id, torch_dtype=torch.bfloat16).to(device).eval()
+        mdl = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id, dtype=torch.bfloat16).to(device).eval()
+        proc = AutoProcessor.from_pretrained(repo_id)
         for s in range(0, len(eval_audios), batch_size):
             b_aud = eval_audios[s : s + batch_size]
             inputs = proc(b_aud, sampling_rate=16000, return_tensors="pt", language="en", punctuation=False).to(device, dtype=torch.bfloat16)
@@ -573,23 +724,9 @@ def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndar
         torch.cuda.empty_cache()
         return preds_all
 
-    if tag == "granite":
-        mdl = AutoModelForMultimodalLM.from_pretrained(repo_id, torch_dtype=torch.bfloat16).to(device).eval()
-        for s in range(0, len(eval_audios), batch_size):
-            b_aud = eval_audios[s : s + batch_size]
-            inputs = proc.apply_transcription_request(audio=b_aud, language="en").to(device, dtype=torch.bfloat16)
-            p_len = inputs["input_ids"].shape[1]
-            p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
-            dec = proc.decode(p_ids[:, p_len:], skip_special_tokens=True)
-            if isinstance(dec, str):
-                dec = [dec]
-            preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
-        del mdl, proc
-        torch.cuda.empty_cache()
-        return preds_all
-
     if tag == "whisper":
-        mdl = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id, torch_dtype=torch.bfloat16).to(device).eval()
+        mdl = AutoModelForSpeechSeq2Seq.from_pretrained(repo_id, dtype=torch.bfloat16).to(device).eval()
+        proc = AutoProcessor.from_pretrained(repo_id)
         if hasattr(mdl.generation_config, "forced_decoder_ids"):
             mdl.generation_config.forced_decoder_ids = None
         for s in range(0, len(eval_audios), batch_size):
@@ -602,19 +739,6 @@ def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndar
         torch.cuda.empty_cache()
         return preds_all
 
-    mdl = AutoModelForCausalLM.from_pretrained(repo_id, torch_dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
-    for s in range(0, len(eval_audios), batch_size):
-        b_aud = eval_audios[s : s + batch_size]
-        if hasattr(proc, "apply_transcription_request"):
-            inputs = proc.apply_transcription_request(audio=b_aud, language="en").to(device, dtype=torch.bfloat16)
-        else:
-            inputs = proc(audio=b_aud, sampling_rate=16000, return_tensors="pt", padding=True).to(device, dtype=torch.bfloat16)
-        p_len = inputs["input_ids"].shape[1] if "input_ids" in inputs else 0
-        p_ids = mdl.generate(**inputs, max_new_tokens=256, do_sample=False)
-        dec = proc.batch_decode(p_ids[:, p_len:], skip_special_tokens=True)
-        preds_all.extend([clean_for_profile(t, is_spgi) for t in dec])
-    del mdl, proc
-    torch.cuda.empty_cache()
     return preds_all
 
 
