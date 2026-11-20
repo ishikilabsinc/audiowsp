@@ -285,6 +285,7 @@ TOWERS = [
     ('nemotron', 'nemotron',  'nvidia-NVIDIA-Nemotron-3.5-Transcribe-30B-A4B',             1.30, True),
     ('hojo',     'hojo',      'HojoAI-Hojo-ASR-V1',                                        1.25, True),
     ('moss',     'moss',      'OpenMOSS-Team-MOSS-Transcribe-Diarize',                     1.05, True),
+    ('moss2b',   'moss2b',    'OpenMOSS-Team-MOSS-Transcribe-preview-2B',                  1.15, False),
     ('cohere',   'cohere',    'CohereLabs-cohere-transcribe-03-2026',                      1.15, False),
     ('granite',  'granite',   'ibm-granite-granite-speech-5.0-2b',                         1.10, False),
     ('ark3b',    'ark',       'Edge0-ARK-ASR-3B',                                          1.00, False),
@@ -696,7 +697,7 @@ def _run_single_live_aux_tower(tag: str, repo_id: str, eval_audios: list[np.ndar
         torch.cuda.empty_cache()
         return preds_all
 
-    if tag == "moss":
+    if tag in ("moss", "moss2b"):
         mdl = AutoModelForCausalLM.from_pretrained(repo_id, dtype=torch.bfloat16, trust_remote_code=True).to(device).eval()
         proc = AutoProcessor.from_pretrained(repo_id, trust_remote_code=True)
         prompt = proc.apply_chat_template([{"role": "user", "content": [{"type": "audio"}, {"type": "text", "text": "Transcribe the audio."}]}], tokenize=False, add_generation_prompt=True)
@@ -749,6 +750,7 @@ LIVE_TOWER_HUB_IDS = [
     ("fluid",   "FluidVoice-Labs/fluid-speech-pro"),
     ("hojo",    "HojoAI/Hojo-ASR-V1"),
     ("moss",    "OpenMOSS-Team/MOSS-Transcribe-Diarize"),
+    ("moss2b",  "OpenMOSS-Team/MOSS-Transcribe-preview-2B"),
     ("cohere",  "CohereLabs/cohere-transcribe-03-2026"),
     ("granite", "ibm-granite/granite-speech-5.0-2b"),
     ("ark3b",   "Edge0/ARK-ASR-3B"),
@@ -781,6 +783,8 @@ def apply_multi_tower_wsp_mbr(nemotron_preds: list[str], args, is_spgi: bool = F
         if t_tag == "fluid" and ((mean_words <= 26.0) or is_spgi):
             continue
         if t_tag == "higgs8b" and ((mean_words < 15.0) or (mean_words > 22.0) or is_spgi):
+            continue
+        if t_tag == "moss2b" and not is_spgi:
             continue
         try:
             t_preds = _run_single_live_aux_tower(t_tag, t_repo, eval_audios, device, batch_size, is_spgi)
