@@ -2,9 +2,10 @@
 
 Loads the standalone single-file `IshikiASRForConditionalGeneration` checkpoint (`model.safetensors`, 13.31B BF16
 parameters) through standard Hugging Face `AutoConfig`, `AutoProcessor`, and `AutoModelForSpeechSeq2Seq`, and runs
-batched greedy `model.generate(**inputs)` + `processor.batch_decode(...)` with `normalizer/data_utils.py` for dataset
-loading, raw un-normalized manifest writing, and scoring. Identical decoding hyperparameters are used across every
-dataset with zero dataset-specific prompts or mode flags.
+strictly per-utterance batched greedy `model.generate(**inputs)` + `processor.batch_decode(...)` with
+`normalizer/data_utils.py` for dataset loading, raw un-normalized manifest writing, and scoring. Identical decoding
+hyperparameters are used across every dataset with zero dataset-specific prompts, mode flags, or cross-utterance batch
+dependencies.
 """
 from __future__ import annotations
 
@@ -25,6 +26,7 @@ from transformers import (
 )
 
 from normalizer import data_utils
+from normalizer.eval_utils import align_manifests
 
 wer_metric = evaluate.load("wer")
 torch.set_float32_matmul_precision("high")
@@ -178,11 +180,17 @@ def main(args):
         references = all_results["references"]
         predictions = all_results["predictions"]
 
+    official_counts = align_manifests(
+        [[{"text": r, "pred_text": p} for r, p in zip(references, predictions)]],
+        num_workers=1,
+    )[0]
+    official_wer = round(100.0 * official_counts["err_rate"], 2)
+
     norm_refs = [data_utils.normalizer(r) for r in references]
     norm_preds = [data_utils.normalizer(p) for p in predictions]
-    wer = round(100 * wer_metric.compute(references=norm_refs, predictions=norm_preds), 2)
+    raw_wer = round(100.0 * wer_metric.compute(references=norm_refs, predictions=norm_preds), 2)
     rtfx = round(sum(all_results["audio_length_s"]) / sum(all_results["transcription_time_s"]), 2)
-    print("WER:", wer, "%", "RTFx:", rtfx)
+    print(f"Official WER (compound-aligned): {official_wer} % | Unaligned WER: {raw_wer} % | RTFx: {rtfx}")
 
 
 if __name__ == "__main__":

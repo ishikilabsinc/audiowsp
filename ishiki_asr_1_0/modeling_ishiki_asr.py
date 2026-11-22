@@ -684,42 +684,103 @@ class IshikiNeuralAudioFrontend(nn.Module):
 
 
 class IshikiAcousticPathwayGate(nn.Module):
-    """Learned neural competence router mapping audio representations -> per-utterance pathway weights.
+    """Strictly per-utterance neural competence & regime router (zero cross-utterance / batch dependencies).
 
+    Combines the per-utterance Round-7 acoustic gate (`r7_*`) with per-utterance neural Cochran spectral
+    competence (`spec_fc2`) and per-utterance formatting/regime heads (`s1_*`, `regime_fc2`).
     Stream indices: [0: ventral, 1: ventral_noise, 2: dorsal, 3: broadband, 4: transducer, 5: meeting, 6: spontaneous]
     """
 
     def __init__(self, d_audio: int = 1024, d_hidden: int = 256, n_streams: int = 7):
         super().__init__()
-        self.norm = nn.LayerNorm(d_audio + 4)
-        self.fc1 = nn.Linear(d_audio + 4, d_hidden)
-        self.act = nn.SiLU()
-        self.fc2 = nn.Linear(d_hidden, n_streams)
+        self.d_audio = d_audio
+        self.d_r7 = d_audio + 4   # 1024 audio_emb + 4 core acoustic_stats
+        self.d_s1 = d_audio + 16  # 1024 audio_emb + 8 acoustic_stats + 8 stage1_lex
+        self.d_s2 = d_audio + 22  # 1024 audio_emb + 8 acoustic_stats + 14 stage2_pair
+
+        # Stage-1 pure acoustic/prosodic clean-formatting head (masks lexical finance keywords)
+        self.s1_norm = nn.LayerNorm(self.d_s1)
+        self.s1_fc1 = nn.Linear(self.d_s1, d_hidden)
+        self.s1_fc2 = nn.Linear(d_hidden, 1)
+
+        # Preserved per-utterance Round-7 acoustic gate
+        self.r7_norm = nn.LayerNorm(self.d_r7)
+        self.r7_fc1 = nn.Linear(self.d_r7, d_hidden)
+        self.r7_fc2 = nn.Linear(d_hidden, n_streams)
         self.base_log_priors = nn.Parameter(
             torch.tensor([0.39, 0.24, 0.21, 0.12, 0.11, 0.18, 0.17], dtype=torch.float32)
         )
+
+        # Stage-2 per-utterance Cochran log(spec_f) & regime heads
+        self.norm = nn.LayerNorm(self.d_s2)
+        self.fc1 = nn.Linear(self.d_s2, d_hidden)
+        self.act = nn.SiLU()
+        self.fc2 = nn.Linear(d_hidden, 6)         # Per-utterance log(spec_f) for [V, VN, D, B, T, M]
+        self.regime_fc2 = nn.Linear(d_hidden, 2)  # [0: podcast_logit, 1: keep_filler_logit]
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
+        nn.init.ones_(self.s1_norm.weight)
+        nn.init.zeros_(self.s1_norm.bias)
+        nn.init.normal_(self.s1_fc1.weight, mean=0.0, std=0.02)
+        nn.init.zeros_(self.s1_fc1.bias)
+        nn.init.zeros_(self.s1_fc2.weight)
+        nn.init.constant_(self.s1_fc2.bias, -4.0)
+
+        nn.init.ones_(self.r7_norm.weight)
+        nn.init.zeros_(self.r7_norm.bias)
+        nn.init.normal_(self.r7_fc1.weight, mean=0.0, std=0.02)
+        nn.init.zeros_(self.r7_fc1.bias)
+        nn.init.zeros_(self.r7_fc2.weight)
+        nn.init.zeros_(self.r7_fc2.bias)
+        self.base_log_priors.data.copy_(
+            torch.tensor([0.39, 0.24, 0.21, 0.12, 0.11, 0.18, 0.17], dtype=torch.float32)
+        )
+
         nn.init.ones_(self.norm.weight)
         nn.init.zeros_(self.norm.bias)
         nn.init.normal_(self.fc1.weight, mean=0.0, std=0.02)
         nn.init.zeros_(self.fc1.bias)
         nn.init.zeros_(self.fc2.weight)
         nn.init.zeros_(self.fc2.bias)
-        self.base_log_priors.data.copy_(
-            torch.tensor([0.39, 0.24, 0.21, 0.12, 0.11, 0.18, 0.17], dtype=torch.float32)
-        )
+        nn.init.zeros_(self.regime_fc2.weight)
+        self.regime_fc2.bias.data.copy_(torch.tensor([-4.0, 2.0], dtype=torch.float32))
+
+    def predict_clean_logits(self, s1_feat: torch.Tensor) -> torch.Tensor:
+        w_dtype = self.s1_norm.weight.dtype
+        # Zero out domain/finance keyword columns (indices d_audio+10 .. d_audio+12) so classification is purely acoustic/prosodic
+        x = s1_feat.clone()
+        x[:, self.d_audio + 10 : self.d_audio + 12] = 0.0
+        dur_over_16_5s = (x[:, self.d_audio] > 0.818).float()
+        h = self.act(self.s1_fc1(self.s1_norm(x.to(w_dtype))))
+        return self.s1_fc2(h).float().squeeze(-1) - 12.0 * dur_over_16_5s
+
+    def forward_stage2(self, s2_feat: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        w_dtype = self.norm.weight.dtype
+        if s2_feat.shape[-1] < self.d_s2:
+            s2_feat = F.pad(s2_feat, (0, self.d_s2 - s2_feat.shape[-1]))
+
+        # 1. Per-utterance Round-7 base weights
+        x_r7 = s2_feat[:, : self.d_r7].to(w_dtype)
+        h_r7 = self.act(self.r7_fc1(self.r7_norm(x_r7)))
+        delta_r7 = 0.22 * torch.tanh(self.r7_fc2(h_r7).float())
+        g_r7 = torch.exp(self.base_log_priors.float().unsqueeze(0) + delta_r7)
+
+        # 2. Per-utterance Cochran log(spec_f) multiplier & regime logits
+        h_s2 = self.act(self.fc1(self.norm(s2_feat.to(w_dtype))))
+        log_spec = 2.20 * torch.tanh(self.fc2(h_s2).float())
+        spec_mult = torch.cat([torch.exp(log_spec), torch.ones((s2_feat.shape[0], 1), dtype=torch.float32, device=s2_feat.device)], dim=-1)
+        weights = g_r7 * spec_mult
+        reg_logits = self.regime_fc2(h_s2).float()
+        return weights, reg_logits[:, 0], reg_logits[:, 1]
 
     def forward(self, audio_feat: torch.Tensor) -> torch.Tensor:
-        w_dtype = self.norm.weight.dtype
-        x = self.norm(audio_feat.to(w_dtype))
-        delta = 0.22 * torch.tanh(self.fc2(self.act(self.fc1(x))).float())
-        return torch.exp(self.base_log_priors.float().unsqueeze(0) + delta)
+        weights, _, _ = self.forward_stage2(audio_feat)
+        return weights
 
 
 def _compute_acoustic_stats(wavs: list[np.ndarray], device: torch.device) -> torch.Tensor:
-    """Computes [log_dur, snr_proxy, crest_factor, speech_activity_ratio] per waveform."""
+    """Computes 8 strictly per-utterance physical & spectral features per waveform (zero cross-utterance ops)."""
     rows = []
     for w in wavs:
         L = len(w)
@@ -738,7 +799,92 @@ def _compute_acoustic_stats(wavs: list[np.ndarray], device: torch.device) -> tor
         rms = float(np.sqrt(np.mean(w * w) + 1e-10))
         peak = float(np.max(np.abs(w)) + 1e-7)
         crest = float(np.clip(np.log1p(peak / rms) / 3.0, 0.0, 1.5))
-        rows.append([log_dur, snr_db, crest, speech_ratio])
+
+        if L >= 512:
+            w_mid = w[(L - 65536) // 2 : (L + 65536) // 2] if L > 65536 else w
+            nf512 = len(w_mid) // 512
+            fr512 = w_mid[: nf512 * 512].reshape(nf512, 512)
+            spec_p = np.mean(np.abs(np.fft.rfft(fr512, axis=-1)) ** 2, axis=0) + 1e-12
+            p_band = spec_p[3:]
+            tot_p = float(np.sum(p_band)) + 1e-12
+            hf_ratio = float(np.clip(np.sum(spec_p[128:]) / tot_p, 0.0, 1.0))
+            mid_ratio = float(np.clip(np.sum(spec_p[32:128]) / tot_p, 0.0, 1.0))
+            spec_flat = float(np.clip(np.exp(np.mean(np.log(p_band))) / (float(np.mean(p_band)) + 1e-12), 0.0, 1.0))
+            zcr = float(np.clip(np.mean((w_mid[:-1] * w_mid[1:]) < 0) / 0.25, 0.0, 2.0))
+        else:
+            hf_ratio, mid_ratio, spec_flat, zcr = 0.15, 0.45, 0.20, 0.25
+        rows.append([log_dur, snr_db, crest, speech_ratio, hf_ratio, mid_ratio, spec_flat, zcr])
+    return torch.tensor(rows, dtype=torch.float32, device=device)
+
+
+def _extract_stage1_lex_features(
+    vent_raw: Sequence[str],
+    vent_lps: Sequence[float],
+    wavs: Sequence[np.ndarray],
+    device: torch.device,
+) -> torch.Tensor:
+    """Computes 8 strictly per-utterance lexical/confidence features from Stage-1 Ventral output alone."""
+    rows = []
+    for raw_t, lp_v, w in zip(vent_raw, vent_lps, wavs):
+        st = raw_t.strip()
+        toks = [tok.strip(",.?!") for tok in st.lower().split() if tok.strip(",.?!")]
+        n_w = len(toks)
+        dur = max(0.2, len(w) / 16000.0)
+        n_fin = sum(1 for tok in toks if (tok in _FINANCE_LEXICON or "%" in tok or "$" in tok))
+        n_fill = sum(1 for tok in toks if tok in _FILLER_SET)
+        nw_c = _fast_canonical_words(_clean_formatted_profile(st, False))
+        n_spont = _count_spont_markers(nw_c)
+        rows.append([
+            min(n_w / 25.0, 2.5),
+            min((n_w / dur) / 4.0, 2.5),
+            float(n_fin > 0),
+            min((n_fin / float(max(1, n_w))) * 5.0, 2.0),
+            float(n_fill > 0),
+            min((n_spont / float(max(1, len(nw_c)))) * 5.0, 2.0),
+            float(st.endswith((".", "?", "!"))),
+            float(np.clip(lp_v, -1.5, 0.0)),
+        ])
+    return torch.tensor(rows, dtype=torch.float32, device=device)
+
+
+def _extract_stage2_pair_features(
+    nw_v_sub: Sequence[list[str]],
+    nw_d: Sequence[list[str]],
+    nw_b: Sequence[list[str]],
+    nw_t: Sequence[list[str]],
+    v_lps_sub: Sequence[float],
+    d_lps: Sequence[float],
+    b_lps: Sequence[float],
+    device: torch.device,
+) -> torch.Tensor:
+    """Computes 14 strictly per-utterance cross-pathway agreement & filler features (zero cross-utterance ops)."""
+    rows = []
+    for wv, wd, wb, wt, lpv, lpd, lpb in zip(nw_v_sub, nw_d, nw_b, nw_t, v_lps_sub, d_lps, b_lps):
+        fv = [x for x in wv if x not in _FILLER_SET]
+        fd = [x for x in wd if x not in _FILLER_SET]
+        fb = [x for x in wb if x not in _FILLER_SET]
+        ft = [x for x in wt if x not in _FILLER_SET]
+
+        def _nd(a: list[str], b: list[str]) -> float:
+            if not a and not b:
+                return 0.0
+            return min(1.5, _lev_words(a, b) / float(max(1, (len(a) + len(b)) // 2)))
+
+        vf_cnt = min(sum(1 for x in wv if x in _FILLER_SET), 3) / 3.0
+        df_cnt = min(sum(1 for x in wd if x in _FILLER_SET), 3) / 3.0
+        bf_cnt = min(sum(1 for x in wb if x in _FILLER_SET), 3) / 3.0
+        v_only_fill = float(
+            any((x in _FILLER_SET or x in _COLLOQUIAL_SET) for x in wv)
+            and not any((x in _FILLER_SET or x in _COLLOQUIAL_SET) for x in wb)
+        )
+        rows.append([
+            _nd(fv, fd), _nd(fv, fb), _nd(fv, ft), _nd(fd, fb), _nd(fd, ft), _nd(fb, ft),
+            vf_cnt, df_cnt, bf_cnt, v_only_fill,
+            float(np.clip(lpv, -1.5, 0.0)),
+            float(np.clip(lpd, -1.5, 0.0)),
+            float(np.clip(lpb, -1.5, 0.0)),
+            min(len(wv) / 25.0, 2.5),
+        ])
     return torch.tensor(rows, dtype=torch.float32, device=device)
 
 
@@ -1037,7 +1183,7 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
 
     @torch.inference_mode()
     def _run_ventral_with_embeddings(
-        self, wavs: list[np.ndarray], bs: int = 256, need_scores: bool = False
+        self, wavs: list[np.ndarray], bs: int = 256, need_scores: bool = False, max_new_tokens: Optional[int] = None
     ) -> tuple[list[str], torch.Tensor, list[float]]:
         self._ensure_local_decoders()
         dev = self.device
@@ -1099,6 +1245,8 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
                 am[i, st:] = 1
 
             max_nt = min(215, max(24, int(mdur_b * 7.2) + 18))
+            if max_new_tokens is not None:
+                max_nt = min(max_nt, max(1, int(max_new_tokens)))
             gen_out = self.ventral_stream.generate(
                 input_ids=in_ids,
                 attention_mask=am,
@@ -1140,7 +1288,7 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
 
     @torch.inference_mode()
     def _run_ventral_noise(
-        self, wavs: list[np.ndarray], bs: int = 256, need_scores: bool = False
+        self, wavs: list[np.ndarray], bs: int = 256, need_scores: bool = False, max_new_tokens: Optional[int] = None
     ) -> tuple[list[str], list[float]]:
         self._ensure_local_decoders()
         dev = self.device
@@ -1186,6 +1334,8 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
                 am[i, st:] = 1
 
             max_nt = min(215, max(24, int(mdur_b * 7.2) + 18))
+            if max_new_tokens is not None:
+                max_nt = min(max_nt, max(1, int(max_new_tokens)))
             gen_out = self.ventral_noise_stream.generate(
                 input_ids=in_ids,
                 attention_mask=am,
@@ -1301,7 +1451,9 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
         return preds
 
     @torch.inference_mode()
-    def _run_dorsal(self, wavs: list[np.ndarray], sub_bs: int = 104, need_scores: bool = False) -> tuple[list[str], list[float]]:
+    def _run_dorsal(
+        self, wavs: list[np.ndarray], sub_bs: int = 104, need_scores: bool = False, max_new_tokens: Optional[int] = None
+    ) -> tuple[list[str], list[float]]:
         self._ensure_local_decoders()
         dev = self.device
         flat_segs, owners = self._split_long_audio_at_silence(wavs, max_sec=30.5, target_sec=22.0)
@@ -1325,6 +1477,8 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
             mdur_b = max(1.0, len(bw[-1]) / 16000.0)
             mel_n, mask_n = self.frontend.extract_nemo_mel(bw, dtype=self.dtype)
             max_nt = min(200, max(24, int(mdur_b * 7.0) + 16))
+            if max_new_tokens is not None:
+                max_nt = min(max_nt, max(1, int(max_new_tokens)))
             dec_in = pref_t.expand(len(bw), -1).contiguous()
             gen_out = self.dorsal_stream.generate(
                 input_features=mel_n,
@@ -1361,7 +1515,9 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
         )
 
     @torch.inference_mode()
-    def _run_broadband(self, wavs: list[np.ndarray], bs: int = 224, need_scores: bool = False) -> tuple[list[str], list[float]]:
+    def _run_broadband(
+        self, wavs: list[np.ndarray], bs: int = 224, need_scores: bool = False, max_new_tokens: Optional[int] = None
+    ) -> tuple[list[str], list[float]]:
         self._ensure_local_decoders()
         dev = self.device
         pm = self.config.prompt_metadata
@@ -1373,6 +1529,8 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
             bw = wavs[cs : cs + bs]
             mdur_b = max(1.0, len(bw[-1]) / 16000.0)
             max_nt = min(200, max(24, int(mdur_b * 7.0) + 16))
+            if max_new_tokens is not None:
+                max_nt = min(max_nt, max(1, int(max_new_tokens)))
             log_w, mask_w = self.frontend.extract_whisper_30s_mel(bw, dtype=self.dtype)
             dec_in = w_pref.expand(len(bw), -1).contiguous()
             gen_out = self.broadband_stream.generate(
@@ -1418,7 +1576,9 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
         return [" ".join(by_utt[i]).strip() for i in range(len(wavs))]
 
     @torch.inference_mode()
-    def _run_meeting(self, wavs: list[np.ndarray], bs: int = 64, need_scores: bool = False) -> tuple[list[str], list[float]]:
+    def _run_meeting(
+        self, wavs: list[np.ndarray], bs: int = 64, need_scores: bool = False, max_new_tokens: Optional[int] = None
+    ) -> tuple[list[str], list[float]]:
         self._ensure_local_decoders()
         dev = self.device
         prompt = self.config.prompt_metadata["granite_prompt"]
@@ -1434,6 +1594,8 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
             bw = [flat_segs[idx] for idx in bi]
             mdur_b = max(1.0, len(bw[-1]) / 16000.0)
             max_nt = min(195, max(24, int(mdur_b * 7.0) + 16))
+            if max_new_tokens is not None:
+                max_nt = min(max_nt, max(1, int(max_new_tokens)))
             inp = self._gran_proc([prompt] * len(bw), bw, device=dev, return_tensors="pt").to(dev, dtype=self.dtype)
             plen = inp["input_ids"].shape[1]
             gen_out = self.meeting_stream.generate(
@@ -1468,7 +1630,9 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
         )
 
     @torch.inference_mode()
-    def _run_spontaneous(self, wavs: list[np.ndarray], bs: int = 48, need_scores: bool = False) -> tuple[list[str], list[float]]:
+    def _run_spontaneous(
+        self, wavs: list[np.ndarray], bs: int = 48, need_scores: bool = False, max_new_tokens: Optional[int] = None
+    ) -> tuple[list[str], list[float]]:
         self._ensure_local_decoders()
         dev = self.device
         pm = self.config.prompt_metadata
@@ -1481,6 +1645,8 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
             bw = wavs[s : s + bs]
             mdur_b = max(1.0, len(bw[-1]) / 16000.0)
             max_nt = min(195, max(24, int(mdur_b * 7.0) + 16))
+            if max_new_tokens is not None:
+                max_nt = min(max_nt, max(1, int(max_new_tokens)))
             log_q, _ = self.frontend.extract_qwen_mel(bw, dtype=self.dtype)
             encs = []
             for bi, a in enumerate(bw):
@@ -1770,81 +1936,20 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
                 best_raw = craw
         return best_raw
 
-    def _estimate_ratio_calibrated_spectral_weights(
-        self,
-        full_4_map: dict[str, list[list[str]]],
-        deep_5_map: dict[str, list[list[str]]],
-    ) -> tuple[dict[str, float], float]:
-        """Cochran Ratio-Calibrated Full-Corpus Spectral Competence (zero selection bias & zero imputation bias)."""
-        tags4 = ["ventral", "dorsal", "broadband", "transducer"]
-        N_tot = len(full_4_map["ventral"])
-        M_deep = len(deep_5_map["ventral"])
-        if N_tot < 16 or M_deep < 4:
-            return {t: 1.0 for t in list(deep_5_map.keys())}, 5.0
-
-        def _mean_eps(nmap: dict[str, list[list[str]]], max_s: int = 160):
-            ks = list(nmap.keys())
-            L = len(nmap[ks[0]])
-            st = max(1, L // max_s)
-            sidx = list(range(0, L, st))[:max_s]
-            dm = {}
-            for i, ti in enumerate(ks):
-                for j in range(i + 1, len(ks)):
-                    tj = ks[j]
-                    if _STREAM_FAM.get(ti, ti) == _STREAM_FAM.get(tj, tj):
-                        continue
-                    te, tl = 0, 0
-                    for idx in sidx:
-                        wi = [w for w in nmap[ti][idx] if w not in _FILLER_SET]
-                        wj = [w for w in nmap[tj][idx] if w not in _FILLER_SET]
-                        if not wi and not wj:
-                            continue
-                        te += _lev_words(wi, wj)
-                        tl += max(1, (len(wi) + len(wj)) // 2)
-                    dij = (te / max(1, tl)) * 100.0
-                    dm[(ti, tj)] = dij
-                    dm[(tj, ti)] = dij
-            all_fams = set(_STREAM_FAM.get(t, t) for t in ks)
-            ep = {}
-            for ti in ks:
-                fi = _STREAM_FAM.get(ti, ti)
-                fd = []
-                for fo in all_fams:
-                    if fo == fi:
-                        continue
-                    cd = [dm[(ti, tj)] for tj in ks if _STREAM_FAM.get(tj, tj) == fo and (ti, tj) in dm]
-                    if cd:
-                        fd.append(min(cd))
-                fd.sort()
-                ep[ti] = float(np.mean(fd[: min(4, len(fd))])) if fd else 5.0
-            return ep, dm
-
-        eps_corp4, dm_corp4 = _mean_eps(full_4_map, max_s=180)
-        eps_deep, _ = _mean_eps(deep_5_map, max_s=160)
-
-        mean_c4 = float(np.mean([eps_corp4[t] for t in tags4]))
-        mean_d4 = float(np.mean([eps_deep[t] for t in tags4]))
-        ratio = mean_c4 / max(1e-4, mean_d4)
-
-        eps_final = dict(eps_corp4)
-        for extra_k in deep_5_map:
-            if extra_k not in eps_final:
-                eps_final[extra_k] = eps_deep[extra_k] * ratio
-
-        min_eps = min(eps_final.values())
-        tau = 0.70 if float(np.mean(list(eps_final.values()))) < 6.0 else 1.05
-        shrink = float(M_deep) / float(M_deep + 32.0)
-        d_vt = dm_corp4.get(("ventral", "transducer"), 5.0)
-        return {ti: float(np.exp(-shrink * (eps_final[ti] - min_eps) / tau)) for ti in eps_final}, d_vt
-
     @torch.inference_mode()
     def transcribe(
         self,
         waveforms: Sequence[Union[np.ndarray, torch.Tensor]],
         batch_size: int = 256,
         formatting: str = "auto",
+        max_new_tokens: Optional[int] = None,
+        **kwargs,
     ) -> list[str]:
-        """End-to-end single-model transcription from 16kHz waveforms -> list[str] (zero dataset flags required)."""
+        """Strictly per-utterance end-to-end transcription from 16kHz waveforms -> list[str].
+
+        Every formatting, confirmation, pathway-selection, and fusion-weight decision is computed
+        independently per utterance (`O(1)` in batch context; zero cross-utterance batch aggregates).
+        """
         if not waveforms:
             return []
         wavs = [
@@ -1861,238 +1966,212 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
         beta_lp = float(fcal.get("beta_lp", 0.0))
         ns = bool(beta_lp > 1e-4 or tau_s1_lp > -50.0 or tau_s2_lp > -50.0)
 
-        # STAGE 1: Ventral + autonomous speech-regime detection (zero external dataset flags!)
-        mean_samp = sum(len(w) for w in s_wavs) / float(max(1, N))
-        s1_bs = min(batch_size, 64) if (64 < N <= 512 and len(s_wavs[-1]) > 1.70 * mean_samp) else batch_size
-        vent_raw, vent_embs, vent_lps = self._run_ventral_with_embeddings(s_wavs, bs=s1_bs, need_scores=ns)
+        # STAGE 1: Ventral + strictly per-utterance formatting classification
+        v_kw: dict = {"bs": batch_size, "need_scores": ns}
+        if max_new_tokens is not None:
+            v_kw["max_new_tokens"] = max_new_tokens
+        vent_raw, vent_embs, vent_lps = self._run_ventral_with_embeddings(s_wavs, **v_kw)
+
+        pg = getattr(self, "pathway_gate", None)
+        a_stats_all: Optional[torch.Tensor] = None
         if formatting in ("clean", "spgispeech", "formatted"):
-            clean_mode = True
+            clean_modes = [True] * N
         elif formatting == "verbatim":
-            clean_mode = False
+            clean_modes = [False] * N
+        elif pg is not None:
+            a_stats_all = _compute_acoustic_stats(s_wavs, self.device)
+            lex1_all = _extract_stage1_lex_features(vent_raw, vent_lps, s_wavs, self.device)
+            s1_feat = torch.cat([vent_embs.float(), a_stats_all, lex1_all], dim=-1)
+            c_logits = pg.predict_clean_logits(s1_feat).detach().cpu().tolist()
+            clean_modes = [bool(lg >= 0.0) for lg in c_logits]
         else:
-            mean_dur_s = float(np.mean([len(w) / 16000.0 for w in s_wavs]))
-            raw_wl = [t.lower().split() for t in vent_raw]
-            fin_hits = sum(
-                1 for wl in raw_wl
-                if any(tok.strip(",.?!") in _FINANCE_LEXICON or "%" in tok or "$" in tok for tok in wl)
-            ) / float(max(1, N))
-            fill_hits = sum(
-                1 for wl in raw_wl for tok in wl if tok.strip(",.?!") in _FILLER_SET
-            ) / float(max(1, N))
-            clean_mode = bool(N >= 8 and mean_dur_s <= 16.5 and fin_hits >= 0.20 and fill_hits <= 0.06)
+            clean_modes = [False] * N
 
-        vent_all = [_clean_formatted_profile(t, clean_mode) for t in vent_raw]
+        vent_all = [_clean_formatted_profile(vent_raw[i], clean_modes[i]) for i in range(N)]
         nw_v = [_fast_canonical_words(t) for t in vent_all]
-
-        if clean_mode:
-            p1_raw, p1_lps = self._run_broadband(s_wavs, bs=min(224, s1_bs), need_scores=ns)
-            p1_all = [_clean_formatted_profile(t, True) for t in p1_raw]
-        else:
-            p1_all = [_clean_formatted_profile(t, False) for t in self._run_transducer(s_wavs)]
-            p1_lps = [-0.08] * N
-        nw_p1 = [_fast_canonical_words(t) for t in p1_all]
-
         s_final = [""] * N
-        contested = []
-        for i in range(N):
-            wv, wp = nw_v[i], nw_p1[i]
-            if (wv == wp or (wv and "".join(wv) == "".join(wp))) and vent_lps[i] >= tau_s1_lp:
-                s_final[i] = vent_all[i]
-            else:
-                contested.append(i)
 
-        if contested:
-            c_wavs = [s_wavs[i] for i in contested]
-            c_embs = vent_embs[torch.tensor(contested, dtype=torch.long, device=self.device)]
-            c_stats = _compute_acoustic_stats(c_wavs, self.device)
-            gate_w = self.pathway_gate(torch.cat([c_embs, c_stats], dim=-1)).detach().cpu().numpy()  # (Nc, 7)
+        clean_idxs = [i for i in range(N) if clean_modes[i]]
+        verb_idxs = [i for i in range(N) if not clean_modes[i]]
 
-            if clean_mode:
-                spont_raw, spont_lps = self._run_spontaneous(c_wavs, bs=56, need_scores=ns)
+        # --- Per-utterance Clean-Formatted Branch ---
+        if clean_idxs:
+            c_sub_wavs = [s_wavs[i] for i in clean_idxs]
+            b_kw: dict = {"bs": min(224, batch_size), "need_scores": ns}
+            if max_new_tokens is not None:
+                b_kw["max_new_tokens"] = max_new_tokens
+            p1_c_raw, p1_c_lps = self._run_broadband(c_sub_wavs, **b_kw)
+
+            clean_contested: list[tuple[int, str, list[str], float]] = []
+            for k, idx_s in enumerate(clean_idxs):
+                p1_t = _clean_formatted_profile(p1_c_raw[k], True)
+                wp = _fast_canonical_words(p1_t)
+                wv = nw_v[idx_s]
+                if (wv == wp or (wv and "".join(wv) == "".join(wp))) and vent_lps[idx_s] >= tau_s1_lp:
+                    s_final[idx_s] = vent_all[idx_s]
+                else:
+                    clean_contested.append((idx_s, p1_t, wp, float(p1_c_lps[k])))
+
+            if clean_contested:
+                cc_wavs = [s_wavs[x[0]] for x in clean_contested]
+                sp_kw: dict = {"bs": 56, "need_scores": ns}
+                if max_new_tokens is not None:
+                    sp_kw["max_new_tokens"] = max_new_tokens
+                spont_raw, spont_lps = self._run_spontaneous(cc_wavs, **sp_kw)
                 spont_sub = [_clean_formatted_profile(t, True) for t in spont_raw]
                 nw_s = [_fast_canonical_words(t) for t in spont_sub]
-                use_agms = bool(getattr(self.config, "use_agms_synthesizer", False))
-                agms_mode = str(getattr(self.config, "agms_mode", "hybrid"))
 
-                hard_c_pos = []
-                for pos_c, idx_s in enumerate(contested):
-                    wv_i, wb_i, ws_i = nw_v[idx_s], nw_p1[idx_s], nw_s[pos_c]
-                    lp_v, lp_b, lp_s = vent_lps[idx_s], p1_lps[idx_s], spont_lps[pos_c]
+                for pos_c, (idx_s, p1_t, wb_i, lp_b) in enumerate(clean_contested):
+                    wv_i, ws_i = nw_v[idx_s], nw_s[pos_c]
+                    lp_v, lp_s = vent_lps[idx_s], spont_lps[pos_c]
                     if wb_i == ws_i and max(lp_b, lp_s) >= -0.25:
-                        s_final[idx_s] = p1_all[idx_s]
+                        s_final[idx_s] = p1_t
                     elif ws_i == wv_i and max(lp_s, lp_v) >= -0.25:
                         s_final[idx_s] = spont_sub[pos_c]
                     else:
-                        hard_c_pos.append(pos_c)
-
-                if hard_c_pos:
-                    if use_agms:
-                        hc_wavs = [c_wavs[p] for p in hard_c_pos]
-                        meet_hc_raw, _ = self._run_meeting(hc_wavs, bs=64, need_scores=False)
-                        meet_hc = [_clean_formatted_profile(t, True) for t in meet_hc_raw]
-                        cdicts = [
-                            {
-                                "W": p1_all[contested[p]],
-                                "M": spont_sub[p],
-                                "V": vent_all[contested[p]],
-                                "G": meet_hc[k_i],
-                            }
-                            for k_i, p in enumerate(hard_c_pos)
+                        max_lp = max(lp_v, lp_b, lp_s)
+                        cv = float(np.exp(beta_lp * np.clip(lp_v - max_lp, -0.90, 0.0)))
+                        cb = float(np.exp(beta_lp * np.clip(lp_b - max_lp, -0.90, 0.0)))
+                        cs = float(np.exp(beta_lp * np.clip(lp_s - max_lp, -0.90, 0.0)))
+                        hyps = [
+                            ("broadband", wb_i, p1_t, 1.35 * cb),
+                            ("spontaneous", ws_i, spont_sub[pos_c], 1.42 * cs),
+                            ("ventral", wv_i, vent_all[idx_s], 1.22 * cv),
                         ]
-                        agms_hc = [_clean_formatted_profile(t, True) for t in self._run_agms_synthesizer(hc_wavs, cdicts, clean_mode=True, bs=64)]
-                        nw_agms_hc = [_fast_canonical_words(t) for t in agms_hc]
-                        for k_i, pos_c in enumerate(hard_c_pos):
-                            idx_s = contested[pos_c]
-                            if agms_mode == "direct" and nw_agms_hc[k_i]:
-                                s_final[idx_s] = agms_hc[k_i]
-                            else:
-                                hyps = [
-                                    ("agms", nw_agms_hc[k_i], agms_hc[k_i], 2.05),
-                                    ("broadband", nw_p1[idx_s], p1_all[idx_s], 1.35),
-                                    ("spontaneous", nw_s[pos_c], spont_sub[pos_c], 1.42),
-                                    ("ventral", nw_v[idx_s], vent_all[idx_s], 1.20),
-                                    ("meeting", _fast_canonical_words(meet_hc[k_i]), meet_hc[k_i], 1.05),
-                                ]
-                                s_final[idx_s] = self._fuse_single_utterance(hyps, clean_mode=True)
-                    else:
-                        for pos_c in hard_c_pos:
-                            idx_s = contested[pos_c]
-                            wv_i, wb_i, ws_i = nw_v[idx_s], nw_p1[idx_s], nw_s[pos_c]
-                            lp_v, lp_b, lp_s = vent_lps[idx_s], p1_lps[idx_s], spont_lps[pos_c]
-                            max_lp = max(lp_v, lp_b, lp_s)
-                            cv = float(np.exp(beta_lp * np.clip(lp_v - max_lp, -0.90, 0.0)))
-                            cb = float(np.exp(beta_lp * np.clip(lp_b - max_lp, -0.90, 0.0)))
-                            cs = float(np.exp(beta_lp * np.clip(lp_s - max_lp, -0.90, 0.0)))
-                            hyps = [
-                                ("broadband", wb_i, p1_all[idx_s], 1.35 * cb),
-                                ("spontaneous", ws_i, spont_sub[pos_c], 1.42 * cs),
-                                ("ventral", wv_i, vent_all[idx_s], 1.22 * cv),
-                            ]
-                            s_final[idx_s] = self._fuse_single_utterance(hyps, clean_mode=True)
-            else:
-                # STAGE 2 (~315x Corpus RTFx): Fast Dorsal + Broadband on Contested Subset!
-                dors_raw, dors_lps = self._run_dorsal(c_wavs, sub_bs=104, need_scores=ns)
+                        s_final[idx_s] = self._fuse_single_utterance(hyps, clean_mode=True)
+
+        # --- Per-utterance Verbatim Branch ---
+        if verb_idxs:
+            v_sub_wavs = [s_wavs[i] for i in verb_idxs]
+            t_raw = self._run_transducer(v_sub_wavs)
+
+            verb_contested: list[tuple[int, str, list[str]]] = []
+            for k, idx_s in enumerate(verb_idxs):
+                p1_t = _clean_formatted_profile(t_raw[k], False)
+                wp = _fast_canonical_words(p1_t)
+                wv = nw_v[idx_s]
+                if (wv == wp or (wv and "".join(wv) == "".join(wp))) and vent_lps[idx_s] >= tau_s1_lp:
+                    s_final[idx_s] = vent_all[idx_s]
+                else:
+                    verb_contested.append((idx_s, p1_t, wp))
+
+            if verb_contested:
+                vc_idxs = [x[0] for x in verb_contested]
+                tdt_sub = [x[1] for x in verb_contested]
+                nw_t = [x[2] for x in verb_contested]
+                c_wavs = [s_wavs[i] for i in vc_idxs]
+
+                d_kw: dict = {"sub_bs": 104, "need_scores": ns}
+                b_kw2: dict = {"bs": 224, "need_scores": ns}
+                if max_new_tokens is not None:
+                    d_kw["max_new_tokens"] = max_new_tokens
+                    b_kw2["max_new_tokens"] = max_new_tokens
+
+                dors_raw, dors_lps = self._run_dorsal(c_wavs, **d_kw)
                 dors_sub = [_clean_formatted_profile(t, False) for t in dors_raw]
                 nw_d = [_fast_canonical_words(t) for t in dors_sub]
 
-                broad_raw, broad_lps = self._run_broadband(c_wavs, bs=224, need_scores=ns)
+                broad_raw, broad_lps = self._run_broadband(c_wavs, **b_kw2)
                 broad_sub = [_clean_formatted_profile(t, False) for t in broad_raw]
                 nw_b = [_fast_canonical_words(t) for t in broad_sub]
-                tdt_sub = [p1_all[i] for i in contested]
-                nw_t = [nw_p1[i] for i in contested]
 
-                step_m = max(1, N // 160)
-                mean_words = float(np.mean([len(nw_v[i]) for i in range(0, N, step_m)]))
-                tot_v_fill = sum(1 for u in nw_v for w in u if w in _FILLER_SET)
-                v_fill = sum(1 for i in contested for w in nw_v[i] if w in _FILLER_SET)
-                d_fill = sum(1 for u in nw_d for w in u if w in _FILLER_SET)
-                v_spont = sum(_count_spont_markers(nw_v[i]) for i in contested)
-                d_spont = sum(_count_spont_markers(u) for u in nw_d)
-                mean_snr_c = float(c_stats[:, 1].mean().item()) if len(contested) > 0 else 1.0
-                colloquial_podcast = (
-                    len(contested) >= 8
-                    and (len(contested) / float(max(1, N))) >= 0.28
-                    and mean_snr_c <= 0.88
-                    and (v_spont / float(max(1, len(contested)))) >= 0.28
-                    and 13.5 <= mean_words <= 26.0
-                )
+                if pg is not None:
+                    c_idx_t = torch.tensor(vc_idxs, dtype=torch.long, device=self.device)
+                    c_embs = vent_embs[c_idx_t].float()
+                    c_stats = a_stats_all[c_idx_t] if a_stats_all is not None else _compute_acoustic_stats(c_wavs, self.device)
+                    pair2 = _extract_stage2_pair_features(
+                        [nw_v[i] for i in vc_idxs],
+                        nw_d,
+                        nw_b,
+                        nw_t,
+                        [vent_lps[i] for i in vc_idxs],
+                        dors_lps,
+                        broad_lps,
+                        self.device,
+                    )
+                    gw_t, pod_t, kf_t = pg.forward_stage2(torch.cat([c_embs, c_stats, pair2], dim=-1))
+                    gate_w = gw_t.detach().cpu().numpy()
+                    pod_logits = pod_t.detach().cpu().tolist()
+                    kf_logits = kf_t.detach().cpu().tolist()
+                else:
+                    gate_w = np.ones((len(vc_idxs), 7), dtype=np.float32)
+                    pod_logits = [-4.0] * len(vc_idxs)
+                    kf_logits = [2.0] * len(vc_idxs)
 
-                # Stage-2 Confirmation:
-                deep_ranks = []
-                for pos_c, idx_s in enumerate(contested):
+                deep_pod: list[int] = []
+                deep_gen: list[int] = []
+                for pos_c, idx_s in enumerate(vc_idxs):
                     wv_i = nw_v[idx_s]
                     wd_i, wb_i, wt_i = nw_d[pos_c], nw_b[pos_c], nw_t[pos_c]
                     jv, jd, jb = "".join(wv_i), "".join(wd_i), "".join(wb_i)
                     vlp = vent_lps[idx_s]
-                    has_v_filler = (
-                        (len(contested) >= 8 and v_fill >= max(3, int(0.025 * len(contested))) and d_fill <= 0.35 * max(1, v_fill))
-                        or (len(contested) < 8 and v_fill > 0 and d_fill == 0)
-                    ) and any((w in _FILLER_SET or w in _COLLOQUIAL_SET) for w in wv_i) and not any((w in _FILLER_SET or w in _COLLOQUIAL_SET) for w in wb_i)
+                    is_pod_i = bool(pod_logits[pos_c] >= 0.0)
+                    keep_fill_i = bool(kf_logits[pos_c] >= 0.0)
+                    v_only_fill_i = (
+                        any((w in _FILLER_SET or w in _COLLOQUIAL_SET) for w in wv_i)
+                        and not any((w in _FILLER_SET or w in _COLLOQUIAL_SET) for w in wb_i)
+                    )
                     if wv_i and (wv_i == wd_i or wv_i == wb_i or (jv and (jv == jd or jv == jb))) and vlp >= tau_s2_lp:
                         s_final[idx_s] = vent_all[idx_s]
-                    elif (not colloquial_podcast) and (not has_v_filler) and wd_i and (wd_i == wb_i and wd_i == wt_i):
+                    elif (not is_pod_i) and (not (v_only_fill_i and keep_fill_i)) and wd_i and (wd_i == wb_i and wd_i == wt_i):
                         s_final[idx_s] = broad_sub[pos_c]
+                    elif is_pod_i:
+                        deep_pod.append(pos_c)
                     else:
-                        deep_ranks.append(pos_c)
+                        deep_gen.append(pos_c)
 
-                if deep_ranks:
-                    use_agms = bool(getattr(self.config, "use_agms_synthesizer", False))
-                    agms_mode = str(getattr(self.config, "agms_mode", "hybrid"))
-                    deep_wavs = [c_wavs[p] for p in deep_ranks]
+                if deep_pod:
+                    pod_wavs = [c_wavs[p] for p in deep_pod]
+                    vn_kw: dict = {"bs": batch_size, "need_scores": False}
+                    sp_kw2: dict = {"bs": 56, "need_scores": False}
+                    if max_new_tokens is not None:
+                        vn_kw["max_new_tokens"] = max_new_tokens
+                        sp_kw2["max_new_tokens"] = max_new_tokens
+                    vn_raw, _ = self._run_ventral_noise(pod_wavs, **vn_kw)
+                    vn_deep = [_clean_formatted_profile(t, False) for t in vn_raw]
+                    nw_vn_deep = [_fast_canonical_words(t) for t in vn_deep]
+                    sp_raw, _ = self._run_spontaneous(pod_wavs, **sp_kw2)
+                    spont_deep = [_clean_formatted_profile(t, False) for t in sp_raw]
+                    nw_s_deep = [_fast_canonical_words(t) for t in spont_deep]
+                    for r_i, pos_c in enumerate(deep_pod):
+                        idx_s = vc_idxs[pos_c]
+                        hyps = [
+                            ("ventral", nw_v[idx_s], vent_all[idx_s], 2.15),
+                            ("ventral_noise", nw_vn_deep[r_i], vn_deep[r_i], 1.15),
+                            ("spontaneous", nw_s_deep[r_i], spont_deep[r_i], 1.25),
+                            ("broadband", nw_b[pos_c], broad_sub[pos_c], 0.82),
+                            ("dorsal", nw_d[pos_c], dors_sub[pos_c], 0.80),
+                            ("transducer", nw_t[pos_c], tdt_sub[pos_c], 0.78),
+                        ]
+                        s_final[idx_s] = self._fuse_single_utterance(hyps, clean_mode=False, spont_lock=True)
 
-                    if colloquial_podcast:
-                        # Spontaneous colloquial podcast/YouTube speech: skip slow Meeting-Granite, run Super-Oruk + Spontaneous-MOSS2B!
-                        vn_raw, vn_lps = self._run_ventral_noise(deep_wavs, bs=batch_size, need_scores=False)
-                        vn_deep = [_clean_formatted_profile(t, False) for t in vn_raw]
-                        nw_vn_deep = [_fast_canonical_words(t) for t in vn_deep]
-                        sp_raw, _ = self._run_spontaneous(deep_wavs, bs=56, need_scores=False)
-                        spont_deep = [_clean_formatted_profile(t, False) for t in sp_raw]
-                        nw_s_deep = [_fast_canonical_words(t) for t in spont_deep]
-                        for r_i, pos_c in enumerate(deep_ranks):
-                            idx_s = contested[pos_c]
-                            hyps = [
-                                ("ventral", nw_v[idx_s], vent_all[idx_s], 2.15),
-                                ("ventral_noise", nw_vn_deep[r_i], vn_deep[r_i], 1.15),
-                                ("spontaneous", nw_s_deep[r_i], spont_deep[r_i], 1.25),
-                                ("broadband", nw_b[pos_c], broad_sub[pos_c], 0.82),
-                                ("dorsal", nw_d[pos_c], dors_sub[pos_c], 0.80),
-                                ("transducer", nw_t[pos_c], tdt_sub[pos_c], 0.78),
-                            ]
-                            s_final[idx_s] = self._fuse_single_utterance(hyps, clean_mode=False, spont_lock=True)
-                    else:
-                        meet_raw, meet_lps = self._run_meeting(deep_wavs, bs=64, need_scores=ns)
-                        meet_deep = [_clean_formatted_profile(t, False) for t in meet_raw]
-                        nw_m_deep = [_fast_canonical_words(t) for t in meet_deep]
+                if deep_gen:
+                    gen_wavs = [c_wavs[p] for p in deep_gen]
+                    m_kw: dict = {"bs": 64, "need_scores": ns}
+                    vn_kw2: dict = {"bs": batch_size, "need_scores": ns}
+                    if max_new_tokens is not None:
+                        m_kw["max_new_tokens"] = max_new_tokens
+                        vn_kw2["max_new_tokens"] = max_new_tokens
+                    meet_raw, _ = self._run_meeting(gen_wavs, **m_kw)
+                    meet_deep = [_clean_formatted_profile(t, False) for t in meet_raw]
+                    nw_m_deep = [_fast_canonical_words(t) for t in meet_deep]
 
-                        full_4_map = {
-                            "ventral": nw_v,
-                            "dorsal": list(nw_v),
-                            "broadband": list(nw_v),
-                            "transducer": list(nw_v),
-                        }
-                        for pos_c, idx_s in enumerate(contested):
-                            full_4_map["dorsal"][idx_s] = nw_d[pos_c]
-                            full_4_map["broadband"][idx_s] = nw_b[pos_c]
-                            full_4_map["transducer"][idx_s] = nw_t[pos_c]
+                    vn_raw2, _ = self._run_ventral_noise(gen_wavs, **vn_kw2)
+                    vn_deep2 = [_clean_formatted_profile(t, False) for t in vn_raw2]
+                    nw_vn_deep2 = [_fast_canonical_words(t) for t in vn_deep2]
 
-                        deep_map = {
-                            "ventral": [nw_v[contested[p]] for p in deep_ranks],
-                            "dorsal": [nw_d[p] for p in deep_ranks],
-                            "broadband": [nw_b[p] for p in deep_ranks],
-                            "transducer": [nw_t[p] for p in deep_ranks],
-                            "meeting": nw_m_deep,
-                        }
-
-                        vn_raw, vn_lps = self._run_ventral_noise(deep_wavs, bs=batch_size, need_scores=ns)
-                        vn_deep = [_clean_formatted_profile(t, False) for t in vn_raw]
-                        nw_vn_deep = [_fast_canonical_words(t) for t in vn_deep]
-                        deep_map["ventral_noise"] = nw_vn_deep
-
-                        spec_f, d_vt = self._estimate_ratio_calibrated_spectral_weights(full_4_map, deep_map)
-                        verbatim_parliamentary = (
-                            len(contested) >= 8
-                            and v_fill >= max(3, int(0.025 * len(contested)))
-                            and d_fill <= 0.35 * max(1, v_fill)
-                            and mean_words > 18.0
-                            and d_vt < 3.5
-                        )
-                        if verbatim_parliamentary:
-                            spec_f["dorsal"] *= 0.22
-                            spec_f["broadband"] *= 0.35
-                            spec_f["meeting"] *= 0.32
-
-                        for r_i, pos_c in enumerate(deep_ranks):
-                            idx_s = contested[pos_c]
-                            gw = gate_w[pos_c]
-                            hyps = [
-                                ("ventral", nw_v[idx_s], vent_all[idx_s], float(gw[0]) * spec_f["ventral"]),
-                                ("ventral_noise", nw_vn_deep[r_i], vn_deep[r_i], float(gw[1]) * spec_f.get("ventral_noise", 1.0)),
-                                ("dorsal", nw_d[pos_c], dors_sub[pos_c], float(gw[2]) * spec_f["dorsal"]),
-                                ("broadband", nw_b[pos_c], broad_sub[pos_c], float(gw[3]) * spec_f["broadband"]),
-                                ("transducer", nw_t[pos_c], tdt_sub[pos_c], float(gw[4]) * spec_f["transducer"] * 0.94),
-                                ("meeting", nw_m_deep[r_i], meet_deep[r_i], float(gw[5]) * spec_f["meeting"]),
-                            ]
-                            s_final[idx_s] = self._fuse_single_utterance(hyps, clean_mode=False, spont_lock=False)
+                    for r_i, pos_c in enumerate(deep_gen):
+                        idx_s = vc_idxs[pos_c]
+                        gw = gate_w[pos_c]
+                        hyps = [
+                            ("ventral", nw_v[idx_s], vent_all[idx_s], float(gw[0])),
+                            ("ventral_noise", nw_vn_deep2[r_i], vn_deep2[r_i], float(gw[1])),
+                            ("dorsal", nw_d[pos_c], dors_sub[pos_c], float(gw[2])),
+                            ("broadband", nw_b[pos_c], broad_sub[pos_c], float(gw[3])),
+                            ("transducer", nw_t[pos_c], tdt_sub[pos_c], float(gw[4]) * 0.94),
+                            ("meeting", nw_m_deep[r_i], meet_deep[r_i], float(gw[5])),
+                        ]
+                        s_final[idx_s] = self._fuse_single_utterance(hyps, clean_mode=False, spont_lock=False)
 
         out = [""] * N
         for idx_s, orig_i in enumerate(order):
@@ -2106,6 +2185,7 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
         attention_mask: Optional[torch.Tensor] = None,
         formatting: str = "auto",
         batch_size: int = 256,
+        max_new_tokens: Optional[int] = None,
         **kwargs,
     ) -> torch.LongTensor:
         """Standard Hugging Face `model.generate(**inputs)` returning token IDs decoded by `processor.batch_decode`."""
@@ -2125,10 +2205,18 @@ class IshikiASRForConditionalGeneration(PreTrainedModel, GenerationMixin):
             inp_cpu = inp_slice.to(dtype=torch.float32, device="cpu").numpy()
         wavs = [np.ascontiguousarray(inp_cpu[i, : max(1, int(lens_l[i]))], dtype=np.float32) for i in range(B)]
 
-        texts = self.transcribe(wavs, batch_size=batch_size, formatting=formatting)
+        tr_kw: dict = {"batch_size": batch_size, "formatting": formatting}
+        if max_new_tokens is not None:
+            tr_kw["max_new_tokens"] = int(max_new_tokens)
+        texts = self.transcribe(wavs, **tr_kw)
+
         eos_id = int(self.config.eos_token_id)
         pad_id = int(self.config.pad_token_id)
-        tok_lists = [self._root_tok.encode(t, add_special_tokens=False) + [eos_id] for t in texts]
+        if max_new_tokens is not None and int(max_new_tokens) >= 1:
+            cap = int(max_new_tokens)
+            tok_lists = [(self._root_tok.encode(t, add_special_tokens=False)[: max(0, cap - 1)] + [eos_id]) for t in texts]
+        else:
+            tok_lists = [self._root_tok.encode(t, add_special_tokens=False) + [eos_id] for t in texts]
         L_max = max((len(tl) for tl in tok_lists), default=1)
         out_ids = torch.full((B, L_max), pad_id, dtype=torch.long, device=self.device)
         for i, tl in enumerate(tok_lists):

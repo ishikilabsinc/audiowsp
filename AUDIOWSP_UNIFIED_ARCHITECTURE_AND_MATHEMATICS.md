@@ -1,7 +1,7 @@
 # Weight-Space Programming (`AudioWSP`) & One-Forward-Pass Optimization (`OFP`) — Visual First-Principles Guide
 
 **Common Modular Harness (`harness/audiowsp.py`), Concrete Signal Visualizations, and Released Models:**
-- **ASR Model (`13.31B` Standalone Single-File Checkpoint, `3.78%` Full 10-Set Mean WER at `323.4x` Corpus RTFx across 76,443 Utts & `8.09% -> 6.87%` Noisy 4-Corruption Suite, PR #291)**: [`https://huggingface.co/ishiki-labs/ishiki-asr-1.0`](https://huggingface.co/ishiki-labs/ishiki-asr-1.0)
+- **ASR Model (`13.31B` Standalone Single-File Checkpoint, `3.75%` Full 10-Set Mean WER at `302.3x` Corpus RTFx across 76,443 Utts & `8.09% -> 6.87%` Noisy 4-Corruption Suite, PR #291)**: [`https://huggingface.co/ishiki-labs/ishiki-asr-1.0`](https://huggingface.co/ishiki-labs/ishiki-asr-1.0)
 - **Deepfake Detector (`315.4M -> 86.75M`, `-72.5%` compressed, `353.6 MB` `.safetensors`)**: [`https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5`](https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5)
 
 ---
@@ -152,5 +152,5 @@ python -m harness run-wsp --task both
 | Released Artifact | Public Link / Path | Size / Parameters | Verified Benchmark Performance |
 | :--- | :--- | :--- | :--- |
 | **Unified AudioWSP + OFP Harness** | `harness/audiowsp.py` (`AudioWSPPipeline`) | 7 Modular Blocks (`1F + 0B`) | Enforces `EvalFirewallViolation` + SHA-256 calibration audit certificates |
-| **Ishiki-ASR-1.0 (Open-Weights Standalone ASR, PR #291)** | [`huggingface.co/ishiki-labs/ishiki-asr-1.0`](https://huggingface.co/ishiki-labs/ishiki-asr-1.0) | `13.31B` (single `24.79 GiB` `model.safetensors`) | **`3.78%` Full 10-Set Mean WER (`76,443` utts, `323.4x` Corpus RTFx)** & **`6.87%` vs. `8.09%` Noisy Suite WER** |
+| **Ishiki-ASR-1.0 (Open-Weights Standalone ASR, PR #291)** | [`huggingface.co/ishiki-labs/ishiki-asr-1.0`](https://huggingface.co/ishiki-labs/ishiki-asr-1.0) | `13.31B` (single `24.79 GiB` `model.safetensors`) | **`3.75%` Full 10-Set Mean WER (`76,443` utts, `302.3x` Corpus RTFx)** & **`6.87%` vs. `8.09%` Noisy Suite WER** |
 | **Ishiki-Deepfake-0.5 (Open-Weights Detector)** | [`huggingface.co/ishiki-labs/ishiki-deepfake-0.5`](https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5) | **`86.75M` params** (`353.6 MB` `.safetensors`, `-72.5%`) | **`0.163%` ASV19 LA**, **`1.51%` ASV21 LA**, **`2.19%` ASV21 DF**, **`2.72%` ITW**, **`0.028%` TIMIT-Clean** |

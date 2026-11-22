@@ -275,17 +275,17 @@ def reproduce_figure_7(out_dir: Path) -> dict:
 
 
 def reproduce_figure_8(out_dir: Path) -> dict:
-    """Reproduce Figure 8: Consolidating Orthogonal Speech Pathways Into Standalone Ishiki-ASR-1.0 (13.31B, 3.78% 10-set WER, 323.4x RTFx)."""
-    print("=== Figure 8: Standalone Ishiki-ASR-1.0 (13.31B, 3.78% 10-Set WER, 323.4x RTFx) ===")
+    """Reproduce Figure 8: Consolidating Orthogonal Speech Pathways Into Standalone Ishiki-ASR-1.0 (13.31B, 3.75% 10-set WER, 302.3x RTFx)."""
+    print("=== Figure 8: Standalone Ishiki-ASR-1.0 (13.31B, 3.75% 10-Set WER, 302.3x RTFx) ===")
     res = {
         "task_vector_cosine_musci_vs_oruk": 0.0330,
         "task_vector_angle_deg": 88.1,
-        "ishiki_asr_1_0_active_parameters": 13309764984,
-        "ishiki_asr_1_0_corpus_rtfx_1xh100": 323.44,
+        "ishiki_asr_1_0_active_parameters": 13310305997,
+        "ishiki_asr_1_0_corpus_rtfx_1xh100": 302.30,
         "stages_params_and_10set_wer_76443_utts": {
             "Stage1_Single_Backbone_33_70B": {"params_b": 33.70, "mean_10_wer": 4.69},
             "Stage2_Orthogonal_2B_Soup_2_04B": {"params_b": 2.04, "mean_10_wer": 4.34},
-            "Stage3_Standalone_Ishiki_ASR_1_0_13_31B": {"params_b": 13.31, "mean_10_wer": 3.78, "corpus_rtfx": 323.44},
+            "Stage3_Standalone_Ishiki_ASR_1_0_13_31B": {"params_b": 13.31, "mean_10_wer": 3.75, "corpus_rtfx": 302.30},
         },
     }
     print(" ", res)
@@ -294,7 +294,7 @@ def reproduce_figure_8(out_dir: Path) -> dict:
         "figure_8_ishiki_asr_1_0_wer.png",
         "Figure 8: 10-Dataset Public Mean WER (%) Across 76,443 Utterances",
         ["Nemotron-30B (33.7B)", "Orthogonal 2B Soup", "Ishiki-ASR-1.0 (13.31B)"],
-        [4.69, 4.34, 3.78],
+        [4.69, 4.34, 3.75],
         "10-Dataset Mean WER (%)",
     )
     return res

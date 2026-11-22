@@ -1010,7 +1010,7 @@
     const stageBars = [
       { id: "1", label: "Single (33.7B)", wer: 4.69 },
       { id: "2", label: "2B Soup (2.0B)", wer: 4.34 },
-      { id: "3", label: "Ishiki-1.0 (13.3B)", wer: 3.78 },
+      { id: "3", label: "Ishiki-1.0 (13.3B)", wer: 3.75 },
     ];
 
     function draw() {

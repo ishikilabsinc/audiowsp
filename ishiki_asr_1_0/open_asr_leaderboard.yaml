@@ -1,7 +1,7 @@
 - dataset:
     id: hf-audio/esb-datasets-test-only-sorted
     task_id: automatic-speech-recognition
-  value: 1.54
+  value: 1.55
   verifyToken: ""
   config:
     config_name: spgispeech
@@ -23,7 +23,7 @@
 - dataset:
     id: hf-audio/esb-datasets-test-only-sorted
     task_id: automatic-speech-recognition
-  value: 1.81
+  value: 1.82
   verifyToken: ""
   config:
     config_name: librispeech
@@ -45,7 +45,7 @@
 - dataset:
     id: hf-audio/open-asr-leaderboard
     task_id: automatic-speech-recognition
-  value: 4.35
+  value: 4.38
   verifyToken: ""
   config:
     config_name: earnings22_cleaned_aa_chunked
@@ -56,7 +56,7 @@
 - dataset:
     id: hf-audio/open-asr-leaderboard
     task_id: automatic-speech-recognition
-  value: 6.68
+  value: 6.67
   verifyToken: ""
   config:
     config_name: gigaspeech_cleaned
@@ -67,7 +67,7 @@
 - dataset:
     id: hf-audio/open-asr-leaderboard
     task_id: automatic-speech-recognition
-  value: 8.19
+  value: 8.02
   verifyToken: ""
   config:
     config_name: urgent2024
@@ -78,7 +78,7 @@
 - dataset:
     id: hf-audio/open-asr-leaderboard
     task_id: automatic-speech-recognition
-  value: 3.97
+  value: 3.84
   verifyToken: ""
   config:
     config_name: urgent2024_clean
@@ -89,7 +89,7 @@
 - dataset:
     id: hf-audio/open-asr-leaderboard
     task_id: automatic-speech-recognition
-  value: 1.47
+  value: 1.45
   verifyToken: ""
   config:
     config_name: voxpopuli_cleaned_aa
@@ -100,7 +100,7 @@
 - dataset:
     id: VoiceArena/Monsoon_en_IN_test
     task_id: automatic-speech-recognition
-  value: 2.83
+  value: 2.79
   verifyToken: ""
   config:
     config_name: default

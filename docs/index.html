@@ -269,7 +269,7 @@
       <a class="block-chip" href="#block-6" style="text-decoration:none; color:inherit;">
         <span class="bnum">BLOCK 6</span>
         <strong>Consolidating Orthogonal Speech Pathways (13.31B)</strong>
-        <span>Pack orthogonal speech pathways into one 13.31B file (3.78% WER, 323× RTFx).</span>
+        <span>Pack orthogonal speech pathways into one 13.31B file (3.75% WER, 302× RTFx).</span>
       </a>
     </div>
   </div>
@@ -584,14 +584,14 @@
     </p>
   </div>
 
-  <h2 id="block-6">Block 6: Consolidating Orthogonal Speech Pathways Into a Single 13.31B Checkpoint (323× RTFx)</h2>
+  <h2 id="block-6">Block 6: Consolidating Orthogonal Speech Pathways Into a Single 13.31B Checkpoint (302× RTFx)</h2>
 
   <p>
-    When we compare hidden states and weight matrices across open-weights speech architectures on <a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data/tree/main/practice_dev"><code>practice_dev</code></a> and official validation splits, two observations let us package a <strong>single standalone <code>13.31B</code> checkpoint</strong> (<a href="https://huggingface.co/ishiki-labs/ishiki-asr-1.0"><code>ishiki-labs/ishiki-asr-1.0</code></a>, one <code>24.79 GiB</code> <code>model.safetensors</code> file with zero external model dependencies) that lowers average Word Error Rate across all 10 public benchmarks on the Hugging Face Open ASR Leaderboard from <code>4.69%</code> (<code>33.7B</code> <code>Nemotron-3.5-30B</code>) and <code>4.40%</code> (best prior single open-weights model) to <strong><code>3.78%</code></strong> at <strong><code>323.4×</code> corpus RTFx</strong> on a single H100 GPU:
+    When we compare hidden states and weight matrices across open-weights speech architectures on <a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data/tree/main/practice_dev"><code>practice_dev</code></a> and official validation splits, two observations let us package a <strong>single standalone <code>13.31B</code> checkpoint</strong> (<a href="https://huggingface.co/ishiki-labs/ishiki-asr-1.0"><code>ishiki-labs/ishiki-asr-1.0</code></a>, one <code>24.79 GiB</code> <code>model.safetensors</code> file with zero external model dependencies) that lowers average Word Error Rate across all 10 public benchmarks on the Hugging Face Open ASR Leaderboard from <code>4.69%</code> (<code>33.7B</code> <code>Nemotron-3.5-30B</code>) and <code>4.40%</code> (best prior single open-weights model) to <strong><code>3.75%</code></strong> at <strong><code>302.3×</code> corpus RTFx</strong> on a single H100 GPU:
   </p>
   <ol>
     <li><strong>Different Models Learn Complementary, Nearly Perpendicular Features (88.1° Apart):</strong> When the same base model (<code>Qwen3-ASR-1.7B</code>) is adapted for conversational speech (\(\Delta W_{\text{conv}}\)) versus noisy/accented speech (\(\Delta W_{\text{noisy}}\)), their weight updates have cosine similarity \(\cos\theta = 0.033\) (\(88.1^\circ\)—nearly perpendicular). Combining perpendicular weight-space surgery, zero-distortion validation WiSE-FT, and <code>BatchNorm</code>-frozen Conformer/Q-Former adaptation aligns complementary dense pathways (<code>Ventral</code> &amp; <code>Ventral-Noise</code> <code>4.70B</code>, <code>Spontaneous</code> <code>2.73B</code>, <code>Meeting</code> <code>2.31B</code>, <code>Dorsal</code> <code>2.07B</code>, <code>Broadband Whisper</code> + <code>Transducer Parakeet</code> <code>1.50B</code>) inside one self-contained <code>13.31B</code> checkpoint—eliminating <code>60.3B</code> of multi-MoE backbones entirely.</li>
-    <li><strong>Acoustic-Gated Cascaded Routing &amp; Word-Posterior Confusion Networks (`323.4×` RTFx):</strong> A <code>0.27M</code>-parameter <code>IshikiAcousticPathwayGate</code> resolves unambiguous utterances immediately in Stage 1 (reaching <code>423.6×</code> RTFx on <code>LibriSpeech clean</code> and <code>348.1×</code> RTFx on <code>SPGISpeech</code>) and routes only contested utterances through Cochran ratio-calibrated spectral competence and word-posterior confusion-network decoding, delivering <strong><code>3.78%</code> 10-dataset mean WER</strong> at <strong><code>323.4×</code> corpus RTFx</strong> from raw audio alone with zero dataset flags:</li>
+    <li><strong>Strictly Per-Utterance Acoustic Routing &amp; Confusion Networks (`302.3×` RTFx):</strong> A <code>0.81M</code>-parameter per-utterance <code>IshikiAcousticPathwayGate</code> resolves unambiguous utterances immediately in Stage 1 (reaching <code>391.2×</code> RTFx on <code>LibriSpeech clean</code> and <code>327.1×</code> RTFx on <code>SPGISpeech</code>) and routes contested utterances independently via amortized Cochran spectral competence and word-posterior confusion-network decoding, delivering <strong><code>3.75%</code> 10-dataset mean WER</strong> at <strong><code>302.3×</code> corpus RTFx</strong> from raw audio alone with zero dataset flags or batch-context coupling:</li>
   </ol>
 
   <div class="interactive-box">
@@ -599,7 +599,7 @@
       <div style="display:flex; gap:6px; flex-wrap:wrap;">
         <button class="pill-btn" data-b6-stage="1" type="button">Stage 1: Single 33.7B MoE (4.69% WER)</button>
         <button class="pill-btn" data-b6-stage="2" type="button">Stage 2: Orthogonal 2B Soup (4.34% WER)</button>
-        <button class="pill-btn active-pill" data-b6-stage="3" type="button">Stage 3: Standalone Ishiki-ASR-1.0 (13.31B → 3.78% WER, 323× RTFx)</button>
+        <button class="pill-btn active-pill" data-b6-stage="3" type="button">Stage 3: Standalone Ishiki-ASR-1.0 (13.31B → 3.75% WER, 302× RTFx)</button>
       </div>
     </div>
     <canvas id="b6-canvas" width="900" height="225" style="width:100%; height:auto; display:block;"></canvas>
@@ -825,16 +825,16 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>No</strong> (multi-corpus noisy ASR)</td>
           <td><strong>Yes</strong> (<code>461</code> val)</td>
           <td><code>10.98%</code></td>
-          <td class="best-cell"><strong><code>8.19%</code></strong> (<code>-2.79%</code>, <code>238×</code> RTFx, #1 Overall)</td>
+          <td class="best-cell"><strong><code>8.02%</code></strong> (<code>-2.96%</code>, <code>216×</code> RTFx, #1 Overall)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/ami_cleaned"><strong>AMI-Cleaned</strong></a> · [<a href="https://groups.inf.ed.ac.uk/ami/corpus/">Paper</a>]</td>
           <td>Full (<code>3 shards / 7,715</code>)</td>
           <td class="best-cell"><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>6.57%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>5.84%</code></strong></td>
           <td><strong>Yes</strong> (AMI train)</td>
-          <td><strong>Yes</strong> (<code>1.8K</code> val)</td>
+          <td><strong>Yes</strong> (<code>1.1K</code> val)</td>
           <td><code>7.81%</code></td>
-          <td><strong><code>6.12%</code></strong> (<code>-1.69%</code>, <code>215×</code> RTFx, #1 Open)</td>
+          <td><strong><code>6.12%</code></strong> (<code>-1.69%</code>, <code>203×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-other)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
@@ -843,7 +843,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>Yes</strong> (LibriSpeech 960h)</td>
           <td><strong>Yes</strong> (<code>2.86K</code> dev-other)</td>
           <td><code>2.66%</code></td>
-          <td><strong><code>1.81%</code></strong> (<code>-0.85%</code>, <code>331×</code> RTFx, #1 Open)</td>
+          <td><strong><code>1.82%</code></strong> (<code>-0.84%</code>, <code>309×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/VoiceArena/Monsoon_en_IN_test"><strong>Voice Arena Monsoon (en-IN)</strong></a> · [<a href="https://huggingface.co/datasets/VoiceArena/Monsoon_en_IN_test">Repo</a>]</td>
@@ -852,16 +852,16 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>No</strong> (multi-corpus ASR)</td>
           <td><strong>No</strong></td>
           <td><code>3.65%</code></td>
-          <td><strong><code>2.83%</code></strong> (<code>-0.82%</code>, <code>311×</code> RTFx, #1 Open)</td>
+          <td><strong><code>2.79%</code></strong> (<code>-0.86%</code>, <code>298×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/urgent2024_clean"><strong>URGENT 2024 (Clean)</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
           <td>Full (<code>1 shard / 1,000</code>)</td>
           <td class="best-cell"><a href="https://huggingface.co/oruk/orukqwen-asr-1.7b">orukqwen-1.7B</a>: <code>4.25%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>3.50%</code></strong></td>
           <td><strong>No</strong> (multi-corpus ASR)</td>
-          <td><strong>Yes</strong> (<code>461</code> val)</td>
+          <td><strong>Yes</strong> (<code>573</code> val)</td>
           <td><code>4.39%</code></td>
-          <td><strong><code>3.97%</code></strong> (<code>-0.42%</code>, <code>298×</code> RTFx, #1 Open)</td>
+          <td><strong><code>3.84%</code></strong> (<code>-0.55%</code>, <code>265×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/ArtificialAnalysis/Earnings22-Cleaned-AA-chunked"><strong>Earnings22-Cleaned-AA</strong></a> · [<a href="https://arxiv.org/abs/2203.15591">Paper</a>]</td>
@@ -870,16 +870,16 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>No</strong> (multi-corpus ASR)</td>
           <td><strong>No</strong></td>
           <td><code>5.27%</code></td>
-          <td><strong><code>4.33%</code></strong> (<code>-0.94%</code>, <code>156×</code> RTFx, #1 Open)</td>
+          <td><strong><code>4.38%</code></strong> (<code>-0.89%</code>, <code>154×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/gigaspeech_cleaned"><strong>GigaSpeech-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2106.06909">Paper</a>]</td>
           <td>Full (<code>8 shards / 18,757</code>)</td>
           <td class="best-cell"><a href="https://huggingface.co/HojoAI/Hojo-ASR-V1">Hojo-ASR-V1</a>: <strong><code>6.36%</code></strong> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>7.19%</code></td>
           <td><strong>Yes</strong> (GigaSpeech 10,000h)</td>
-          <td><strong>Yes</strong> (<code>1.2K</code> val)</td>
+          <td><strong>Yes</strong> (<code>1.0K</code> val)</td>
           <td><code>7.26%</code></td>
-          <td><strong><code>6.68%</code></strong> (<code>-0.58%</code>, <code>317×</code> RTFx)</td>
+          <td><strong><code>6.67%</code></strong> (<code>-0.59%</code>, <code>290×</code> RTFx)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/voxpopuli_cleaned_aa"><strong>VoxPopuli-AA-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2101.00390">Paper</a>]</td>
@@ -888,7 +888,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>Yes</strong> (VoxPopuli train)</td>
           <td><strong>Yes</strong> (<code>500</code> val)</td>
           <td><code>1.89%</code></td>
-          <td class="best-cell"><strong><code>1.47%</code></strong> (<code>-0.42%</code>, <code>243×</code> RTFx, Tied #1 Overall)</td>
+          <td class="best-cell"><strong><code>1.45%</code></strong> (<code>-0.44%</code>, <code>233×</code> RTFx, #1 Overall)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-clean)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
@@ -897,7 +897,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>Yes</strong> (LibriSpeech 960h)</td>
           <td><strong>Yes</strong> (<code>2.7K</code> dev-clean)</td>
           <td><code>1.10%</code></td>
-          <td class="best-cell"><strong><code>0.89%</code></strong> (<code>-0.21%</code>, <code>424×</code> RTFx, #1 Overall)</td>
+          <td class="best-cell"><strong><code>0.89%</code></strong> (<code>-0.21%</code>, <code>391×</code> RTFx, #1 Overall)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/spgispeech"><strong>SPGISpeech</strong></a> · [<a href="https://arxiv.org/abs/2104.02014">Paper</a>]</td>
@@ -906,7 +906,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>Yes</strong> (SPGISpeech train)</td>
           <td><strong>Yes</strong> (<code>1.0K</code> val)</td>
           <td><code>1.92%</code></td>
-          <td><strong><code>1.54%</code></strong> (<code>-0.38%</code>, <code>348×</code> RTFx, #1 Open)</td>
+          <td><strong><code>1.55%</code></strong> (<code>-0.37%</code>, <code>327×</code> RTFx, #1 Open)</td>
         </tr>
         <tr style="background:#e8f5ee;">
           <td><strong>Mean WER (All 10 Official Leaderboard Sets)</strong></td>
@@ -915,7 +915,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>Yes</strong></td>
           <td><strong>Official val/dev only (0% test overlap)</strong></td>
           <td><code>4.69%</code></td>
-          <td class="best-cell"><strong><code>3.78%</code></strong> (<code>-0.91%</code> vs Base, <code>323.4×</code> RTFx, <strong>#1 Open-Weights</strong>)</td>
+          <td class="best-cell"><strong><code>3.75%</code></strong> (<code>-0.94%</code> vs Base, <code>302.3×</code> RTFx, <strong>#1 Open-Weights</strong>)</td>
         </tr>
         <tr style="background:#f4f9f6;">
           <td colspan="7" style="font-weight:700; color:#118659; padding-top:12px;">
