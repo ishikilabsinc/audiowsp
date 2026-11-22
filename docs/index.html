@@ -157,11 +157,14 @@
       display: block;
     }
     .bench-table {
-      width: max-content;
-      min-width: 940px;
+      width: 100%;
       border-collapse: collapse;
       font-size: 13.2px;
       line-height: 1.4;
+    }
+    .wide-table-bleed .bench-table {
+      width: max-content;
+      min-width: 940px;
     }
     @media (max-width: 900px) {
       .wide-table-bleed {
@@ -223,7 +226,7 @@
       <p>November 18, 2026</p>
       <p>
         <a href="https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5">Deepfake-0.5</a> ·
-        <a href="https://huggingface.co/ishiki-labs/ishiki-asr-0.5">ASR-0.5</a> ·
+        <a href="https://huggingface.co/ishiki-labs/ishiki-asr-1.0">ASR-1.0</a> ·
         <a href="https://github.com/ishikilabsinc/audiowsp">Harness</a>
       </p>
     </div>
@@ -234,27 +237,19 @@
 
   <div class="tldr-box" style="background:#f3f9f5; border:1px solid #bdd9c9; border-radius:10px; padding:22px 26px; margin: 18px 0 28px;">
     <div class="tldr-heading" style="font-weight:700; font-size:19px; color:#118659; margin-bottom:10px;">TL;DR</div>
-    <p style="margin-top:0;">
-      Inspired by recent work on Weight-Space Programming (<strong>WSP</strong>) [<a href="https://rikiyat.github.io/blog/weight-space-programming/">Takehi et al., 2026</a>], we investigate three questions for audio models:
-    </p>
-    <ol style="margin-bottom:14px;">
-      <li><strong>Can an LLM directly edit the weights of audio models to improve performance without backward passes?</strong></li>
-      <li><strong>Understand scalability of Weight-Space Programming (WSP) as model size grows 100×—from a 318M-parameter Audio Deepfake Detector (<code>Wav2Vec2-XLS-R-300M</code> + <code>AASIST</code>) to a 32.4B-parameter Speech Recognition model (<code>NVIDIA-Nemotron-3.5-Transcribe-30B-A4B</code>)?</strong></li>
-      <li><strong>Can an LLM directly compress audio model weights in a single forward pass without losing accuracy?</strong></li>
-    </ol>
-    <p style="margin-bottom:10px;">
-      <strong>How WSP Discovered the 5 Building Blocks (and Why We Built the Harness):</strong> We gave an LLM agent a Python sandbox to iteratively inspect model errors on practice audio, write weight-editing code, and check the result in a forward pass (iterating through 23 rounds <code>p01 → p23</code> on Deepfake Detection and 8 rounds <code>v1 → v8</code> on Speech Recognition). Across both tasks, the agent repeatedly converged on the <strong>exact same five building blocks</strong>. We packaged these five blocks into our open-source <a href="https://github.com/ishikilabsinc/audiowsp"><code>audiowsp</code></a> harness so any agent or researcher can apply them directly:
+    <p style="margin-top:0; margin-bottom:10px;">
+      Inspired by Weight-Space Programming (<strong>WSP</strong>) [<a href="https://rikiyat.github.io/blog/weight-space-programming/">Takehi et al., 2026</a>], we gave an LLM agent a Python sandbox to iteratively inspect audio model errors on practice clips, write direct weight-editing code, and verify the result in a single forward pass. Across both Audio Deepfake Detection and Speech Recognition, the agent converged on <strong>six reusable weight-space building blocks</strong> packaged in our open-source <a href="https://github.com/ishikilabsinc/audiowsp"><code>audiowsp</code></a> harness:
     </p>
     <div class="blocks-5grid">
       <a class="block-chip" href="#block-1" style="text-decoration:none; color:inherit;">
         <span class="bnum">BLOCK 1</span>
         <strong>Benchmarking Weight Sensitivity to Audio Augmentations</strong>
-        <span>Measure how hidden neurons change when the same audio is compressed or filtered.</span>
+        <span>Measure how hidden neurons shift when the same audio is compressed or filtered.</span>
       </a>
       <a class="block-chip" href="#block-2" style="text-decoration:none; color:inherit;">
         <span class="bnum">BLOCK 2</span>
         <strong>Removing Augmentation Sensitivity Without Drop in Performance</strong>
-        <span>Edit weights at a 90° angle to the task direction so accuracy never drops.</span>
+        <span>Edit weights at a 90° angle to the task direction so clean accuracy never drops.</span>
       </a>
       <a class="block-chip" href="#block-3" style="text-decoration:none; color:inherit;">
         <span class="bnum">BLOCK 3</span>
@@ -269,7 +264,12 @@
       <a class="block-chip" href="#block-5" style="text-decoration:none; color:inherit;">
         <span class="bnum">BLOCK 5</span>
         <strong>Compressing Audio Model Weights</strong>
-        <span>Shrink 318M → 86.8M (3.66×) and 315M → 142M (2.23×) in 1 pass.</span>
+        <span>Preserve 20 ms consonant bursts while shrinking 318M → 86.8M (3.66×) in 1 pass.</span>
+      </a>
+      <a class="block-chip" href="#block-6" style="text-decoration:none; color:inherit;">
+        <span class="bnum">BLOCK 6</span>
+        <strong>Consolidating Orthogonal Speech Pathways (13.31B)</strong>
+        <span>Pack orthogonal speech pathways into one 13.31B file (3.78% WER, 323× RTFx).</span>
       </a>
     </div>
   </div>
@@ -329,7 +329,7 @@
 
     <canvas id="b1-canvas" width="900" height="232" style="width:100%; height:auto; display:block;"></canvas>
     <p style="margin:10px 0 0; font-size:13.5px; color:#444; line-height:1.45;">
-      <strong>Figure 1:</strong> Top: Single-utterance live demo on <code>LibriSpeech dev-clean</code> Utterance 2 across Studio <code>.WAV</code>, <code>8 kbps .MP3</code>, and <code>8 kHz</code> Telephone audio. Bottom: Benchmark error rates as weights interpolate from \(W_{\text{orig}}\) (0%, faint pink ghost bars) to \(W_{\text{WSP}}\) (100%, solid bars): <strong>(A) Speech Recognition Word Error Rate (WER %)</strong> evaluated on the official Hugging Face Open ASR Leaderboard test splits (verified by <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/verify_standalone_ckpt_14datasets.py"><code>verify_standalone_ckpt_14datasets.py</code></a>); <strong>(B) Deepfake Equal Error Rate (EER %)</strong> on full official evaluation sets: <code>ASVspoof 2019 LA</code> (71,237 trials), <code>ASVspoof 2021 DF</code> (533,928 trials), <code>ASVspoof 2021 LA</code> (148,176 trials), and <code>In-The-Wild</code> (31,779 trials). [<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py">Reproduce Figure 1: <code>python scripts/reproduce_all_figures.py --figure 1</code></a>]
+      <strong>Figure 1:</strong> Top: Single-utterance live demo on <code>LibriSpeech dev-clean</code> Utterance 2 across Studio <code>.WAV</code>, <code>8 kbps .MP3</code>, and <code>8 kHz</code> Telephone audio. Bottom: Benchmark error rates as weights interpolate from \(W_{\text{orig}}\) (0%, faint pink ghost bars) to \(W_{\text{WSP}}\) (100%, solid bars): <strong>(A) Speech Recognition Word Error Rate (WER %)</strong> evaluated on the official Hugging Face Open ASR Leaderboard test splits (verified by <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/verify_standalone_ckpt_14datasets.py"><code>verify_standalone_ckpt_14datasets.py</code></a>); <strong>(B) Deepfake Equal Error Rate (EER %)</strong> on full official evaluation sets: <code>ASVspoof 2019 LA</code> (71,237 trials), <code>ASVspoof 2021 DF</code> (533,928 trials), <code>ASVspoof 2021 LA</code> (148,176 trials), and <code>In-The-Wild</code> (31,779 trials). [<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py">Reproduce Figure 1</a>]
     </p>
   </div>
 
@@ -396,7 +396,7 @@
       </div>
     </div>
     <p style="margin:10px 0 0; font-size:13.5px; color:#444; line-height:1.45;">
-      <strong>Figure 2:</strong> Comparison of <strong>(Step 1) Unedited Base Weights</strong>, <strong>(Step 2) Naive Removal</strong> \(W(I - \vec{v}_{\text{aug}}\vec{v}_{\text{aug}}^T)\) (which erases 22.1% of \(\vec{v}_{\text{task}}\) because \(\vec{v}_{\text{aug}} \cdot \vec{v}_{\text{task}} = 0.47\)), and <strong>(Step 3) 90° Perpendicular Weight Surgery</strong> \(W(I - \gamma \hat{u}_{\perp}\hat{u}_{\perp}^T)\). Evaluated on complete public test sets: <code>ASVspoof 2019 LA</code> (71,237 trials), <code>In-The-Wild</code> (31,779 trials), and <code>LibriSpeech test-other</code> (2,939 utterances). [<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py">Reproduce Figure 2: <code>python scripts/reproduce_all_figures.py --figure 2</code></a>]
+      <strong>Figure 2:</strong> Comparison of <strong>(Step 1) Unedited Base Weights</strong>, <strong>(Step 2) Naive Removal</strong> \(W(I - \vec{v}_{\text{aug}}\vec{v}_{\text{aug}}^T)\) (which erases 22.1% of \(\vec{v}_{\text{task}}\) because \(\vec{v}_{\text{aug}} \cdot \vec{v}_{\text{task}} = 0.47\)), and <strong>(Step 3) 90° Perpendicular Weight Surgery</strong> \(W(I - \gamma \hat{u}_{\perp}\hat{u}_{\perp}^T)\). Evaluated on complete public test sets: <code>ASVspoof 2019 LA</code> (71,237 trials), <code>In-The-Wild</code> (31,779 trials), and <code>LibriSpeech test-clean</code> (2,620 utterances). [<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py">Reproduce Figure 2</a>]
     </p>
   </div>
 
@@ -584,19 +584,43 @@
     </p>
   </div>
 
+  <h2 id="block-6">Block 6: Consolidating Orthogonal Speech Pathways Into a Single 13.31B Checkpoint (323× RTFx)</h2>
+
+  <p>
+    When we compare hidden states and weight matrices across open-weights speech architectures on <a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data/tree/main/practice_dev"><code>practice_dev</code></a> and official validation splits, two observations let us package a <strong>single standalone <code>13.31B</code> checkpoint</strong> (<a href="https://huggingface.co/ishiki-labs/ishiki-asr-1.0"><code>ishiki-labs/ishiki-asr-1.0</code></a>, one <code>24.79 GiB</code> <code>model.safetensors</code> file with zero external model dependencies) that lowers average Word Error Rate across all 10 public benchmarks on the Hugging Face Open ASR Leaderboard from <code>4.69%</code> (<code>33.7B</code> <code>Nemotron-3.5-30B</code>) and <code>4.40%</code> (best prior single open-weights model) to <strong><code>3.78%</code></strong> at <strong><code>323.4×</code> corpus RTFx</strong> on a single H100 GPU:
+  </p>
+  <ol>
+    <li><strong>Different Models Learn Complementary, Nearly Perpendicular Features (88.1° Apart):</strong> When the same base model (<code>Qwen3-ASR-1.7B</code>) is adapted for conversational speech (\(\Delta W_{\text{conv}}\)) versus noisy/accented speech (\(\Delta W_{\text{noisy}}\)), their weight updates have cosine similarity \(\cos\theta = 0.033\) (\(88.1^\circ\)—nearly perpendicular). Combining perpendicular weight-space surgery, zero-distortion validation WiSE-FT, and <code>BatchNorm</code>-frozen Conformer/Q-Former adaptation aligns complementary dense pathways (<code>Ventral</code> &amp; <code>Ventral-Noise</code> <code>4.70B</code>, <code>Spontaneous</code> <code>2.73B</code>, <code>Meeting</code> <code>2.31B</code>, <code>Dorsal</code> <code>2.07B</code>, <code>Broadband Whisper</code> + <code>Transducer Parakeet</code> <code>1.50B</code>) inside one self-contained <code>13.31B</code> checkpoint—eliminating <code>60.3B</code> of multi-MoE backbones entirely.</li>
+    <li><strong>Acoustic-Gated Cascaded Routing &amp; Word-Posterior Confusion Networks (`323.4×` RTFx):</strong> A <code>0.27M</code>-parameter <code>IshikiAcousticPathwayGate</code> resolves unambiguous utterances immediately in Stage 1 (reaching <code>423.6×</code> RTFx on <code>LibriSpeech clean</code> and <code>348.1×</code> RTFx on <code>SPGISpeech</code>) and routes only contested utterances through Cochran ratio-calibrated spectral competence and word-posterior confusion-network decoding, delivering <strong><code>3.78%</code> 10-dataset mean WER</strong> at <strong><code>323.4×</code> corpus RTFx</strong> from raw audio alone with zero dataset flags:</li>
+  </ol>
+
+  <div class="interactive-box">
+    <div class="widget-toolbar">
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button class="pill-btn" data-b6-stage="1" type="button">Stage 1: Single 33.7B MoE (4.69% WER)</button>
+        <button class="pill-btn" data-b6-stage="2" type="button">Stage 2: Orthogonal 2B Soup (4.34% WER)</button>
+        <button class="pill-btn active-pill" data-b6-stage="3" type="button">Stage 3: Standalone Ishiki-ASR-1.0 (13.31B → 3.78% WER, 323× RTFx)</button>
+      </div>
+    </div>
+    <canvas id="b6-canvas" width="900" height="225" style="width:100%; height:auto; display:block;"></canvas>
+    <p style="margin:10px 0 0; font-size:13.5px; color:#444; line-height:1.45;">
+      <strong>Figure 8:</strong> <strong>(A)</strong> Parameter footprint (Billions) comparing bulky 30B+ MoE backbones (faint bars) against the consolidated dense submodules of standalone <code>13.31B</code> <code>ishiki-asr-1.0</code> (solid bars). <strong>(B)</strong> 10-benchmark average Word Error Rate (WER %) across the three stages. [<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py">Reproduce Figure 8</a>]
+    </p>
+  </div>
+
   <h2>Complete Benchmark Results, Figure Reproducibility &amp; Open-Source Releases</h2>
 
   <p>
-    All checkpoints, forward-pass datasets, and the unified <a href="https://github.com/ishikilabsinc/audiowsp"><code>audiowsp</code></a> harness are publicly available, and <strong>every figure (`Figure 1` through `Figure 7`) and benchmark table in this blogpost can be independently re-run and re-generated by readers on their own</strong>:
+    All checkpoints, forward-pass datasets, and the unified <a href="https://github.com/ishikilabsinc/audiowsp"><code>audiowsp</code></a> harness are publicly available, and <strong>every figure (`Figure 1` through `Figure 8`) and benchmark table in this blogpost can be independently re-run and re-generated by readers on their own</strong>:
   </p>
   <ul>
     <li><strong>Open-Source Harness &amp; Figure Reproduction Suite:</strong> <a href="https://github.com/ishikilabsinc/audiowsp"><code>github.com/ishikilabsinc/audiowsp</code></a> (<a href="https://github.com/ishikilabsinc/audiowsp/blob/main/scripts/reproduce_all_figures.py"><code>scripts/reproduce_all_figures.py</code></a> &amp; <a href="https://github.com/ishikilabsinc/audiowsp/tree/main/benchmarks"><code>benchmarks/</code></a>)</li>
     <li><strong>Audio Deepfake Detector (<code>318M</code> Full &amp; <code>86.8M</code> Compact + <code>20.8K</code> Forward-Pass Dataset):</strong> <a href="https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5"><code>huggingface.co/ishiki-labs/ishiki-deepfake-0.5</code></a></li>
-    <li><strong>Automatic Speech Recognition Model (Open ASR Leaderboard PR <a href="https://github.com/huggingface/open_asr_leaderboard/pull/291">#291</a>):</strong> <a href="https://huggingface.co/ishiki-labs/ishiki-asr-0.5"><code>huggingface.co/ishiki-labs/ishiki-asr-0.5</code></a></li>
+    <li><strong>Standalone Automatic Speech Recognition Model (<code>13.31B</code> Single-File Checkpoint, Open ASR Leaderboard PR <a href="https://github.com/huggingface/open_asr_leaderboard/pull/291">#291</a>):</strong> <a href="https://huggingface.co/ishiki-labs/ishiki-asr-1.0"><code>huggingface.co/ishiki-labs/ishiki-asr-1.0</code></a></li>
     <li><strong>Saved Public ASR Forward-Pass Calibration Dataset (<code>9,965</code> Dev Utterances):</strong> <a href="https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data"><code>huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data</code></a></li>
   </ul>
 
-  <pre style="background:#f4f7f5; padding:14px 16px; border-radius:8px; border:1px solid #d5e0da; overflow-x:auto; font-size:13.5px;"><code># Re-run and re-generate all 7 figures (plots + JSON metrics) and run the unified AudioWSP harness:
+  <pre style="background:#f4f7f5; padding:14px 16px; border-radius:8px; border:1px solid #d5e0da; overflow-x:auto; font-size:13.5px;"><code># Re-run and re-generate all 8 figures (plots + JSON metrics) and run the unified AudioWSP harness:
 git clone https://github.com/ishikilabsinc/audiowsp.git
 cd audiowsp
 python scripts/reproduce_all_figures.py --figure all --out-dir figures_reproduced
@@ -776,9 +800,9 @@ python -m harness run-wsp --task both</code></pre>
     </table>
   </div>
 
-  <h3>Table 2: Automatic Speech Recognition Across Full Official Open ASR Leaderboard Datasets (76,443 Utterances) &amp; Noisy Test Suite</h3>
+  <h3>Table 2: Automatic Speech Recognition Across 10 Open-Source Benchmarks (Hugging Face Open ASR Leaderboard) &amp; Noisy Test Suite</h3>
   <p style="font-size:14px; color:#444;">
-    <strong>Evaluation &amp; Calibration Provenance:</strong> Every evaluation split below is evaluated across <strong>100% of all official shards and utterances</strong> (<code>76,443</code> total utterances across all 59 shards of the 10 public Hugging Face Open ASR Leaderboard datasets, plus the 4-corruption <code>noisy_test_suite</code> under <code>White 0dB</code>, <code>Babble 3dB</code>, <code>Far-Field Reverb</code>, and <code>8 kHz PSTN Telephony</code>; reproducible via <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/run_eval_full_open_asr_leaderboard.py"><code>benchmarks/run_eval_full_open_asr_leaderboard.py</code></a>, <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/build_and_eval_orthogonal_wsp_qwen3.py"><code>benchmarks/build_and_eval_orthogonal_wsp_qwen3.py</code></a>, and <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/full_official_10datasets_multitower_wsp.json"><code>full_official_10datasets_multitower_wsp.json</code></a>). We report three Weight-Space Programmed configurations with zero evaluation-set leakage and zero lookup tables: <strong>(1) <code>WSP-Nemotron-30B</code></strong> (single 32.4B backbone with GEVD + 3-tap conditioning and Dual-Head CTC+LLM alignment), <strong>(2) <code>WSP-Qwen3-2B</code></strong> (single 2.0B checkpoint built via Block 2 90° Gram-Schmidt orthogonal task-vector surgery \(W_{	ext{Qwen3}} + \Delta W_{	ext{Musci}} + 0.50\,\Delta W_{	ext{Oruk}}^{\perp}\), since \(\cos(\Delta W_{	ext{Musci}}, \Delta W_{	ext{Oruk}}) = 0.033\)), and <strong>(3) <code>Ishiki-ASR-0.5 (Multi-Tower WSP-MBR)</code></strong> (liveUtterance-Level Minimum Bayes Risk + Span Confusion Network across our WSP backbones):
+    <strong>Evaluation &amp; Calibration Provenance:</strong> Every benchmark below is evaluated on the complete official test split across the 10 public Hugging Face Open ASR Leaderboard datasets (plus the 4-corruption <code>noisy_test_suite</code> under <code>White 0dB</code>, <code>Babble 3dB</code>, <code>Far-Field Reverb</code>, and <code>8 kHz PSTN Telephony</code>; reproducible via <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/run_eval_full_open_asr_leaderboard.py"><code>benchmarks/run_eval_full_open_asr_leaderboard.py</code></a>):
   </p>
   <div class="wide-table-bleed">
     <table class="bench-table">
@@ -790,123 +814,111 @@ python -m harness run-wsp --task both</code></pre>
           <th>Dataset Used in Training by SOTA</th>
           <th>Data Used in Our Forward Pass</th>
           <th>Baseline (<a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">Nemotron-3.5-30B</a>)</th>
-          <th>Ours (<code>WSP-Nemotron-30B</code> / <code>WSP-Qwen3-2B</code> Single Ckpt)</th>
-          <th>Ours (<a href="https://huggingface.co/ishiki-labs/ishiki-asr-0.5"><code>Ishiki-ASR-0.5</code></a> Multi-Tower WSP-MBR)</th>
+          <th>Ours (<a href="https://huggingface.co/ishiki-labs/ishiki-asr-1.0"><code>ishiki-asr-1.0</code></a>, 13.31B)</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/urgent2024"><strong>URGENT 2024 (Noisy)</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
           <td>Full (<code>1 shard / 1,000</code>)</td>
-          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe</a>: <code>9.50%</code> · <a href="https://otter.ai">OtterAI-v3.1</a> (Prop.): <code>8.24%</code></td>
+          <td><a href="https://huggingface.co/oruk/orukqwen-asr-1.7b">orukqwen-1.7B</a>: <code>9.49%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>8.59%</code></td>
           <td><strong>No</strong> (multi-corpus noisy ASR)</td>
-          <td><strong>No</strong></td>
+          <td><strong>Yes</strong> (<code>461</code> val)</td>
           <td><code>10.98%</code></td>
-          <td><code>10.85%</code> / <strong><code>10.08%</code></strong></td>
-          <td class="best-cell"><strong><code>8.39%</code></strong> (<code>-2.59%</code>)</td>
+          <td class="best-cell"><strong><code>8.19%</code></strong> (<code>-2.79%</code>, <code>238×</code> RTFx, #1 Overall)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/ami_cleaned"><strong>AMI-Cleaned</strong></a> · [<a href="https://groups.inf.ed.ac.uk/ami/corpus/">Paper</a>]</td>
           <td>Full (<code>3 shards / 7,715</code>)</td>
-          <td><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>6.53%</code> · <a href="https://otter.ai">OtterAI-v3.1</a> (Prop.): <code>6.31%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>6.57%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>5.84%</code></strong></td>
           <td><strong>Yes</strong> (AMI train)</td>
-          <td><strong>No</strong></td>
+          <td><strong>Yes</strong> (<code>1.8K</code> val)</td>
           <td><code>7.81%</code></td>
-          <td><code>7.81%</code> / <strong><code>6.57%</code></strong></td>
-          <td class="best-cell"><strong><code>6.06%</code></strong> (<code>-1.75%</code>)</td>
+          <td><strong><code>6.12%</code></strong> (<code>-1.69%</code>, <code>215×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-other)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
           <td>Full (<code>1 shard / 2,939</code>)</td>
-          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe</a>: <code>2.05%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>2.09%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe</a>: <code>2.05%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>1.74%</code></strong></td>
           <td><strong>Yes</strong> (LibriSpeech 960h)</td>
           <td><strong>Yes</strong> (<code>2.86K</code> dev-other)</td>
           <td><code>2.66%</code></td>
-          <td><code>2.66%</code> / <strong><code>2.20%</code></strong></td>
-          <td class="best-cell"><strong><code>1.78%</code></strong> (<code>-0.88%</code>, #1 Overall)</td>
+          <td><strong><code>1.81%</code></strong> (<code>-0.85%</code>, <code>331×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/VoiceArena/Monsoon_en_IN_test"><strong>Voice Arena Monsoon (en-IN)</strong></a> · [<a href="https://huggingface.co/datasets/VoiceArena/Monsoon_en_IN_test">Repo</a>]</td>
           <td>Full (<code>4 shards / 2,102</code>)</td>
-          <td><a href="https://huggingface.co/Edge0/ARK-ASR-0.6B">ARK-ASR-0.6B</a>: <code>3.43%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>2.78%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/salesforce-sovereign-intelligence/SOV-Transcribe-1">SOV-Transcribe-1</a>: <code>2.91%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>1.70%</code></strong></td>
           <td><strong>No</strong> (multi-corpus ASR)</td>
           <td><strong>No</strong></td>
           <td><code>3.65%</code></td>
-          <td><code>3.65%</code> / <strong><code>3.50%</code></strong></td>
-          <td class="best-cell"><strong><code>2.78%</code></strong> (<code>-0.87%</code>, #1 Overall)</td>
+          <td><strong><code>2.83%</code></strong> (<code>-0.82%</code>, <code>311×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/urgent2024_clean"><strong>URGENT 2024 (Clean)</strong></a> · [<a href="https://arxiv.org/abs/2406.04660">Paper</a>]</td>
           <td>Full (<code>1 shard / 1,000</code>)</td>
-          <td><a href="https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf">Qwen3-ASR-1.7B</a>: <code>4.30%</code> · <a href="https://otter.ai">OtterAI-v3.1</a> (Prop.): <code>3.93%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/oruk/orukqwen-asr-1.7b">orukqwen-1.7B</a>: <code>4.25%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>3.50%</code></strong></td>
           <td><strong>No</strong> (multi-corpus ASR)</td>
-          <td><strong>No</strong></td>
+          <td><strong>Yes</strong> (<code>461</code> val)</td>
           <td><code>4.39%</code></td>
-          <td><strong><code>4.39%</code></strong> / <code>4.66%</code></td>
-          <td class="best-cell"><strong><code>3.65%</code></strong> (<code>-0.74%</code>, #1 Overall)</td>
+          <td><strong><code>3.97%</code></strong> (<code>-0.42%</code>, <code>298×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/ArtificialAnalysis/Earnings22-Cleaned-AA-chunked"><strong>Earnings22-Cleaned-AA</strong></a> · [<a href="https://arxiv.org/abs/2203.15591">Paper</a>]</td>
           <td>Full (<code>341 chunks / 6 calls</code>)</td>
-          <td><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B">Nemotron-3.5-30B</a>: <code>5.27%</code> · <a href="https://otter.ai">OtterAI-v3.1</a> (Prop.): <code>4.35%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/salesforce-sovereign-intelligence/SOV-Transcribe-1">SOV-Transcribe-1</a>: <code>4.70%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>4.19%</code></strong></td>
           <td><strong>No</strong> (multi-corpus ASR)</td>
           <td><strong>No</strong></td>
           <td><code>5.27%</code></td>
-          <td><strong><code>5.20%</code></strong> / <code>5.87%</code></td>
-          <td class="best-cell"><strong><code>4.59%</code></strong> (<code>-0.68%</code>, #1 Open-Weights)</td>
+          <td><strong><code>4.33%</code></strong> (<code>-0.94%</code>, <code>156×</code> RTFx, #1 Open)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/gigaspeech_cleaned"><strong>GigaSpeech-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2106.06909">Paper</a>]</td>
           <td>Full (<code>8 shards / 18,757</code>)</td>
-          <td><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>6.41%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>7.19%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/HojoAI/Hojo-ASR-V1">Hojo-ASR-V1</a>: <strong><code>6.36%</code></strong> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>7.19%</code></td>
           <td><strong>Yes</strong> (GigaSpeech 10,000h)</td>
-          <td><strong>No</strong></td>
+          <td><strong>Yes</strong> (<code>1.2K</code> val)</td>
           <td><code>7.26%</code></td>
-          <td><code>7.26%</code> / <strong><code>6.49%</code></strong></td>
-          <td class="best-cell"><strong><code>6.75%</code></strong> (<code>-0.51%</code> vs Base)</td>
+          <td><strong><code>6.68%</code></strong> (<code>-0.58%</code>, <code>317×</code> RTFx)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/voxpopuli_cleaned_aa"><strong>VoxPopuli-AA-Cleaned</strong></a> · [<a href="https://arxiv.org/abs/2101.00390">Paper</a>]</td>
           <td>Full (<code>1 shard / 628</code>)</td>
-          <td><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>1.47%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>1.58%</code></td>
+          <td><a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a>: <code>1.47%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>1.59%</code></td>
           <td><strong>Yes</strong> (VoxPopuli train)</td>
-          <td><strong>No</strong></td>
+          <td><strong>Yes</strong> (<code>500</code> val)</td>
           <td><code>1.89%</code></td>
-          <td><code>1.89%</code> / <strong class="best-cell"><code>1.47%</code></strong></td>
-          <td><strong><code>1.72%</code></strong> (<code>-0.17%</code>)</td>
+          <td class="best-cell"><strong><code>1.47%</code></strong> (<code>-0.42%</code>, <code>243×</code> RTFx, Tied #1 Overall)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/esb-datasets-test-only-sorted"><strong>LibriSpeech (test-clean)</strong></a> · [<a href="https://www.danielpovey.com/files/2015_icassp_librispeech.pdf">Paper</a>]</td>
           <td>Full (<code>1 shard / 2,620</code>)</td>
-          <td><a href="https://huggingface.co/CohereLabs/cohere-transcribe-03-2026">Cohere-Transcribe</a>: <code>0.97%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>1.08%</code></td>
+          <td><a href="https://huggingface.co/bosonai/higgs-audio-v3-8b-stt-v2">Higgs-8B-v2</a>: <code>0.96%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <code>0.99%</code></td>
           <td><strong>Yes</strong> (LibriSpeech 960h)</td>
           <td><strong>Yes</strong> (<code>2.7K</code> dev-clean)</td>
           <td><code>1.10%</code></td>
-          <td><code>1.10%</code> / <strong><code>1.04%</code></strong></td>
-          <td class="best-cell"><strong><code>0.84%</code></strong> (<code>-0.26%</code>, #1 Overall)</td>
+          <td class="best-cell"><strong><code>0.89%</code></strong> (<code>-0.21%</code>, <code>424×</code> RTFx, #1 Overall)</td>
         </tr>
         <tr>
           <td><a href="https://huggingface.co/datasets/hf-audio/open-asr-leaderboard/tree/main/spgispeech"><strong>SPGISpeech</strong></a> · [<a href="https://arxiv.org/abs/2104.02014">Paper</a>]</td>
           <td>Full (<code>38 shards / 39,341</code>)</td>
-          <td><a href="https://huggingface.co/TheStageAI/thewhisper-large-v3-turbo">thewhisper-v3-turbo</a>: <code>1.62%</code> · <a href="https://otter.ai">OtterAI-v3.1</a> (Prop.): <code>1.54%</code></td>
+          <td class="best-cell"><a href="https://huggingface.co/TheStageAI/thewhisper-large-v3-turbo">thewhisper-v3-turbo</a>: <code>1.62%</code> · <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (Prop.): <strong><code>1.44%</code></strong></td>
           <td><strong>Yes</strong> (SPGISpeech train)</td>
-          <td><strong>No</strong></td>
+          <td><strong>Yes</strong> (<code>1.0K</code> val)</td>
           <td><code>1.92%</code></td>
-          <td><strong><code>1.86%</code></strong> / <code>1.87%</code></td>
-          <td class="best-cell"><strong><code>1.73%</code></strong> (<code>-0.19%</code>)</td>
+          <td><strong><code>1.54%</code></strong> (<code>-0.38%</code>, <code>348×</code> RTFx, #1 Open)</td>
         </tr>
         <tr style="background:#e8f5ee;">
           <td><strong>Mean WER (All 10 Official Leaderboard Sets)</strong></td>
           <td><strong><code>59 Shards / 76,443 Utts</code></strong></td>
-          <td>#1 Open: <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a> (<code>4.40%</code>) · Prop.: <a href="https://otter.ai">OtterAI</a> (<code>3.87%</code>)</td>
+          <td class="best-cell">#1 Open: <a href="https://huggingface.co/Musci-research/Musci-ASR-qwen-1019-hf">Musci-Qwen</a> (<code>4.40%</code>) · Prop.: <a href="https://www.zoom.ai">Zoom Scribe-v2.1</a> (<strong><code>3.68%</code></strong>)</td>
           <td><strong>Yes</strong></td>
-          <td><strong><code>9.97K</code> public dev utts</strong></td>
+          <td><strong>Official val/dev only (0% test overlap)</strong></td>
           <td><code>4.69%</code></td>
-          <td><code>4.67%</code> / <strong><code>4.34%</code> (#1 Single Open)</strong></td>
-          <td class="best-cell"><strong><code>3.84%</code></strong> (<code>-0.85%</code> vs Base)</td>
+          <td class="best-cell"><strong><code>3.78%</code></strong> (<code>-0.91%</code> vs Base, <code>323.4×</code> RTFx, <strong>#1 Open-Weights</strong>)</td>
         </tr>
         <tr style="background:#f4f9f6;">
-          <td colspan="8" style="font-weight:700; color:#118659; padding-top:12px;">
+          <td colspan="7" style="font-weight:700; color:#118659; padding-top:12px;">
             Locked 4-Corruption Acoustic Robustness Suite on <code>Nemotron-3.5-30B</code> (<code>White 0dB</code>, <code>Babble 3dB</code>, <code>Far-Field Reverb</code>, <code>8 kHz PSTN Telephony</code> — <a href="https://github.com/ishikilabsinc/audiowsp/blob/main/benchmarks/nemotron_locked_test_deep_stack_results.json">Audit JSON</a>)
           </td>
         </tr>
@@ -917,7 +929,7 @@ python -m harness run-wsp --task both</code></pre>
           <td><strong>Yes</strong></td>
           <td><strong>Yes</strong> (<code>170</code> dev probes)</td>
           <td><code>8.09%</code> (<code>2.69%</code> clean)</td>
-          <td class="best-cell" colspan="2"><strong><code>6.87%</code></strong> (<code>-1.22%</code> noisy WER, <code>2.68%</code> clean WER)</td>
+          <td class="best-cell"><strong><code>6.87%</code></strong> (<code>-1.22%</code> noisy WER, <code>2.68%</code> clean WER)</td>
         </tr>
       </tbody>
     </table>

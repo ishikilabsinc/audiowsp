@@ -1,6 +1,6 @@
 # AudioWSP: Weight-Space Programming & One-Forward-Pass Optimization for Audio Models
 
-[**Interactive Research Blogpost**](https://aksy1999.github.io/blog/weight-space-programming-for-audio-models/) | [**Audio Deepfake Model (`ishiki-deepfake-0.5`, 86.8M / 318M)**](https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5) | [**Speech Recognition Model (`ishiki-asr-0.5`)**](https://huggingface.co/ishiki-labs/ishiki-asr-0.5) | [**Calibration & Evaluation Dataset (`audiowsp-asr-calibration-data`)**](https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data)
+[**Interactive Research Blogpost**](https://aksy1999.github.io/blog/weight-space-programming-for-audio-models/) | [**Audio Deepfake Model (`ishiki-deepfake-0.5`, 86.8M / 318M)**](https://huggingface.co/ishiki-labs/ishiki-deepfake-0.5) | [**Speech Recognition Model (`ishiki-asr-1.0`, 13.31B)**](https://huggingface.co/ishiki-labs/ishiki-asr-1.0) | [**Calibration & Evaluation Dataset (`audiowsp-asr-calibration-data`)**](https://huggingface.co/datasets/ishiki-labs/audiowsp-asr-calibration-data)
 
 `audiowsp` (`harness/audiowsp.py`) is the unified open-source Python repository accompanying **"Weight-Space Programming for Audio Models: LLMs Can Directly Edit Audio Model Weights and Compress Them"** by **Amit Kumar Singh Yadav** and **Robert Xu** (*Ishiki Labs Research*, Nov 2026).
 
@@ -17,6 +17,7 @@ All five building blocks execute inside `torch.inference_mode()` (`1 Forward Pas
 3. **Block 3 — Increasing Context Across Layers (`MultiTapTemporalLifter` & `lift_rectified_quadratic_rkhs`)**: Wires earlier-layer skip connections (`L8`, `L16`), $K$-tap adjacent-frame differences $[h_{t-1}, h_t, h_{t+1}]$ (velocity $\Delta_1$ and glitch curvature $\Delta_2$), and one-sided squared anomaly features $\log(1 + \max(0, z \cdot \text{sign}(\Delta\mu))^2)$.
 4. **Block 4 — Finding the Optimal Weights in One Forward Pass (`OneForwardPassOptimizer` / `OFP`)**: Solves globally for readout and bridge weights in `torch.inference_mode()` (`1` forward pass, `0` backward passes) using boundary-precision sample weighting $\Pi$, Dual-Space Woodbury inversion, and exact augmentation-nulling constraints ($C_{\text{aug}}^T W = 0$).
 5. **Block 5 — Compressing Audio Model Weights (`OTVelocityCompressor` / `OT-SVD`)**: Compresses linear and Transformer layers in the joint static + transition-velocity metric $\Sigma_{\text{joint}} = \text{Cov}(Z_t) + 2\,\text{Cov}(Z_t - Z_{t-1})$ with Optimal-Transport marginal variance restoration (`318M -> 86.8M` deepfake detector; `315M -> 142M` `Wav2Vec2-Large` ASR).
+6. **Block 6 — Consolidating Orthogonal Speech Pathways (`ishiki-labs/ishiki-asr-1.0`, `13.31B`)**: Consolidates perpendicular WSP-adapted speech pathways into a single self-contained `24.79 GiB` `model.safetensors` checkpoint achieving **`3.78%` 10-Dataset Public Mean WER** at **`323.4x` Corpus RTFx** across all `76,443` utterances of the Hugging Face Open ASR Leaderboard ([PR #291](https://github.com/huggingface/open_asr_leaderboard/pull/291)).
 
 ---
 

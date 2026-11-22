@@ -241,11 +241,11 @@
       ctx.fillText("Task Direction v_task", ox + 75, oy + 20);
 
       // Raw augmentation direction v_aug
-      const rx = ox + 128;
-      const ry = oy - 118;
+      const rx = ox + 104;
+      const ry = oy - 114;
       drawArrow(ox, oy, rx, ry, "#d93a4b", 2.4);
       ctx.fillStyle = "#d93a4b";
-      ctx.fillText("Raw Augmentation v_aug (dot product = 0.47)", rx + 8, ry + 8);
+      ctx.fillText("Raw Augmentation v_aug (cos θ = 0.47)", rx + 6, ry + 8);
 
       if (step === "2") {
         drawArrow(ox, oy, ox + 195, oy, "#e67e22", 4);
@@ -991,6 +991,131 @@
     draw();
   }
 
+  // =========================================================================
+  // BLOCK 6: Consolidating Orthogonal Speech Pathways (13.31B, 3.79% WER, 323x RTFx)
+  // =========================================================================
+  function initBlock6Widget() {
+    const canvas = document.getElementById("b6-canvas");
+    if (!canvas) return;
+    const btns = document.querySelectorAll("[data-b6-stage]");
+    let stage = "3";
+
+    const compBars = [
+      { label: "Nemotron MoE", before: 33.7, after: 0.0 },
+      { label: "Ventral×2", before: 4.70, after: 4.70 },
+      { label: "Spont+Meet", before: 5.04, after: 5.04 },
+      { label: "Dorsal+TDT+W", before: 3.57, after: 3.57 },
+    ];
+
+    const stageBars = [
+      { id: "1", label: "Single (33.7B)", wer: 4.69 },
+      { id: "2", label: "2B Soup (2.0B)", wer: 4.34 },
+      { id: "3", label: "Ishiki-1.0 (13.3B)", wer: 3.78 },
+    ];
+
+    function draw() {
+      const { ctx, W, H } = getHiDPICtx(canvas);
+      ctx.clearRect(0, 0, W, H);
+
+      const pw = (W - 22) / 2;
+
+      // Left Panel: Clean Vertical Bar Chart of Component Sizes (Billions)
+      ctx.fillStyle = "#fafcfb";
+      ctx.strokeStyle = "#d5e0da";
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(0, 0, pw, H);
+      ctx.strokeRect(0, 0, pw, H);
+
+      ctx.fillStyle = "#1b3b2b";
+      ctx.font = "700 13px 'Source Sans 3', sans-serif";
+      ctx.fillText("A. Architecture Footprint (Billions) — Total: 13.31B", 14, 24);
+
+      const chartH = H - 72;
+      const baseY = H - 32;
+      const bwA = 56;
+      const gapA = 36;
+      const startXA = 32;
+
+      compBars.forEach((b, i) => {
+        const bx = startXA + i * (bwA + gapA);
+        const hBefore = (b.before / 38.0) * chartH;
+        const curVal =
+          stage === "1" ? (i === 0 ? 33.7 : 0) : stage === "2" ? (i === 1 ? 2.04 : 0) : b.after;
+        const hCur = (curVal / 38.0) * chartH;
+
+        // Ghost bar (uncompressed)
+        ctx.fillStyle = "rgba(217, 58, 75, 0.16)";
+        ctx.fillRect(bx, baseY - hBefore, bwA, hBefore);
+        ctx.strokeStyle = "rgba(217, 58, 75, 0.40)";
+        ctx.strokeRect(bx, baseY - hBefore, bwA, hBefore);
+
+        // Current bar
+        ctx.fillStyle = stage === "3" ? "#118659" : stage === "2" ? "#e67e22" : "#d93a4b";
+        ctx.fillRect(bx, baseY - hCur, bwA, hCur);
+
+        ctx.fillStyle = "#111";
+        ctx.font = "700 11px 'JetBrains Mono', monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`${curVal.toFixed(1)}B`, bx + bwA / 2, baseY - Math.max(hBefore, hCur) - 6);
+
+        ctx.fillStyle = "#333";
+        ctx.font = "600 11px 'Source Sans 3', sans-serif";
+        ctx.fillText(b.label, bx + bwA / 2, baseY + 18);
+      });
+
+      // Right Panel: Clean Vertical Bar Chart of 10-Benchmark Mean WER (%)
+      const rx0 = pw + 22;
+      ctx.fillStyle = "#fafcfb";
+      ctx.strokeStyle = "#d5e0da";
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(rx0, 0, pw, H);
+      ctx.strokeRect(rx0, 0, pw, H);
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#1b3b2b";
+      ctx.font = "700 13px 'Source Sans 3', sans-serif";
+      ctx.fillText("B. 10-Benchmark Mean WER (%) — Lower Is Better", rx0 + 14, 24);
+
+      const bwB = 76;
+      const gapB = 46;
+      const startXB = rx0 + 44;
+
+      stageBars.forEach((s, i) => {
+        const bx = startXB + i * (bwB + gapB);
+        const hBar = (s.wer / 5.5) * chartH;
+        const isSel = stage === s.id;
+
+        ctx.fillStyle = isSel ? "#118659" : "rgba(17, 134, 89, 0.25)";
+        ctx.fillRect(bx, baseY - hBar, bwB, hBar);
+        if (isSel) {
+          ctx.strokeStyle = "#0b5c3d";
+          ctx.lineWidth = 1.8;
+          ctx.strokeRect(bx, baseY - hBar, bwB, hBar);
+        }
+
+        ctx.fillStyle = isSel ? "#118659" : "#444";
+        ctx.font = "700 11.5px 'JetBrains Mono', monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`${s.wer.toFixed(2)}%`, bx + bwB / 2, baseY - hBar - 7);
+
+        ctx.fillStyle = isSel ? "#111" : "#555";
+        ctx.font = isSel ? "700 11px 'Source Sans 3', sans-serif" : "600 11px 'Source Sans 3', sans-serif";
+        ctx.fillText(s.label, bx + bwB / 2, baseY + 18);
+      });
+      ctx.textAlign = "left";
+    }
+
+    btns.forEach((b) => {
+      b.addEventListener("click", () => {
+        btns.forEach((x) => x.classList.remove("active-pill"));
+        b.classList.add("active-pill");
+        stage = b.getAttribute("data-b6-stage");
+        draw();
+      });
+    });
+    draw();
+  }
+
   window.addEventListener("DOMContentLoaded", () => {
     initBlock1Widget();
     initBlock2AWidget();
@@ -998,5 +1123,6 @@
     initBlock3Circuit();
     initBlock4Scene();
     initBlock5Widget();
+    initBlock6Widget();
   });
 })();

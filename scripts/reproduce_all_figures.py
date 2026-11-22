@@ -275,25 +275,26 @@ def reproduce_figure_7(out_dir: Path) -> dict:
 
 
 def reproduce_figure_8(out_dir: Path) -> dict:
-    """Reproduce Figure 8: Orthogonal Subspace Mining & MoE-SVD Compression (65.30B -> 27.48B, 3.58% 10-set WER)."""
-    print("=== Figure 8: Orthogonal Subspace Mining & MoE-SVD Compression (27.48B) ===")
+    """Reproduce Figure 8: Consolidating Orthogonal Speech Pathways Into Standalone Ishiki-ASR-1.0 (13.31B, 3.78% 10-set WER, 323.4x RTFx)."""
+    print("=== Figure 8: Standalone Ishiki-ASR-1.0 (13.31B, 3.78% 10-Set WER, 323.4x RTFx) ===")
     res = {
         "task_vector_cosine_musci_vs_oruk": 0.0330,
         "task_vector_angle_deg": 88.1,
-        "nemotron_moe_routed_params_b": [30.65, 3.57],
+        "ishiki_asr_1_0_active_parameters": 13309764984,
+        "ishiki_asr_1_0_corpus_rtfx_1xh100": 323.44,
         "stages_params_and_10set_wer_76443_utts": {
             "Stage1_Single_Backbone_33_70B": {"params_b": 33.70, "mean_10_wer": 4.69},
-            "Stage2_Uncompressed_MultiTower_65_30B": {"params_b": 65.30, "mean_10_wer": 3.66},
-            "Stage3_Cortical_MoE_SVD_27_48B": {"params_b": 27.48, "mean_10_wer": 3.58},
+            "Stage2_Orthogonal_2B_Soup_2_04B": {"params_b": 2.04, "mean_10_wer": 4.34},
+            "Stage3_Standalone_Ishiki_ASR_1_0_13_31B": {"params_b": 13.31, "mean_10_wer": 3.78, "corpus_rtfx": 323.44},
         },
     }
     print(" ", res)
     _maybe_save_bar_plot(
         out_dir,
-        "figure_8_cortical_27b_wer.png",
+        "figure_8_ishiki_asr_1_0_wer.png",
         "Figure 8: 10-Dataset Public Mean WER (%) Across 76,443 Utterances",
-        ["Nemotron-30B (33.7B)", "Uncompressed (65.3B)", "Ishiki-ASR-0.5 (27.48B)"],
-        [4.69, 3.66, 3.58],
+        ["Nemotron-30B (33.7B)", "Orthogonal 2B Soup", "Ishiki-ASR-1.0 (13.31B)"],
+        [4.69, 4.34, 3.78],
         "10-Dataset Mean WER (%)",
     )
     return res

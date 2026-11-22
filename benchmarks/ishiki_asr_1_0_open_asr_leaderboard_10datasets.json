@@ -1,0 +1,219 @@
+{
+  "checkpoint": "/home/ubuntu/unified_27b_wsp/ishiki_asr_1_0",
+  "forensic_audit": {
+    "single_safetensors_file": "/home/ubuntu/unified_27b_wsp/ishiki_asr_1_0/model.safetensors",
+    "safetensors_size_gib": 24.793,
+    "safetensors_tensor_count": 6679,
+    "safetensors_total_elements": 13310061264,
+    "model_active_parameters": 13309764984,
+    "model_active_parameters_billions": 13.309765,
+    "submodule_parameters": {
+      "ventral_stream": 2349217408,
+      "ventral_noise_stream": 2349217408,
+      "dorsal_stream": 2065647872,
+      "broadband_stream": 875266560,
+      "transducer_stream": 627008134,
+      "meeting_stream": 2313141596,
+      "spontaneous_stream": 2729998720,
+      "frontend": 0,
+      "pathway_gate": 267286
+    },
+    "zero_external_hub_references": true
+  },
+  "resident_vram_gib": 24.8,
+  "zero_flag_transcribe_10ds": {
+    "api": "preds = model.transcribe(wavs)  # zero flags, formatting=\"auto\" default",
+    "mean_10ds_wer": 3.785,
+    "corpus_10ds_rtfx": 323.44,
+    "datasets": {
+      "ls_clean": {
+        "dataset": "ls_clean",
+        "n_utts": 2620,
+        "audio_s": 19452.48,
+        "time_s": 45.93,
+        "wer": 0.89,
+        "wer_raw_norm": 1.21,
+        "rtfx": 423.56
+      },
+      "ls_other": {
+        "dataset": "ls_other",
+        "n_utts": 2939,
+        "audio_s": 19229.57,
+        "time_s": 58.12,
+        "wer": 1.81,
+        "wer_raw_norm": 2.18,
+        "rtfx": 330.84
+      },
+      "urgent_clean": {
+        "dataset": "urgent_clean",
+        "n_utts": 1000,
+        "audio_s": 6928.63,
+        "time_s": 23.21,
+        "wer": 3.97,
+        "wer_raw_norm": 4.24,
+        "rtfx": 298.47
+      },
+      "ami_cleaned": {
+        "dataset": "ami_cleaned",
+        "n_utts": 7715,
+        "audio_s": 28727.59,
+        "time_s": 133.65,
+        "wer": 6.12,
+        "wer_raw_norm": 6.43,
+        "rtfx": 214.94
+      },
+      "earnings22": {
+        "dataset": "earnings22",
+        "n_utts": 341,
+        "audio_s": 6900.94,
+        "time_s": 43.12,
+        "wer": 4.35,
+        "wer_raw_norm": 4.59,
+        "rtfx": 160.06
+      },
+      "gigaspeech": {
+        "dataset": "gigaspeech",
+        "n_utts": 18757,
+        "audio_s": 126515.2,
+        "time_s": 399.46,
+        "wer": 6.68,
+        "wer_raw_norm": 7.2,
+        "rtfx": 316.72
+      },
+      "spgispeech": {
+        "dataset": "spgispeech",
+        "n_utts": 39341,
+        "audio_s": 360007.5,
+        "time_s": 1034.36,
+        "wer": 1.54,
+        "wer_raw_norm": 1.76,
+        "rtfx": 348.05
+      },
+      "urgent2024": {
+        "dataset": "urgent2024",
+        "n_utts": 1000,
+        "audio_s": 6928.63,
+        "time_s": 29.14,
+        "wer": 8.19,
+        "wer_raw_norm": 8.43,
+        "rtfx": 237.79
+      },
+      "monsoon": {
+        "dataset": "monsoon",
+        "n_utts": 2102,
+        "audio_s": 20247.6,
+        "time_s": 65.15,
+        "wer": 2.83,
+        "wer_raw_norm": 3.02,
+        "rtfx": 310.79
+      },
+      "voxpopuli": {
+        "dataset": "voxpopuli",
+        "n_utts": 628,
+        "audio_s": 7122.38,
+        "time_s": 29.29,
+        "wer": 1.47,
+        "wer_raw_norm": 1.64,
+        "rtfx": 243.18
+      }
+    }
+  },
+  "blind_hf_generate_minibatch_10ds": {
+    "api": "inputs = processor(batch_wavs, sampling_rate=16000, return_tensors=\"pt\").to(dev, dtype=torch.bfloat16); ids = model.generate(**inputs); preds = processor.decode(ids, skip_special_tokens=True)",
+    "batch_size": 240,
+    "mean_10ds_wer": 3.858,
+    "corpus_10ds_rtfx": 264.04,
+    "datasets": {
+      "ls_clean": {
+        "dataset": "ls_clean",
+        "n_utts": 2620,
+        "audio_s": 19452.48,
+        "time_s": 101.92,
+        "wer": 0.9,
+        "wer_raw_norm": 1.22,
+        "rtfx": 190.85
+      },
+      "ls_other": {
+        "dataset": "ls_other",
+        "n_utts": 2939,
+        "audio_s": 19229.57,
+        "time_s": 123.2,
+        "wer": 1.84,
+        "wer_raw_norm": 2.21,
+        "rtfx": 156.08
+      },
+      "urgent_clean": {
+        "dataset": "urgent_clean",
+        "n_utts": 1000,
+        "audio_s": 6928.63,
+        "time_s": 26.35,
+        "wer": 3.88,
+        "wer_raw_norm": 4.18,
+        "rtfx": 262.97
+      },
+      "ami_cleaned": {
+        "dataset": "ami_cleaned",
+        "n_utts": 7715,
+        "audio_s": 28727.59,
+        "time_s": 157.95,
+        "wer": 6.25,
+        "wer_raw_norm": 6.57,
+        "rtfx": 181.88
+      },
+      "earnings22": {
+        "dataset": "earnings22",
+        "n_utts": 341,
+        "audio_s": 6900.94,
+        "time_s": 48.74,
+        "wer": 4.33,
+        "wer_raw_norm": 4.6,
+        "rtfx": 141.59
+      },
+      "gigaspeech": {
+        "dataset": "gigaspeech",
+        "n_utts": 18757,
+        "audio_s": 126515.2,
+        "time_s": 488.43,
+        "wer": 6.82,
+        "wer_raw_norm": 7.34,
+        "rtfx": 259.02
+      },
+      "spgispeech": {
+        "dataset": "spgispeech",
+        "n_utts": 39341,
+        "audio_s": 360007.5,
+        "time_s": 1180.52,
+        "wer": 1.55,
+        "wer_raw_norm": 1.76,
+        "rtfx": 304.96
+      },
+      "urgent2024": {
+        "dataset": "urgent2024",
+        "n_utts": 1000,
+        "audio_s": 6928.63,
+        "time_s": 35.34,
+        "wer": 8.52,
+        "wer_raw_norm": 8.74,
+        "rtfx": 196.04
+      },
+      "monsoon": {
+        "dataset": "monsoon",
+        "n_utts": 2102,
+        "audio_s": 20247.6,
+        "time_s": 86.13,
+        "wer": 2.84,
+        "wer_raw_norm": 3.02,
+        "rtfx": 235.07
+      },
+      "voxpopuli": {
+        "dataset": "voxpopuli",
+        "n_utts": 628,
+        "audio_s": 7122.38,
+        "time_s": 31.58,
+        "wer": 1.65,
+        "wer_raw_norm": 1.81,
+        "rtfx": 225.56
+      }
+    }
+  }
+}

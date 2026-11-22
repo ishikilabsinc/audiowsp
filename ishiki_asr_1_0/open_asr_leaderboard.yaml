@@ -1,0 +1,110 @@
+- dataset:
+    id: hf-audio/esb-datasets-test-only-sorted
+    task_id: automatic-speech-recognition
+  value: 1.54
+  verifyToken: ""
+  config:
+    config_name: spgispeech
+    split: test
+  metric:
+    type: wer
+    name: SPGISpeech WER
+- dataset:
+    id: hf-audio/esb-datasets-test-only-sorted
+    task_id: automatic-speech-recognition
+  value: 0.89
+  verifyToken: ""
+  config:
+    config_name: librispeech
+    split: test.clean
+  metric:
+    type: wer
+    name: LibriSpeech (clean) WER
+- dataset:
+    id: hf-audio/esb-datasets-test-only-sorted
+    task_id: automatic-speech-recognition
+  value: 1.81
+  verifyToken: ""
+  config:
+    config_name: librispeech
+    split: test.other
+  metric:
+    type: wer
+    name: LibriSpeech (other) WER
+- dataset:
+    id: hf-audio/open-asr-leaderboard
+    task_id: automatic-speech-recognition
+  value: 6.12
+  verifyToken: ""
+  config:
+    config_name: ami_cleaned
+    split: test
+  metric:
+    type: wer
+    name: AMI (Cleaned) WER
+- dataset:
+    id: hf-audio/open-asr-leaderboard
+    task_id: automatic-speech-recognition
+  value: 4.35
+  verifyToken: ""
+  config:
+    config_name: earnings22_cleaned_aa_chunked
+    split: test
+  metric:
+    type: wer
+    name: Earnings22 (Cleaned AA Chunked) WER
+- dataset:
+    id: hf-audio/open-asr-leaderboard
+    task_id: automatic-speech-recognition
+  value: 6.68
+  verifyToken: ""
+  config:
+    config_name: gigaspeech_cleaned
+    split: test
+  metric:
+    type: wer
+    name: GigaSpeech (Cleaned) WER
+- dataset:
+    id: hf-audio/open-asr-leaderboard
+    task_id: automatic-speech-recognition
+  value: 8.19
+  verifyToken: ""
+  config:
+    config_name: urgent2024
+    split: test
+  metric:
+    type: wer
+    name: URGENT 2024 WER
+- dataset:
+    id: hf-audio/open-asr-leaderboard
+    task_id: automatic-speech-recognition
+  value: 3.97
+  verifyToken: ""
+  config:
+    config_name: urgent2024_clean
+    split: test
+  metric:
+    type: wer
+    name: URGENT 2024 (Clean) WER
+- dataset:
+    id: hf-audio/open-asr-leaderboard
+    task_id: automatic-speech-recognition
+  value: 1.47
+  verifyToken: ""
+  config:
+    config_name: voxpopuli_cleaned_aa
+    split: test
+  metric:
+    type: wer
+    name: VoxPopuli (Cleaned AA) WER
+- dataset:
+    id: VoiceArena/Monsoon_en_IN_test
+    task_id: automatic-speech-recognition
+  value: 2.83
+  verifyToken: ""
+  config:
+    config_name: default
+    split: test
+  metric:
+    type: wer
+    name: Voice Arena Monsoon (en-IN) WER
